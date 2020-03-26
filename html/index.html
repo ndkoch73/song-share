@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <!-- This is where I call to css -->
+        <meta charset="UTF-8">
+       
+        <link rel="stylesheet" type="text/css" href="{% static '/.css' %}">
+        
+       
+       
+
+
+        <title>SongShare</title> 
+
+    </head>
+    <body data-gr-c-s-loaded="true">
+        <div class="header"> 
+            <span id="id_name_of_site" style="color:gray;font-size:xx-large;text-align:right;">Song Share</span> <br>
+        </div>
+
+        {% if message %}
+            <div class="message">
+                {{message}}
+            </div>
+        {% endif %}
+
+        <div class="sidebar">
+            {% block sidebar %}
+            {% endblock %}
+        </div>
+
+        <div class="content">
+            {% block content %}
+            {% endblock %}
+        </div>
+
+    </body>
+
+</html>

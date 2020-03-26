@@ -1,0 +1,19 @@
+{% extends "landing_page.html" %}
+
+{% block sidebar %}
+
+	<span id="id_name_of_page" style="color:black:;text-align:left:">Login</span>
+    <form method="POST" action="{% url 'login' %}">
+        <table>
+            {{form}}
+        </table>
+        {% csrf_token %}
+        <button type="submit" id="id_login_button">Join Song Share</button>
+    </form>
+
+    <br>
+    <a href="{% url 'register' %}" id ="id_register_link"> not a registered user? </a>
+    
+
+
+{% endblock %}
