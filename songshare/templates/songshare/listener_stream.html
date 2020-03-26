@@ -1,0 +1,21 @@
+{% extends "default_sidebar.html" %}
+
+{% block content %}
+	<span id="id_name_of_page" style="color:black:;text-align:center:"> {{dj.user.first_name}} {{dj.user.last_name}} Stream </span>
+	<br>
+	<button id="id_follow_stream"></button>
+
+
+	<span id="id_now_playing"> Now Playing </span>
+
+
+<!-- 	<img src="{url 'photo' song.id }"> -->
+	<!-- Need a way to preserve the current DJ -->
+	<button id="id_add_song"> <a href="{% url 'song-search' dj.id%}"> Add Song </a> </button> 
+
+	<script >getStreamSongs()</script>
+	<span id="id_next_up_songs">
+	<table id="listener_stream_songs">
+	</table>
+
+{% endblock %}
