@@ -1,6 +1,8 @@
+.gitignore
 env
 migrations
 .DS_STORE
 staticfiles/
 images/
 reset.sh
+node_modules/
