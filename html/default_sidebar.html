@@ -1,0 +1,9 @@
+{% extends "index.html" %}
+
+{% block sidebar %}
+	<a href="{% url 'home' %}" id="id_nav_home_page"> Home </a>
+	<a href="{% url 'dj-search' %}" id="id_nav_dj_search"> Search Streams </a>
+	<a href="{% url 'profile' %}" id="id_nav_profile"> Your Profile </a>
+	<a href="{% url 'logout' %}" id="id_nav_logout"> Sign-out </a>
+
+{% endblock %}

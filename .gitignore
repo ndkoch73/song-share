@@ -1,3 +1,4 @@
+.gitignore
 env
 migrations
 .DS_STORE
@@ -6,3 +7,4 @@ images/
 reset.sh
 *.pyc
 db.sqlite3
+node_modules/

@@ -1,0 +1,19 @@
+{% load dsu %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>{% block title %}Song Share{% endblock %}</title>
+        {% load static %}
+        <link href="{% static 'songshare/login_page.css' %}" rel="stylesheet" type="text/css">
+        {% dsu_stylesheet_url %}
+    </head>
+    <body>
+        <div class="content">
+            {% block content %}
+            {% endblock %}
+        </div>
+        {% dsu_jquery_url %}
+        {% dsu_javascript_url %}
+    </body>
+</html>

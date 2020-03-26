@@ -25,14 +25,14 @@ def login_action(request):
     #display the registration form on a GET request
     if request.method == 'GET':
         context['form'] = LoginForm()
-        return render(request, 'songshare/login.html', context)
+        return render(request, 'songshare/login_page.html', context)
 
     form = LoginForm(request.POST)
     context['form'] = form
 
     # validate the form
     if not form.is_valid():
-        return render(request, 'songshare/login.html', context)
+        return render(request, 'songshare/login_page.html', context)
 
     new_user = authenticate(username=form.cleaned_data['username'],
                             password=form.cleaned_data['password'])
@@ -201,6 +201,4 @@ def update_follow(request, id):
         return goto_profile(request, id)
     except:
         raise Http404
-
-
 

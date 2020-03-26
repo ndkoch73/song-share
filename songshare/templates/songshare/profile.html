@@ -1,0 +1,18 @@
+{% extends 'default_sidebar.html' %}
+
+{% block content %}
+
+<div>
+{% if authenticate %}
+	<button id="id_start_new_stream_button"> Start New Stream</button>
+{% else %}
+	<button id="id_link_song_share_button"> Link to Spotify </button>
+{% endif %}
+</div>
+
+<div>
+	<a href="{% url 'dj-stream' dj.id %" id="id_now_listening"> Now Listening to {{dj.user_name}} </a>
+</div>
+
+
+{% endblock %}

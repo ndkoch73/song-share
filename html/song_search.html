@@ -1,0 +1,37 @@
+{% extends 'default_sidebar.html' %}
+
+{% block content %}
+	<form method="post" action="{% url 'song-search' %}">
+        <table>
+        {% for field in form.visible_fields %}
+            <tr>
+                <td> {{field.label_tag}}</td>
+                <td> {{field}}</td>
+                <td class="error">
+                    {% for error in field.errors %} {{error}} {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+        </table>
+
+        {% for field in form.hidden_fields %}
+            {{field}} {{field.errors}}
+        {% endfor %}
+        {% csrf_token %}
+        <button type="submit" id="id_search_song_button" >Search</button>
+	</form>
+
+    <script>searchSongs(form.song)</script>
+	<table id="id_song_search">
+    </table>
+
+
+<!-- 	{% for song in songs %}
+
+		<img src="{% url 'photo' song.id %}" id="id_song_image" >
+			<br>
+			<label > {{song.name}}</label>
+			{% csrf_token %}
+		<button id="id_song_add_button"></button>
+	{% endfor %} -->
+{% endblock %}
