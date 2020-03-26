@@ -5,4 +5,4 @@ migrations
 staticfiles/
 images/
 reset.sh
-node_modules
+node_modules/
