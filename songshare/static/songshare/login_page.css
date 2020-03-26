@@ -1,0 +1,24 @@
+#login-form{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh;
+}
+
+#login-text{
+    padding-top: 2vh;
+}
+
+#register-button{
+    padding-bottom: 5vh;
+}
+
+#login-header{
+    padding-bottom: 15vh;
+}
+
+#login-background{
+    background-color: #1DB954;
+}

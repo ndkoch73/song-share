@@ -1,3 +1,5 @@
 from django.shortcuts import render
 
-# Create your views here.
+def login_action(request):
+    context = {}
+    return render(request, 'songshare/login_page.html',context)
