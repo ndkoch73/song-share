@@ -2,7 +2,32 @@
 
 {% block sidebar %}
 
-<span id=>
+<span id="id_name_of_page" style="color:black:;text-align:center:"> Profile Page for {{profile.user.first_name}} {{profile.user.last_name}}</span><br>
+		<div>
+			{% if profile.profile_picture %}
+            	<img src="{% url 'photo' profile.id %}" alt="{{profile.text}}" width="200px"  id="id_user_picture">
+            {% else %}
+            	<img src="default.jpg" width="200px"  id="id_user_picture">
+        	{% endif %}
+		</div>
+		<div>
+			{{form.picture.label_tag}} 
+		</div>
+		{{form.bio.label_tag}}
+		<label type="text" id="id_user_bio" readonly>{{bio}}</label>
+		<br>
+
+		{% if unfollow %}
+		<form action="{% url 'unfollow' profile.id %}"  method="post">
+			{% csrf_token %}
+			<button type="submit" id="id_unfollow">unfollow</button>
+		</form>
+		{% else %}
+		<form action="{% url 'follow' profile.id %}"  method="post">
+			{% csrf_token %}
+			<button type="submit" id="id_follow">follow</button>
+		</form>
+		{% endif %}
 
 {% endblock %}
 
