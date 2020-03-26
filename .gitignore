@@ -4,3 +4,5 @@ migrations
 staticfiles/
 images/
 reset.sh
+*.pyc
+db.sqlite3
