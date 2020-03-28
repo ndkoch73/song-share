@@ -1,9 +1,13 @@
-{% extends 'songshare/base.html' %}
+{% extends 'songshare/index.html' %}
 
 {% block content %}
+
+
     <div class="ui centered grid">
         <div class="one column centered row" id="login-header">
-            <div class="ui huge header">Song Share</div>
+            <div class="ui huge header">
+                <span id="id_name_of_site" style="color:gray;">Song Share</span>
+            </div>
         </div>
         <div class="four wide column">
             <div class="ui placeholder segment">
@@ -12,8 +16,8 @@
                         <div class="ui huge header" id="login-text">Login</div>
                     </div>
                     <div class="column">
-                        <div class="ui form">
-                            <div class="field">
+                        <form class="ui form">
+                            <div class="field" method="POST" action="{% url 'register' %}">
                                 <label>Username</label>
                                 <div class="ui left icon input">
                                     <input type="text" placeholder="Username">
@@ -28,15 +32,15 @@
                                 </div>
                             </div>
                             <div class="ui blue submit button">Login</div>
-                        </div>
+                        </form>
                     </div>
                     <div class="middle aligned column">
                         <div class="ui horizontal divider">Or</div>
                     </div>
                     <div class="middle aligned column" id="register-button">
-                        <div class="ui big button">
+                        <div class="ui message">
                             <i class="signup icon"></i>
-                            Sign Up
+                            New to us? <a href="{% url 'register' %}"> Sign Up </a>
                         </div>
                     </div>
                 </div>

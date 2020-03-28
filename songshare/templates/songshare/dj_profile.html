@@ -1,8 +1,8 @@
-{% extends 'default_sidebar.html' %}
+{% extends 'songshare/default_sidebar.html' %}
 
 {% block sidebar %}
 
-<span id="id_name_of_page" style="color:black:;text-align:center:"> Profile Page for {{profile.user.first_name}} {{profile.user.last_name}}</span><br>
+	<span id="id_name_of_page" style="color:black;text-align:center;"> Profile Page for {{profile.user.first_name}} {{profile.user.last_name}}</span><br>
 		<div>
 			{% if profile.profile_picture %}
             	<img src="{% url 'photo' profile.id %}" alt="{{profile.text}}" width="200px"  id="id_user_picture">

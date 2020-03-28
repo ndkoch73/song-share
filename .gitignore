@@ -6,3 +6,6 @@ staticfiles/
 images/
 reset.sh
 node_modules/
+db.sqlite3
+*.pyc
+__pycache__/

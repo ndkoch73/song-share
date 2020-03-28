@@ -8,7 +8,7 @@ from songshare.models import Playlist
 
 # login form 
 class LoginForm(forms.Form):
-	username = forms.CharField(max_length = 20)
+	username = forms.CharField(max_length = 20, widget=forms.TextInput(attrs={'placeholder': 'username'}))
 	password = forms.CharField(max_length = 200, widget = forms.PasswordInput())
 
 	def clean(self):
@@ -24,7 +24,7 @@ class LoginForm(forms.Form):
 
 # user registration form
 class RegistrationForm(forms.Form):
-		username = forms.CharField(max_length = 20)
+		username = forms.CharField(max_length = 20, widget=forms.TextInput(attrs={'placeholder': 'username'}))
 		password = forms.CharField(max_length = 200, 
 								   widget = forms.PasswordInput(), 
 								   label='password')
@@ -73,7 +73,7 @@ class ProfilePictureForm(forms.ModelForm):
 
 class PlaylistPictureForm(forms.ModelForm):
     class Meta:
-        model = Profile
+        model = Playlist
         fields = ( 'picture',)
 
     def clean_picture(self):
@@ -85,3 +85,33 @@ class PlaylistPictureForm(forms.ModelForm):
         if picture.size > MAX_UPLOAD_SIZE:
             raise forms.ValidationError('File too big (max size is {0} bytes)'.format(MAX_UPLOAD_SIZE))
         return picture
+
+"""
+class ArtistPictureForm(forms.ModelForm):
+    class Meta:
+        model = Artist
+        fields = ( 'picture',)
+    def clean_picture(self):
+        picture = self.cleaned_data['picture']
+        if not picture:
+            raise forms.ValidationError('You must upload a picture')
+        if not picture.content_type or not picture.content_type.startswith('image'):
+            raise forms.ValidationError('File type is not image')
+        if picture.size > MAX_UPLOAD_SIZE:
+            raise forms.ValidationError('File too big (max size is {0} bytes)'.format(MAX_UPLOAD_SIZE))
+        return picture
+class AlbumPictureForm(forms.ModelForm):
+    class Meta:
+        model = Album
+        model = Profile
+        fields = ( 'picture',)
+    def clean_picture(self):
+        picture = self.cleaned_data['picture']
+        if not picture:
+            raise forms.ValidationError('You must upload a picture')
+        if not picture.content_type or not picture.content_type.startswith('image'):
+            raise forms.ValidationError('File type is not image')
+        if picture.size > MAX_UPLOAD_SIZE:
+            raise forms.ValidationError('File too big (max size is {0} bytes)'.format(MAX_UPLOAD_SIZE))
+        return picture
+ """

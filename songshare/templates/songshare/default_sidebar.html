@@ -1,9 +1,38 @@
-{% extends "index.html" %}
+{% extends 'songshare/index.html' %}
 
-{% block sidebar %}
-	<a href="{% url 'home' %}" id="id_nav_home_page"> Home </a>
-	<a href="{% url 'dj-search' %}" id="id_nav_dj_search"> Search Streams </a>
-	<a href="{% url 'profile' %}" id="id_nav_profile"> Your Profile </a>
-	<a href="{% url 'logout' %}" id="id_nav_logout"> Sign-out </a>
+{% block content %}
+
+<div class="pushable">
+	<div class="ui left vertical inverted visible sidebar labeled icon menu overlay">
+		<a class="item" href="{% url 'home' %}" id="id_nav_home_page">
+			<i class="home icon"></i> Home 
+		</a>
+		<a class="item" href="{% url 'dj-search' %}" id="id_nav_dj_search"> 
+			Search Streams 
+		</a>
+		<a class="item" href="{% url 'profile-create' %}" id="id_nav_profile"> 
+			Your Profile 
+		</a>
+		<a class="item" href="{% url 'logout' %}" id="id_nav_logout"> 
+			Sign-out 
+		</a>
+
+	</div>
+	<div class="ui main fluid container pusher">
+	  	<h1 class="ui header">
+			<span id="id_name_of_site" style="color:gray;font-size:xx-large;text-align:right;">
+				Song Share
+			</span>
+	  	</h1>
+	 	{% block article %}
+	  	{% endblock %}
+	</div>
+  </div>
+
+
+
 
 {% endblock %}
+
+
+

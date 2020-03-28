@@ -1,23 +1,23 @@
+{% load dsu %}
 <!doctype html>
 <html lang="en">
 
     <head>
         <!-- This is where I call to css -->
         <meta charset="UTF-8">
-       
-        <link rel="stylesheet" type="text/css" href="{% static '/.css' %}">
-        
-       
-       
+        {% load static %}
+        <link href="{% static 'songshare/login_page.css' %}" rel="stylesheet" type="text/css">
+        <link href="{% static 'songshare/sidebar.css' %}" rel="stylesheet" type="text/css">
+        {% dsu_stylesheet_url %}
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.3.1/dist/semantic.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/semantic-ui@2.3.1/dist/semantic.min.css" rel="stylesheet"/>
 
 
         <title>SongShare</title> 
 
     </head>
     <body data-gr-c-s-loaded="true">
-        <div class="header"> 
-            <span id="id_name_of_site" style="color:gray;font-size:xx-large;text-align:right;">Song Share</span> <br>
-        </div>
 
         {% if message %}
             <div class="message">
@@ -34,6 +34,8 @@
             {% block content %}
             {% endblock %}
         </div>
+        {% dsu_jquery_url %}
+        {% dsu_javascript_url %}
 
     </body>
 

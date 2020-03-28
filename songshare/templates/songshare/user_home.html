@@ -1,23 +1,35 @@
-{% extends 'default_sidebar.html' %}
+{% extends 'songshare/default_sidebar.html' %}
 <!-- This is after login -->
-{% block content %}
-<div>
-	<script>getRecent()</script>
-	<table id="id_recent_streams">
-	</table>
-</div>
+{% block article %}
+<!-- <div class="ui vertical segement"> -->
+	<div class="main ui container">
+		<h2 class="ui dividing header">
+			<label>Recent Streams</label>
+		</h2>
+		<div>
+			<script>getRecent()</script>
+			<table id="id_recent_streams">
+			</table>
+		</div>
+		<h2 class="ui dividing header">
+				<label>Popular Streams</label>
+		</h2>
+		<div>
+			<script>getPopular()</script>
+			<table id="id_popular_streams">
+			</table>
+		</div>
 
-<div>
-	<script>getPopular()</script>
-	<table id="id_popular_streams">
-	</table>
-</div>
-
-<div>
-	<script>getFavorite()</script>
-	<table id="id_favorite_streams">
-	</table>
-</div>
+		<h2 class="ui dividing header">
+			<label>Favorite Streams</label>
+		</h2>
+		<div>
+			<script>getFavorite()</script>
+			<table id="id_favorite_streams">
+			</table>
+		</div>
+	</div>
+<!-- </div> -->
 
 
 {% endblock %}

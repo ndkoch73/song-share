@@ -1,14 +1,41 @@
-{% extends 'default_sidebar.html' %}
+{% extends 'songshare/default_sidebar.html' %}
 
 {% block content %}
+		<span id="id_name_of_page" style="color:black;text-align:center;"> Profile Page for {{c_user.first_name}} {{c_user.last_name}}</span> <br>
 
-<div>
-{% if authenticate %}
-	<button id="id_start_new_stream_button"> Start New Stream</button>
-{% else %}
-	<button id="id_link_song_share_button"> Link to Spotify </button>
-{% endif %}
-</div>
+		<form enctype="multipart/form-data" method="post" action="{% url 'profile-create' %}" class="add-form">
+			<table>
+    			{% if profile.profile_picture %}
+          <tr>
+            	<img src="{% url 'photo' profile.id %}" alt="{{profile.text}}" width="200px" id="id_profile_picture">
+          </tr>
+          {% else %}
+            <tr>
+              <img src="default.jpg" width="200px"  id="id_user_picture">
+              </tr>
+          {% endif %}
+          {{form}}  
+              
+
+        	</table>
+   				
+
+      
+			</table>
+      {% csrf_token %}
+      <input type="submit" value="Submit" id="id_update_profile_button">
+	  </form>
+    {% for follower in following %}
+        <a href="{% url 'profile-view' follower.id %}" id="id_profile_link_{{follower.user_name}}">{{follower.first_name}} {{follower.last_name}}</a>
+        <br>
+    {% endfor %}
+      
+	{% if authenticate %}
+		<button id="id_start_new_stream_button"> Start New Stream</button>
+	{% else %}
+		<button id="id_link_song_share_button"> Link to Spotify </button>
+	{% endif %}
+
 
 <div>
 	<a href="{% url 'dj-stream' dj.id %" id="id_now_listening"> Now Listening to {{dj.user_name}} </a>
