@@ -1,6 +1,6 @@
 {% extends 'songshare/default_sidebar.html' %}
 
-{% block content %}
+{% block mainpage %}
 	<form method="post" action="{% url 'song-search' %}">
         <table>
         {% for field in form.visible_fields %}

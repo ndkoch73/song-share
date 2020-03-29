@@ -1,5 +1,42 @@
 {% extends 'songshare/default_sidebar.html' %}
 
-{% block content %}
+{% block mainpage %}
+
+<div class="ui centered grid">
+    <div class="one column centered row" id="login-header">
+        <div class="ui huge header">
+            <span id="id_name_of_site" style="color:green;">Spotify</span>
+        </div>
+    </div>
+    <div class="four wide column">
+        <div class="ui placeholder segment">
+            <div class="ui one column very relaxed stackable grid">
+                <div class="column center aligned">
+                    <div class="ui huge header" id="login-text">Login</div>
+                </div>
+                <div class="column">
+                    <form class="ui form">
+                        <div class="field" method="POST" action="{% url 'authenticate' %}">
+                            <label>Username</label>
+                            <div class="ui left icon input">
+                                <input type="text" placeholder="Username">
+                                <i class="user icon"></i>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Password</label>
+                            <div class="ui left icon input">
+                                <input type="password">
+                                <i class="lock icon"></i>
+                            </div>
+                        </div>
+                        {% csrf_token %}
+                        <div class="ui blue submit button">Login</div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

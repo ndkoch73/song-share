@@ -41,11 +41,13 @@ def profile_page_action(request):
     except Profile.DoesNotExist:
         return redirect('home')
     
+    
     # the users that follow the current user
     following = list(c_user.following.all())
     context['c_user'] = c_user
     context['following'] = following
     context['form']  = ProfilePictureForm()
+    print(context)
     return render(request, 'songshare/profile.html', context)
 
 
@@ -124,7 +126,15 @@ def update_follow(request, id):
         return goto_profile(request, id)
     except:
         raise Http404
-    
+
+def authenticate_action(request):
+    context = {}
+    if request.method == "GET":
+        return render(request, 'songshare/authenticate.html', context)
+    return redirect('authenticate')
+
+
+
 
 def profile_view(request):
     pass

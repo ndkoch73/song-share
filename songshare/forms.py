@@ -59,7 +59,7 @@ MAX_UPLOAD_SIZE = 2500000
 class ProfilePictureForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ( 'picture',)
+        fields = ( 'picture','bio')
 
     def clean_picture(self):
         picture = self.cleaned_data['picture']
