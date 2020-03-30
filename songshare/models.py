@@ -44,11 +44,43 @@ class Profile(models.Model):
     following = models.ManyToManyField(User, related_name='following')
     picture = models.FileField(blank=True)
     content_type = models.CharField(max_length=50, blank=True)
-
     def __str__(self):
         return 'Profile(user=' + str(self.user) + \
                ' is_dj=' + str(self.is_dj) + \
                ' bio=' + str(self.bio) + ')'
+
+# Playlist class (essential)
+class Playlist(models.Model):
+    """
+    A class used to represent a user Playlist created using songshare app
+    ...
+    Attributes
+    ----------
+    user : models.ForeignKey(User)
+        the owner of the playlist
+    profile : models.ForeignKey(Profile)
+        reference to the playlist owner's profile for a user to view
+    songs : models.ForeignKey(Song)
+        the songs in the playlist
+    bio : models.CharField
+        a playlist should have a description (maybe?)
+    followers : models.ManyToManyField(Profile)
+        the followers of the playlist used to reference their profile
+    picture : models.FileField(blank=True)
+        the playlist's picture
+    content_type: models.CharField
+        used to verify that the user's profile picture is indeed a picture
+    """
+    user = models.ForeignKey(User, default=None, on_delete=models.PROTECT)
+    profile = models.ForeignKey(Profile, default=None, on_delete=models.PROTECT)
+    songs = models.ForeignKey(Song, default=None, on_delete=models.PROTECT)
+    picture = models.FileField(blank=True)
+    bio = models.CharField(max_length=200)
+    followers = models.ForeignKey(Profile, default=None, on_delete=models.PROTECT)
+    content_type = models.CharField(max_length=50, blank=True)
+
+    def __str__(self):
+        return 'Playlist(user=' + str(self.user) + ' songs=' + str(self.songs) + ')'
 
 # Song class (essential)
 class Song(models.Model):
@@ -74,41 +106,7 @@ class Song(models.Model):
     uri = models.CharField(max_length=200)
     def __str__(self):
         return 'Song(artist=' + str(self.artist) + ' album=' + str(self.album) + ')'
-
-# Playlist class (essential)
-class Playlist(models.Model):
-    """
-    A class used to represent a user Playlist created using songshare app
-    ...
-    Attributes
-    ----------
-    user : models.ForeignKey(User)
-        the owner of the playlist
-    profile : models.ForeignKey(Profile)
-        reference to the playlist owner's profile for a user to view
-    songs : models.ForeignKey(Song)
-        the songs in the playlist
-    bio : models.CharField
-        a playlist should have a description (maybe?)
-    followers : models.ManyToManyField(Profile)
-        the followers of the playlist used to reference their profile
-    picture : models.FileField(blank=True)
-        the playlist's picture
-    content_type: models.CharField
-        used to verify that the user's profile picture is indeed a picture
-    """
-    user = models.ForeignKey(User, default=None, on_delete=models.PROTECT)
-    profile = models.ForeignKey(Profile, default=None, on_delete=models.PROTECT, related_name='profile')
-    songs = models.ForeignKey(Song, default=None, on_delete=models.PROTECT)
-    picture = models.FileField(blank=True)
-    bio = models.CharField(max_length=200)
-    followers = models.ForeignKey(Profile, default=None, on_delete=models.PROTECT, related_name='followering')
-    content_type = models.CharField(max_length=50, blank=True)
-
-    def __str__(self):
-        return 'Playlist(user=' + str(self.user) + ' songs=' + str(self.songs) + ')'
-
-
+      
 # Post Model (optional for now)
 class Post(models.Model):
     """
@@ -170,6 +168,8 @@ Note:
     These encapsulate profiles that cannot be followed, but the information
     might be useful for adding multiple songs by an artist to a playlist, 
     for example
+
+
 """
 
 """
@@ -179,6 +179,9 @@ class Artist(models.Model):
     albums = models.ForeignKey(Album, default=None, on_delete=models.PROTECT)
     picture = models.FileField(blank=True)
     content_type = models.CharField(max_length=50, blank=True)
+
+
+
 class Album(models.Model):
     profile = models.ForeignKey(Profile, default=None, on_delete=models.PROTECT)
     uri = models.CharField(max_length=200)
