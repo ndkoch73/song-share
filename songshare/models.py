@@ -37,7 +37,7 @@ class Profile(models.Model):
         used to verify that the user's profile picture is indeed a picture
     """
     user = models.ForeignKey(User, default=None, on_delete=models.PROTECT)
-    auth_token = models.CharField(default=False)
+    auth_token = models.CharField(max_length=200)
     fname = models.CharField(max_length=20)
     lname = models.CharField(max_length=20)
     bio = models.CharField(max_length=200)
@@ -46,7 +46,6 @@ class Profile(models.Model):
     content_type = models.CharField(max_length=50, blank=True)
     def __str__(self):
         return 'Profile(user=' + str(self.user) + \
-               ' is_dj=' + str(self.is_dj) + \
                ' bio=' + str(self.bio) + ')'
 
 # Song class (essential)
