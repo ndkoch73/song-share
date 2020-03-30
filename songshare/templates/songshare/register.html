@@ -2,7 +2,7 @@
 
 {% block sidebar %}
 
-	<span id="id_name_of_page" style="color:black:;text-align:center:">Register</span><br>
+	<span id="id_name_of_page" style="color:black;text-align:center;">Register</span><br>
     <form method="POST" action="{% url 'register' %}">
         <table>
             {% for field in form.visible_fields %}

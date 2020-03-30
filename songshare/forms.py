@@ -12,7 +12,7 @@ MAX_UPLOAD_SIZE = 2500000
 
 # login form 
 class LoginForm(forms.Form):
-	username = forms.CharField(max_length = 20)
+	username = forms.CharField(max_length = 20, widget=forms.TextInput(attrs={'placeholder': 'username'}))
 	password = forms.CharField(max_length = 200, widget = forms.PasswordInput())
 
 	def clean(self):
@@ -28,7 +28,7 @@ class LoginForm(forms.Form):
 
 # user registration form
 class RegistrationForm(forms.Form):
-		username = forms.CharField(max_length = 20)
+		username = forms.CharField(max_length = 20, widget=forms.TextInput(attrs={'placeholder': 'username'}))
 		password = forms.CharField(max_length = 200, 
 								   widget = forms.PasswordInput(), 
 								   label='password')
@@ -63,7 +63,7 @@ MAX_UPLOAD_SIZE = 2500000
 class ProfilePictureForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ( 'picture',)
+        fields = ( 'picture','bio')
 
     def clean_picture(self):
         picture = self.cleaned_data['picture']
@@ -123,4 +123,3 @@ class AlbumPictureForm(forms.ModelForm):
             raise forms.ValidationError('File too big (max size is {0} bytes)'.format(MAX_UPLOAD_SIZE))
         return picture
  """
-

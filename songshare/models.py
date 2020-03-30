@@ -44,7 +44,6 @@ class Profile(models.Model):
     following = models.ManyToManyField(User, related_name='following')
     picture = models.FileField(blank=True)
     content_type = models.CharField(max_length=50, blank=True)
-
     def __str__(self):
         return 'Profile(user=' + str(self.user) + \
                ' is_dj=' + str(self.is_dj) + \
@@ -107,7 +106,7 @@ class Song(models.Model):
     uri = models.CharField(max_length=200)
     def __str__(self):
         return 'Song(artist=' + str(self.artist) + ' album=' + str(self.album) + ')'
-
+      
 # Post Model (optional for now)
 class Post(models.Model):
     """
@@ -170,6 +169,7 @@ Note:
     might be useful for adding multiple songs by an artist to a playlist, 
     for example
 
+
 """
 
 """
@@ -179,6 +179,7 @@ class Artist(models.Model):
     albums = models.ForeignKey(Album, default=None, on_delete=models.PROTECT)
     picture = models.FileField(blank=True)
     content_type = models.CharField(max_length=50, blank=True)
+
 
 
 class Album(models.Model):

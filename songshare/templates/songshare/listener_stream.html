@@ -1,7 +1,7 @@
-{% extends "default_sidebar.html" %}
+{% extends 'songshare/default_sidebar.html' %}
 
-{% block content %}
-	<span id="id_name_of_page" style="color:black:;text-align:center:"> {{dj.user.first_name}} {{dj.user.last_name}} Stream </span>
+{% block mainpage %}
+	<span id="id_name_of_page" style="color:black;text-align:center;"> {{dj.user.first_name}} {{dj.user.last_name}} Stream </span>
 	<br>
 	<button id="id_follow_stream"></button>
 

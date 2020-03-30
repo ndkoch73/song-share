@@ -1,18 +1,82 @@
-{% extends 'default_sidebar.html' %}
+{% extends 'songshare/default_sidebar.html' %}
 
-{% block content %}
+{% block mainpage %}
+      <div class="main ui container">
+      
+        <h2 class="ui dividing header">
+          <span id="id_name_of_page" style="color:black;text-align:center;"> Profile Page for {{c_user.user.first_name}} {{c_user.user.last_name}}
+          </span>
+          <br>
+          <div class="ui small image">
+            {% if profile.picture %}
+              <img src="{% url 'photo' profile.id %}" alt="{{profile.text}}" width="100px" id="id_profile_picture">
+            {% else %}
+              <img src="default.jpg" width="200px"  id="id_user_picture">
+            {% endif %}
+          </div>
+        </h2>
+        <div class="ui three column grid" id="id-profile">
+          
+          <div class="row">
+            <div class="column">
+              <form class="ui form" enctype="multipart/form-data" method="post" action="{% url 'profile-create' %}" class="add-form">
+                <div class="ui segment">
+                  {% for field in form.visible_fields %}
+                  <div class="field">
+                    {{field.label_tag}}
+                    {{field}}
+                  </div>
+                  {% endfor %}    
+                  {% csrf_token %}
+                  <input class="ui gray submit button" type="submit" value="Submit" id="id_update_profile_button">
+                </div>	
+              </form>
+            </div>
+            <div class="column">
+              <div class="ui verticle segment">
+                
+                  {% if profile.is_dj %}
+                  <button class="ui red submit button" id="id_start_new_stream_button"> Start New Stream</button>
+                  {% else %}
+                  <button class="ui green submit button" id="id_link_song_share_button"> 
+                    <a href="{% url 'authenticate' %}"> Link to Spotify 
+                    <div class="ui small image">
+                    <img src="/static/songshare/spotifylogo.png">
+                    </div>
+                  </button>
 
-<div>
-{% if authenticate %}
-	<button id="id_start_new_stream_button"> Start New Stream</button>
-{% else %}
-	<button id="id_link_song_share_button"> Link to Spotify </button>
-{% endif %}
-</div>
+                  {% endif %}
+              </div>
+            </div>
+            <div class="column">
+              <div class="ui segment">
+                <div class="field">
+                  <a href="{% url 'dj-stream' dj.id %" id="id_now_listening"> 
+                    Now Listening to {{dj.user_name}} 
+                  </a>
+                </div>
+              </div>
+            </div>  
+          </div>
+          
+          {% for follower in following %}
+          <div class="row">
+            <div class="field">
+              <a href="{% url 'profile-view' follower.id %}" id="id_profile_link_{{follower.user_name}}">{{follower.first_name}} {{follower.last_name}}</a>
+            </div>
+          </div>
+          {% endfor %}
+          <div class="row">
+            {% block stream %} 
+            {% endblock %}
+          </div>
+        </div>
+      </div>
+      
 
-<div>
-	<a href="{% url 'dj-stream' dj.id %" id="id_now_listening"> Now Listening to {{dj.user_name}} </a>
-</div>
+
+
+
 
 
 {% endblock %}
