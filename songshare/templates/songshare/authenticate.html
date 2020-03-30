@@ -15,8 +15,8 @@
                     <div class="ui huge header" id="login-text">Login</div>
                 </div>
                 <div class="column">
-                    <form class="ui form">
-                        <div class="field" method="POST" action="{% url 'authenticate' %}">
+                    <form class="ui form" method="POST" action="{% url 'authenticate' %}">
+                        <div class="field">
                             <label>Username</label>
                             <div class="ui left icon input">
                                 <input type="text" placeholder="Username">

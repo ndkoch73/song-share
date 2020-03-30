@@ -16,23 +16,25 @@
                         <div class="ui huge header" id="login-text">Login</div>
                     </div>
                     <div class="column">
-                        <form class="ui form">
-                            <div class="field" method="POST" action="{% url 'register' %}">
-                                <label>Username</label>
+                        <form class="ui form" method="POST" action="{% url 'login' %}">
+                            <div class="field">
+                                {{form.username.label_tag}}
                                 <div class="ui left icon input">
-                                    <input type="text" placeholder="Username">
+                                    <!-- <input type="text" placeholder="Username"> -->
+                                    {{form.username}}
                                     <i class="user icon"></i>
                                 </div>
                             </div>
                             <div class="field">
-                                <label>Password</label>
+                                {{form.password.label_tag}}
                                 <div class="ui left icon input">
-                                    <input type="password">
+                                    <!-- <input type="password"> -->
+                                    {{form.password}}
                                     <i class="lock icon"></i>
                                 </div>
                             </div>
                             {% csrf_token %}
-                            <div class="ui blue submit button">Login</div>
+                            <button class="ui blue submit button" type="submit" id="id_login_button">Log In</button>
                         </form>
                     </div>
                     <div class="middle aligned column">

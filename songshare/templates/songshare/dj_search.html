@@ -1,29 +1,45 @@
 {% extends 'songshare/default_sidebar.html' %}
 
 {% block mainpage %}
-	<form method="post" action="{% url 'dj-search' %}">
-        <table>
-        {% for field in form.visible_fields %}
-            <tr>
-                <td> {{field.label_tag}}</td>
-                <td> {{field}}</td>
-                <td class="error">
-                    {% for error in field.errors %} {{error}} {% endfor %}
-                </td>
-            </tr>
+<div class="main ui container">
+      
+    <h2 class="ui dividing header">
+        <span id="id_name_of_page" style="color:black;text-align:center;"> Search for DJ
+
+    </h2>
+    <div class="ui three column grid" id="id-profile">
+        <div class="row">
+            <div class="column">
+                <form method="post" action="{% url 'dj-search' %}"></form>
+                    <div class="ui category search">
+                        <div class="ui input">
+                            <input class="prompt" id="id_dj_search" type="text" placeholder="Search DJs...">
+                        </div>
+                        {% csrf_token %}
+                        <button class="ui icon submit button" id="id_dj_search_button">
+                            <i class="search icon"></i>
+                        </button>
+                        <div class="results">
+                        </div>
+                    </div>
+                    
+                </form>
+            </div>
+        </div>
+        {% for dj in djs %}
+        <div class="row">
+            <div class="col">
+                
+            </div>
+        </div>
         {% endfor %}
+
+
+        <script>getDJs()</script>
+        <table id="dj_search">
         </table>
-
-        {% for field in form.hidden_fields %}
-            {{field}} {{field.errors}}
-        {% endfor %}
-        {% csrf_token %}
-        <button type="submit" id="id_dj_search_button" >Search</button>
-	</form>
-
-    <script>getDJs()</script>
-	<table id="id_dj_search">
-    </table>
+    </div>
+</div>
 
 
 <!-- 	{% for song in songs %}

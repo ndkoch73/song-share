@@ -143,7 +143,8 @@ def dj_stream(request, id):
     pass
 
 def dj_search(request):
-    pass
+    context = {}
+    return render(request, 'songshare/dj_search.html', context)
 
 def song_search(request,id):
     pass
