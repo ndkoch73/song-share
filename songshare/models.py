@@ -37,7 +37,7 @@ class Profile(models.Model):
         used to verify that the user's profile picture is indeed a picture
     """
     user = models.ForeignKey(User, default=None, on_delete=models.PROTECT)
-    is_dj = models.BooleanField(default=False)
+    auth_token = models.CharField(default=False)
     fname = models.CharField(max_length=20)
     lname = models.CharField(max_length=20)
     bio = models.CharField(max_length=200)
@@ -48,6 +48,31 @@ class Profile(models.Model):
         return 'Profile(user=' + str(self.user) + \
                ' is_dj=' + str(self.is_dj) + \
                ' bio=' + str(self.bio) + ')'
+
+# Song class (essential)
+class Song(models.Model):
+    """
+    A class used to encapsulate a song provided by Spotify API
+    ...
+    Attributes
+    ----------
+    artist : models.CharField
+        the artist of the song (might need an additional field to reference
+        an artist profile via uri)
+    album : models.CharField
+        the album of the song (might need an additional field to reference
+        an album profile via uri)
+    vote_count : models.IntegerField
+        vote count for the song
+    uri : models.CharField
+        reference to the song provided by the Spotify API
+    """
+    artist = models.CharField(max_length=200)
+    album = models.CharField(max_length=200)
+    vote_count = models.IntegerField(blank=True, null=True)
+    uri = models.CharField(max_length=200)
+    def __str__(self):
+        return 'Song(artist=' + str(self.artist) + ' album=' + str(self.album) + ')'
 
 # Playlist class (essential)
 class Playlist(models.Model):
@@ -76,36 +101,10 @@ class Playlist(models.Model):
     songs = models.ForeignKey(Song, default=None, on_delete=models.PROTECT)
     picture = models.FileField(blank=True)
     bio = models.CharField(max_length=200)
-    followers = models.ForeignKey(Profile, default=None, on_delete=models.PROTECT)
     content_type = models.CharField(max_length=50, blank=True)
 
     def __str__(self):
         return 'Playlist(user=' + str(self.user) + ' songs=' + str(self.songs) + ')'
-
-# Song class (essential)
-class Song(models.Model):
-    """
-    A class used to encapsulate a song provided by Spotify API
-    ...
-    Attributes
-    ----------
-    artist : models.CharField
-        the artist of the song (might need an additional field to reference
-        an artist profile via uri)
-    album : models.CharField
-        the album of the song (might need an additional field to reference
-        an album profile via uri)
-    vote_count : models.IntegerField
-        vote count for the song
-    uri : models.CharField
-        reference to the song provided by the Spotify API
-    """
-    artist = models.CharField(max_length=200)
-    album = models.CharField(max_length=200)
-    vote_count = models.IntegerField(blank=True, null=True)
-    uri = models.CharField(max_length=200)
-    def __str__(self):
-        return 'Song(artist=' + str(self.artist) + ' album=' + str(self.album) + ')'
       
 # Post Model (optional for now)
 class Post(models.Model):

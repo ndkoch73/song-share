@@ -9,9 +9,9 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.db import transaction
 
 from django.core import serializers
-
 from django.utils import timezone
 from datetime import datetime
 
@@ -181,13 +181,6 @@ def follow(request, id):
 def unfollow(request, id):
     pass
 
-
-
-
-
-
-
-
 def login_action(request):
     """ Login flow for user authentication.
     Validates login form using username and password fields.
@@ -242,7 +235,7 @@ def register_action(request):
         the django response object containing metadata about the request
     """
     context = {}
-    if True:
+    
     if request.method == 'GET':
         context['form'] = RegistrationForm()
         return render(request, 'songshare/register.html', context)
