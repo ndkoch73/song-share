@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_semantic_ui',
     'songshare',
-    'django_semantic_ui',
 ]
 
 MIDDLEWARE = [

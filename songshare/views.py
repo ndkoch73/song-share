@@ -231,7 +231,7 @@ def logout_action(request):
 
 
 
-@transaction.atomic
+
 def register_action(request):
     """ Register flow
     Validates the User registration form using the appropriate fields, and 
@@ -242,7 +242,6 @@ def register_action(request):
         the django response object containing metadata about the request
     """
     context = {}
-    if True:
     if request.method == 'GET':
         context['form'] = RegistrationForm()
         return render(request, 'songshare/register.html', context)
