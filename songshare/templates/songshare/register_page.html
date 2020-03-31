@@ -85,6 +85,12 @@
                                 {% endfor %}
                             {% endfor %}
                         {% endif %}
+                        {% for error in form.non_field_errors %}
+                        <div class="ui error message">
+                            <i class="close icon"></i>
+                            {{error}}
+                        </div>
+                        {% endfor %}
                     </div>
                     <div class="middle aligned column">
                         <div class="ui horizontal divider">Or</div>

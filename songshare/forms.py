@@ -16,19 +16,19 @@ MAX_UPLOAD_SIZE = 2500000
 
 # login form 
 class LoginForm(forms.Form):
-	username = forms.CharField(max_length = 20, widget=forms.TextInput(attrs={'placeholder': 'username'}))
-	password = forms.CharField(max_length = 200, widget = forms.PasswordInput())
+    username = forms.CharField(max_length=20, widget=forms.TextInput(attrs={'placeholder':'username'}))
+    password = forms.CharField(max_length=200, widget=forms.PasswordInput())
 
-	def clean(self):
-			cleaned_data = super().clean()
-			username = cleaned_data.get('username')
-			password = cleaned_data.get('password')
-			user = authenticate(username=username, password=password)
+    def clean(self):
+        cleaned_data = super().clean()
+        username = cleaned_data.get('username')
+        password = cleaned_data.get('password')
+        user = authenticate(username=username,password=password)
 
-			if not user:
-				raise forms.ValidationError("Invalid username/password")
-
-			return cleaned_data
+        if not user:
+            print("not valid user!")
+            raise forms.ValidationError('Invalid username or password')
+        return cleaned_data
 
 # user registration form
 class RegistrationForm(forms.Form):
@@ -43,7 +43,8 @@ class RegistrationForm(forms.Form):
     fname = forms.CharField(max_length = 20, label="First Name")
     lname = forms.CharField(max_length = 20, label="Last Name")
     spotify_username = forms.CharField(max_length=100, label="Spotify Username",
-                        widget=forms.TextInput(attrs={'placeholder': 'Username'}))
+                        widget=forms.TextInput(attrs={'placeholder': 'Username'}),
+                        required=False)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -61,6 +62,8 @@ class RegistrationForm(forms.Form):
     
     def clean_spotify_username(self):
         spotify_username = self.cleaned_data.get('spotify_username')
+        if spotify_username == "":
+            return spotify_username
         client_credentials_manager = SpotifyClientCredentials(
             client_id=settings.SPOTIPY_CLIENT_ID,
             client_secret=settings.SPOTIPY_CLIENT_SECRET)
