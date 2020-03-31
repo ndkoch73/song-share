@@ -36,13 +36,14 @@
               <div class="ui verticle segment">
                 
                   {% if profile.is_dj %}
-                  <button class="ui red submit button" id="id_start_new_stream_button"> Start New Stream</button>
+                  <button class="ui red submit button" id="id_start_new_stream_button"> <a href="{% url 'dj-stream' %}"> Start New Stream</a></button>
                   {% else %}
                   <button class="ui green submit button" id="id_link_song_share_button"> 
                     <a href="{% url 'authenticate' %}"> Link to Spotify Premium
                     <div class="ui small image">
                       <img src="/static/songshare/spotifylogo.png" width="100px" id="id_spotify_logo">
                     </div>
+                    </a>
                   </button>
 
                   {% endif %}

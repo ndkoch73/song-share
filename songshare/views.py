@@ -143,6 +143,15 @@ def profile_view(request):
 def dj_stream(request, id):
     pass
 
+def user_stream(request):
+    context = {}
+    return render(request, 'songshare/dj_stream.html', context)
+
+def clear_stream_action(request):
+    context = {}
+    return render(request, 'songshare/dj_stream.html', context)
+
+
 def dj_search(request):
     context = {}
     return render(request, 'songshare/dj_search.html', context)
@@ -244,27 +253,27 @@ def register_action(request):
     context = {}
     if request.method == 'GET':
         context['form'] = RegistrationForm()
-        return render(request, 'songshare/register.html', context)
+        return render(request, 'songshare/register_page.html', context)
 
     form = RegistrationForm(request.POST)
     context['form'] = form
 
     if not form.is_valid():
-        return render(request, 'songshare/register.html', context)
+        return render(request, 'songshare/register_page.html', context)
 
     new_user = User.objects.create_user(username=form.cleaned_data['username'], 
                                         password=form.cleaned_data['password'],
                                         email=form.cleaned_data['email'],
-                                        fname=form.cleaned_data['fname'],
-                                        lname=form.cleaned_data['lname'])
+                                        first_name=form.cleaned_data['first_name'],
+                                        last_name=form.cleaned_data['last_name'])
     new_user.save()
     new_user = authenticate(username=form.cleaned_data['username'], 
                             password=form.cleaned_data['password'])
     login(request, new_user)
     new_profile = Profile(user=request.user, 
                           is_dj=False,
-                          fname=request.POST['fname'], 
-                          lname=request.POST['lname'], 
+                          fname=request.POST['first_name'], 
+                          lname=request.POST['last_name'], 
                           picture=None)
     new_profile.save()
     return redirect(reverse('home'))
