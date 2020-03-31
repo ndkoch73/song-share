@@ -124,3 +124,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
+# cliend id and secret key for the spotify developer API
+# these need to be protected once this is in production
+SPOTIPY_CLIENT_ID = '4f8a77d7836949868c6487a0142d28d2'
+
+SPOTIPY_CLIENT_SECRET = '63135bafa188430991566a01dac77e26'
