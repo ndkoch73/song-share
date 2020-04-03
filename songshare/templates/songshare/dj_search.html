@@ -10,31 +10,41 @@
     <div class="ui three column grid" id="id-profile">
         <div class="row">
             <div class="column">
-                <form method="post" action="{% url 'dj-search' %}"></form>
-                    <div class="ui category search">
-                        <div class="ui input">
-                            <input class="prompt" id="id_dj_search" type="text" placeholder="Search DJs...">
-                        </div>
-                        {% csrf_token %}
-                        <button class="ui icon submit button" id="id_dj_search_button">
-                            <i class="search icon"></i>
-                        </button>
+                <div class="ui category search">
+                    <form method="post" action="{% url 'dj-search' %}">
+                    <div class="ui input">
+                        <input class="prompt" id="id_dj_search" type="text" name="search" placeholder="Search DJs..." value={{search}}>
+                    </div>    
+                    <button class="ui icon submit button" id="id_dj_search_button">
+                        <i class="search icon"></i>
+                    </button>
+                    {% csrf_token %}
+                </form>
                         <div class="results">
                         </div>
-                    </div>
-                    
-                </form>
+                </div>
             </div>
         </div>
         {% for dj in djs %}
         <div class="row">
-            <div class="col">
-                
+            <div class="col" id="id_dj_search">
+                <div class="segment">
+                    <label id="id_name"> {{dj.fname}} {{dj.lname}}
+                </div>
+                <div class="segment">
+                    {% if dj.live %}
+					<i class="circle red icon"></i>
+					{{dj.fname}} {{dj.lname}} is live
+					{% else %}
+					<i class="circle outline icon"></i>
+					{{dj.fname}} {{dj.lname}} is not live
+					{% endif %}
+                </div>
             </div>
         </div>
         {% endfor %}
 
-
+<!-- Refresh to check for status -->
         <script>getDJs()</script>
         <table id="dj_search">
         </table>

@@ -38,6 +38,8 @@ class Profile(models.Model):
     """
     user = models.ForeignKey(User, default=None, on_delete=models.PROTECT)
     is_dj = models.BooleanField(default=False)
+    is_live = models.BooleanField(default=False, name='live')
+    auth_token = models.CharField(max_length=200, default=None)
     fname = models.CharField(max_length=20)
     lname = models.CharField(max_length=20)
     bio = models.CharField(max_length=200)

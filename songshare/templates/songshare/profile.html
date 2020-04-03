@@ -8,7 +8,7 @@
           </span>
           <br>
           <div class="ui small image">
-            {% if profile.picture %}
+            {% if c_user.picture %}
               <img src="{% url 'photo' profile.id %}" alt="{{profile.text}}" width="100px" id="id_profile_picture">
             {% else %}
               <img src="default.jpg" width="200px"  id="id_user_picture">
@@ -34,18 +34,18 @@
             </div>
             <div class="column">
               <div class="ui verticle segment">
-                
-                  {% if profile.is_dj %}
-                  <button class="ui red submit button" id="id_start_new_stream_button"> <a href="{% url 'dj-stream' %}"> Start New Stream</a></button>
+                  {% if c_user.is_dj %}
+                  <button class="ui red submit button" id="id_start_new_stream_button"> 
+                    <a href="{% url 'dj-stream' %}"> <span style="color:black;">Start New Stream</span></a>
+                  </button>
                   {% else %}
                   <button class="ui green submit button" id="id_link_song_share_button"> 
                     <a href="{% url 'authenticate' %}"> Link to Spotify Premium
-                    <div class="ui small image">
-                      <img src="/static/songshare/spotifylogo.png" width="100px" id="id_spotify_logo">
-                    </div>
+                      <div class="ui small image">
+                        <img src="/static/songshare/spotifylogo.png" width="100px" id="id_spotify_logo">
+                      </div>
                     </a>
                   </button>
-
                   {% endif %}
               </div>
             </div>

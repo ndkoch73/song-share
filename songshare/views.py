@@ -21,6 +21,7 @@ from songshare.models import *
 import json
 
 def home_page(request):
+    print(request.user.id)
     return render(request,'songshare/user_home.html', {})
 # renders current user's profile page
 
@@ -39,6 +40,7 @@ def profile_page_action(request):
     # current user
     try:
         c_user = Profile.objects.get(user=request.user)
+        context['form']  = ProfilePictureForm()
     except Profile.DoesNotExist:
         return redirect('home')
     
@@ -128,6 +130,7 @@ def update_follow(request, id):
     except:
         raise Http404
 
+@login_required
 def authenticate_action(request):
     context = {}
     if request.method == "GET":
@@ -136,16 +139,26 @@ def authenticate_action(request):
 
 
 
-
+@login_required
 def profile_view(request):
     pass
 
-def dj_stream(request, id):
+def listener_stream(request, id):
     pass
 
-def user_stream(request):
+# Starts the stream sets flags such as is live
+def dj_stream(request):
     context = {}
-    return render(request, 'songshare/dj_stream.html', context)
+    user = request.user
+    user_id = user.id
+    try:
+        profile = Profile.objects.get(pk=user_id)
+        profile.live =  True
+        profile.save()
+        return render(request, 'songshare/dj_stream.html', context)
+    except:
+        raise Http404
+
 
 def clear_stream_action(request):
     context = {}
@@ -154,7 +167,15 @@ def clear_stream_action(request):
 
 def dj_search(request):
     context = {}
-    return render(request, 'songshare/dj_search.html', context)
+    if request.method == "GET":
+        return render(request, 'songshare/dj_search.html', context)
+    else:
+        # print(request.POST)
+        context['search']=  request.POST['search']
+        context['djs'] = Profile.objects.all()
+        print(context['djs'])
+        return render(request, 'songshare/dj_search.html', context)
+    
 
 def song_search(request,id):
     pass
@@ -166,10 +187,10 @@ def get_photo(request, id):
 
     # Maybe we don't need this check as form validation requires a picture be uploaded.
     # But someone could have delete the picture leaving the DB with a bad references.
-    if not profile.profile_picture:
+    if not profile.picture:
         raise Http404
 
-    return HttpResponse(profile.profile_picture, content_type=profile.content_type)
+    return HttpResponse(profile.picture, content_type=profile.content_type)
 
 
 @login_required
@@ -207,6 +228,27 @@ def login_action(request):
         the django response object containing metadata about the request
     """
     context = {}
+    # try:
+    #     Profile.objects.get(pk=1)
+    #     new_user = User.objects.create_user(username=form.cleaned_data['username'], 
+    #                                     password=form.cleaned_data['password'],
+    #                                     email=form.cleaned_data['email'],
+    #                                     first_name=form.cleaned_data['first_name'],
+    #                                     last_name=form.cleaned_data['last_name'])
+    #     new_user.save()
+    #     new_user = authenticate(username=form.cleaned_data['username'], 
+    #                         password=form.cleaned_data['password'])
+    #     login(request, new_user)
+    #     new_profile = Profile(user=request.user, 
+    #                       is_dj=False,
+    #                       live=False,
+    #                       auth_token="",
+    #                       fname=request.POST['first_name'], 
+    #                       lname=request.POST['last_name'], 
+    #                       picture=None)
+    # except:
+    #     Profile
+
     #display the registration form on a GET request
     if request.method == 'GET':
         context['form'] = LoginForm()
@@ -217,6 +259,7 @@ def login_action(request):
 
     # validate the form
     if not form.is_valid():
+        context['message'] = 'invalid login'
         return render(request, 'songshare/login_page.html', context)
 
     new_user = authenticate(username=form.cleaned_data['username'],
@@ -235,6 +278,15 @@ def logout_action(request):
     request : HttpRequest
         the django response object containing metadata about the request
     """
+    try: 
+        user = request.user
+        profile = Profile.objects.get(pk=user.id)
+        profile.live = False
+        profile.save()
+        logout(request)
+        return redirect(reverse('login'))
+    except:
+        raise Http404
     logout(request)
     return redirect(reverse('login'))
 
@@ -270,10 +322,29 @@ def register_action(request):
     new_user = authenticate(username=form.cleaned_data['username'], 
                             password=form.cleaned_data['password'])
     login(request, new_user)
+    
+    # testing
+    dj_status= False
+    if (new_user.id == 2):
+        dj_status = True
+
     new_profile = Profile(user=request.user, 
-                          is_dj=False,
+                          is_dj=dj_status,
+                          live=False,
+                          auth_token="",
                           fname=request.POST['first_name'], 
                           lname=request.POST['last_name'], 
                           picture=None)
     new_profile.save()
     return redirect(reverse('home'))
+
+DUMMY_LIVEDJ ={
+    'id': 1,
+    'is_dj': True,
+    'live': True,
+    'auth_token': None,
+    'fname': 'dummy',
+    'lname': 'dj',
+    'bio': 'DUMMY',
+}
+
