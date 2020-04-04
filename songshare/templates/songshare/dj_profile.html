@@ -4,7 +4,7 @@
 <div class="main ui container">
       
 	<h2 class="ui dividing header">
-	  <span id="id_name_of_page" style="color:black;text-align:center;"> Profile Page for {{profile.user.first_name}} {{profile.user.last_name}}
+	  <span id="id_name_of_page" style="color:black;text-align:center;"> Profile Page for {{name}}
 	  </span>
 	  <br>
 	  <div class="ui small image">
@@ -22,86 +22,25 @@
 			<div class="ui segment">
 				<div class="field">
 					<label for="id_bio"> Bio: </label>
-					<input type="text" name="bio" required id="id_bio" readonly>{{profile.bio}}<>
+					<div class="ui input">
+						<input  type="text" name="bio" required id="id_bio" readonly>{{profile.bio}}
+				
+					</div>
 				</div>
+				<br>
 				<div class="field">
-					<button class="ui primary button">
+					<button class="ui gray primary button">
 						Follow
 					</button>
 				</div>
-				<div class="field">
-					{% if profile.live %}
-					<i class="circle icon"></i>
-					{{profile.fname}} {{profile.lname}} is live
-					{% else %}
-					<i class="circle outline icon"></i>
-					{{profile.fname}} {{profile.lname}} is not live
-					{% endif %}
-				</div>
-			
-			</div>
-		<div class="column">
-		  <div class="ui verticle segment">
-			
-			  {% if profile.is_dj %}
-			  <button class="ui red submit button" id="id_start_new_stream_button"> <a href="{% url 'dj-stream' %}"> Start New Stream</a></button>
-			  {% else %}
-			  <button class="ui green submit button" id="id_link_song_share_button"> 
-				<a href="{% url 'authenticate' %}"> Link to Spotify Premium
-				<div class="ui small image">
-				  <img src="/static/songshare/spotifylogo.png" width="100px" id="id_spotify_logo">
-				</div>
-				</a>
-			  </button>
 
-			  {% endif %}
-		  </div>
-		</div>
-		<div class="column">
-		  <div class="ui segment">
-			<div class="field">
-			  <a href="{% url 'dj-stream' dj.id %" id="id_now_listening"> 
-				Now Listening to {{dj.user_name}} 
-			  </a>
+			
 			</div>
-		  </div>
-		</div>  
-	  </div>
-	  
-	  {% for follower in following %}
-	  <div class="row">
-		<div class="field">
-		  <a href="{% url 'profile-view' follower.id %}" id="id_profile_link_{{follower.user_name}}">{{follower.first_name}} {{follower.last_name}}</a>
 		</div>
-	  </div>
-	  {% endfor %}
-	  <div class="row">
-		{% block stream %} 
-		{% endblock %}
 	  </div>
 	</div>
   </div>
   
-
-
-		<div>
-			{{form.picture.label_tag}} 
-		</div>
-		{{form.bio.label_tag}}
-		<label type="text" id="id_user_bio" readonly>{{bio}}</label>
-		<br>
-
-		{% if unfollow %}
-		<form action="{% url 'unfollow' profile.id %}"  method="post">
-			{% csrf_token %}
-			<button type="submit" id="id_unfollow">unfollow</button>
-		</form>
-		{% else %}
-		<form action="{% url 'follow' profile.id %}"  method="post">
-			{% csrf_token %}
-			<button type="submit" id="id_follow">follow</button>
-		</form>
-		{% endif %}
 
 {% endblock %}
 

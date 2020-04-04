@@ -13,9 +13,11 @@
 		<a class="item" href="{% url 'profile-create' %}" id="id_nav_profile"> 
 			Your Profile 
 		</a>
+		{% if c_user.is_dj == True  %}
 		<a class="item" href="{% url 'dj-stream' %}" id="id_nav_profile"> 
 			Your Stream 
 		</a>
+		{% endif %}
 		<a class="item" href="{% url 'logout' %}" id="id_nav_logout"> 
 			Sign-out 
 		</a>

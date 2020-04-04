@@ -74,18 +74,17 @@ def goto_profile(request, id):
         profile = Profile.objects.get(user=p_user)
         c_user = Profile.objects.get(user=request.user)
         following = list(c_user.following.all())
-
         if (profile.user == c_user.user): 
             return redirect(reverse('user_profile_page'))
 
         name = profile.fname + ' ' + profile.lname
         context['c_user'] = c_user
         context['profile'] = profile
-        context['following'] = following
         if (profile.user in following):
             context['following'] = True
         else:
             context['following'] = False
+            print('false')
         context['name'] = name
         return render(request, 'songshare/dj_profile.html', context)
     except:
@@ -139,12 +138,20 @@ def authenticate_action(request):
 
 
 
-@login_required
-def profile_view(request):
-    pass
-
 def listener_stream(request, id):
-    pass
+    context = {}
+    try:
+        p_user = User.objects.get(id=id)
+        f_user = Profile.objects.get(user=p_user)
+        c_user = Profile.objects.get(user=request.user)
+        if (c_user.user == f_user.user):
+            return redirect(reverse('dj_stream'))
+        context['dj'] = f_user
+        context['c_user'] = c_user
+        return render(request, 'songshare/listener_stream.html', context)
+    except:
+        raise Http404
+
 
 # Starts the stream sets flags such as is live
 def dj_stream(request):
@@ -153,8 +160,10 @@ def dj_stream(request):
     user_id = user.id
     try:
         profile = Profile.objects.get(pk=user_id)
+        c_user = Profile.objects.get(user=request.user)
         profile.live =  True
         profile.save()
+        context['c_user'] = c_user
         return render(request, 'songshare/dj_stream.html', context)
     except:
         raise Http404
@@ -167,12 +176,15 @@ def clear_stream_action(request):
 
 def dj_search(request):
     context = {}
+    c_user = Profile.objects.get(user=request.user)
+    context['c_user'] = c_user
+
     if request.method == "GET":
         return render(request, 'songshare/dj_search.html', context)
     else:
         # print(request.POST)
         context['search']=  request.POST['search']
-        context['djs'] = Profile.objects.all()
+        context['djs'] = Profile.objects.order_by('live')
         print(context['djs'])
         return render(request, 'songshare/dj_search.html', context)
     
