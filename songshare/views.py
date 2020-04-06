@@ -50,6 +50,7 @@ def profile_page_action(request):
     context['c_user'] = c_user
     context['following'] = following
     context['form']  = ProfilePictureForm()
+    context['is_dj'] = c_user.auth_token != ''
     print(context)
     return render(request, 'songshare/profile.html', context)
 
