@@ -21,8 +21,14 @@ from songshare.models import *
 import json
 
 def home_page(request):
-    print(request.user.id)
-    return render(request,'songshare/user_home.html', {})
+    
+    try:
+        c_user = Profile.objects.get(user=request.user)
+        print(c_user)
+        context = {'c_user': c_user}
+        return render(request,'songshare/user_home.html', context)
+    except:
+        raise Http404
 # renders current user's profile page
 
 
@@ -38,19 +44,44 @@ def profile_page_action(request):
     """
     context = {}
     # current user
+    
+
+
     try:
         c_user = Profile.objects.get(user=request.user)
-        context['form']  = ProfilePictureForm()
+        picture_form  = ProfilePictureForm()
     except Profile.DoesNotExist:
         return redirect('home')
+    if request.method == 'POST':
+        c_user.bio = request.POST['bio']
+    
+    
     
     
     # the users that follow the current user
     following = list(c_user.following.all())
     context['c_user'] = c_user
     context['following'] = following
+
+
+    # Handling pictures
+    profile_form = ProfilePictureForm(request.POST, request.FILES)
+    # print(profile_form)
+    if request.FILES != {} and profile_form.is_valid():
+        # I'm so confused apparently this print statement is essential
+        # print(profile_form)
+        pic = profile_form.cleaned_data['picture']
+        c_user.content_type = profile_form.cleaned_data['picture'].content_type
+        c_user.picture = pic
+        print('picture exists')
+        c_user.save()
+    
+    
+
     context['form']  = ProfilePictureForm()
+    
     print(context)
+    print(Profile.objects.all())
     return render(request, 'songshare/profile.html', context)
 
 
@@ -75,7 +106,7 @@ def goto_profile(request, id):
         c_user = Profile.objects.get(user=request.user)
         following = list(c_user.following.all())
         if (profile.user == c_user.user): 
-            return redirect(reverse('user_profile_page'))
+            return redirect(reverse('profile-create'))
 
         name = profile.fname + ' ' + profile.lname
         context['c_user'] = c_user
@@ -195,7 +226,7 @@ def song_search(request,id):
 @login_required
 def get_photo(request, id):
     profile = get_object_or_404(Profile, id=id)
-    # print('Picture #{} fetched from db: {} (type={})'.format(id, profile.profile_picture, type(profile.profile_picture)))
+    print('Picture #{} fetched from db: {} (type={})'.format(id, profile.picture, type(profile.picture)))
 
     # Maybe we don't need this check as form validation requires a picture be uploaded.
     # But someone could have delete the picture leaving the DB with a bad references.
@@ -343,7 +374,7 @@ def register_action(request):
     new_profile = Profile(user=request.user, 
                           is_dj=dj_status,
                           live=False,
-                          auth_token="",
+                          auth_token=None,
                           fname=request.POST['first_name'], 
                           lname=request.POST['last_name'], 
                           picture=None)

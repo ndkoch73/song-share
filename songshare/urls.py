@@ -14,7 +14,6 @@ urlpatterns = [
     path('stream-off', views.stream_off, name="stream-off"),
     path('stream-on', views.stream_on, name="stream-on"),
     path('follow:<int:id>', views.update_follow, name='follow'),
-    path('unfollow:<int:id>', views.unfollow, name='unfollow'),
     path('profile-create', views.profile_page_action, name="profile-create"),
     path('profile-view/<int:id>', views.goto_profile, name="profile-view"),
     path('authenticate', views.authenticate_action, name="authenticate"),

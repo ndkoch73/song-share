@@ -23,21 +23,45 @@
 				<div class="field">
 					<label for="id_bio"> Bio: </label>
 					<div class="ui input">
-						<input  type="text" name="bio" required id="id_bio" readonly>{{profile.bio}}
+						<input  type="text" name="bio" required id="id_bio" value={{profile.bio}} readonly>
 				
 					</div>
 				</div>
 				<br>
 				<div class="field">
-					<button class="ui gray primary button">
-						Follow
-					</button>
+					<form class="ui form" enctype="multipart/form-data" method="post" action="{% url 'follow' profile.id %}" class="add-form">
+						{% csrf_token %}
+						{% if following == True %}
+						<button class="ui blue button">
+							Unfollow
+						</button>
+						{% else %}
+						<button class="ui orange button">
+							Follow
+						</button>
+						{% endif %}
+					</form>
 				</div>
 
 			
 			</div>
+		</div>	
+	  </div>
+	  {% if profile.live == True %}
+	  <div class="row">
+		<div class="column">
+			<div class="ui segment">
+				<div class="field">
+					<button class="ui orange button">
+						<a href="{% url 'listener-stream' profile.id %}"> 
+							<span style="color: white;"> Go to Stream </span>
+						</a>
+					</button>
+				</div>
+			</div>
 		</div>
 	  </div>
+	  {% endif %}
 	</div>
   </div>
   

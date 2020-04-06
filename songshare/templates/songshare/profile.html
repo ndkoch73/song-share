@@ -9,7 +9,7 @@
           <br>
           <div class="ui small image">
             {% if c_user.picture %}
-              <img src="{% url 'photo' profile.id %}" alt="{{profile.text}}" width="100px" id="id_profile_picture">
+              <img src="{% url 'photo' c_user.id %}" width="100px" id="id_profile_picture">
             {% else %}
               <img src="default.jpg" width="200px"  id="id_user_picture">
             {% endif %}
@@ -26,7 +26,13 @@
                     {{field.label_tag}}
                     {{field}}
                   </div>
-                  {% endfor %}    
+                  {% endfor %} 
+                  <div class="field">
+                    <label for="id_bio">
+                      Bio:
+                    </label>
+                    <input type="text" name="bio" maxlength="200" required="" id="id_bio" value={{c_user.bio}}>
+                  </div>
                   {% csrf_token %}
                   <input class="ui gray submit button" type="submit" value="Submit" id="id_update_profile_button">
                 </div>	
@@ -71,10 +77,6 @@
             </div>
           </div>
           {% endfor %}
-          <div class="row">
-            {% block stream %} 
-            {% endblock %}
-          </div>
         </div>
       </div>
       
