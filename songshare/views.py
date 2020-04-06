@@ -18,6 +18,9 @@ from datetime import datetime
 from songshare.forms import *
 from songshare.models import *
 
+
+from django.contrib.postgres.search import TrigramSimilarity
+
 import json
 
 def home_page(request):
@@ -214,9 +217,18 @@ def dj_search(request):
         return render(request, 'songshare/dj_search.html', context)
     else:
         # print(request.POST)
-        context['search']=  request.POST['search']
+        search = request.POST['search']
+        print(search)
+        context['search']=  search
         context['djs'] = Profile.objects.order_by('live')
-        print(context['djs'])
+        try: 
+            print("hit")
+            similarity = Profile.objects.annotate(similarity=TrigramSimilarity('name', search),).filter(similarity__gt=0.1).order_by('-similarity')
+            print("hit")
+            context['djs'] = similarity
+        except:
+            print("whoops")
+        
         return render(request, 'songshare/dj_search.html', context)
     
 
@@ -242,16 +254,6 @@ def stream_on(request):
 
 @login_required
 def stream_off(request):
-    pass
-
-
-
-@login_required
-def follow(request, id):
-    pass
-
-@login_required
-def unfollow(request, id):
     pass
 
 
@@ -370,13 +372,17 @@ def register_action(request):
     dj_status= False
     if (new_user.id == 2):
         dj_status = True
+    fname = request.POST['first_name']
+    lname = request.POST['last_name']
+    name = fname+' ' + lname
 
     new_profile = Profile(user=request.user, 
                           is_dj=dj_status,
                           live=False,
-                          auth_token=None,
+                          auth_token="",
                           fname=request.POST['first_name'], 
                           lname=request.POST['last_name'], 
+                          name=name,
                           picture=None)
     new_profile.save()
     return redirect(reverse('home'))

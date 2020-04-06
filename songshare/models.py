@@ -42,6 +42,7 @@ class Profile(models.Model):
     auth_token = models.CharField(max_length=200, default=None)
     fname = models.CharField(max_length=20)
     lname = models.CharField(max_length=20)
+    name = models.CharField(max_length=42)
     bio = models.CharField(max_length=200)
     following = models.ManyToManyField(User, related_name='following')
     picture = models.FileField(blank=True)
