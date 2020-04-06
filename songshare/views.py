@@ -15,6 +15,8 @@ from django.core import serializers
 from django.utils import timezone
 from datetime import datetime
 
+import spotipy
+
 from songshare.forms import *
 from songshare.models import *
 
@@ -128,11 +130,29 @@ def update_follow(request, id):
     except:
         raise Http404
 
+@login_required
 def authenticate_action(request):
-    context = {}
-    if request.method == "GET":
-        return render(request, 'songshare/authenticate.html', context)
-    return redirect('authenticate')
+    if request.user.profile_set.all()[0].auth_token != '':
+        return redirect(reverse('profile-create'))
+    
+    if request.method == 'GET':
+        return render(request, 'songshare/spotify_username.html', {'form': SpotifyUsernameForm()})
+    
+    form = SpotifyUsernameForm(request.POST)
+    if not form.is_valid():
+        return redirect(reverse('profile-create'))
+
+    print("Authenticating user with username " + form.cleaned_data['username'])
+    profile = request.user.profile_set.all()[0]
+    profile.auth_token = spotipy.util.prompt_for_user_token(form.cleaned_data['username'], 
+                                                                                scope='user-modify-playback-state',
+                                                                                client_id='1be1732addea44de8fac42a6013de5df',
+                                                                                client_secret='66c0bdea75b9413bb49569324192dbcb',
+                                                                                redirect_uri='http://localhost:8000')
+    
+    profile.save()
+    
+    return redirect(reverse('profile-create'))
 
 
 
@@ -236,7 +256,7 @@ def register_action(request):
     
     if request.method == 'GET':
         context['form'] = RegistrationForm()
-        return render(request, 'songshare/register.html', context)
+        return render(request, 'songshare/register_page.html', context)
 
     form = RegistrationForm(request.POST)
     context['form'] = form
@@ -247,16 +267,15 @@ def register_action(request):
     new_user = User.objects.create_user(username=form.cleaned_data['username'], 
                                         password=form.cleaned_data['password'],
                                         email=form.cleaned_data['email'],
-                                        fname=form.cleaned_data['fname'],
-                                        lname=form.cleaned_data['lname'])
+                                        first_name=form.cleaned_data['first_name'],
+                                        last_name=form.cleaned_data['last_name'])
     new_user.save()
     new_user = authenticate(username=form.cleaned_data['username'], 
                             password=form.cleaned_data['password'])
     login(request, new_user)
     new_profile = Profile(user=request.user, 
-                          is_dj=False,
-                          fname=request.POST['fname'], 
-                          lname=request.POST['lname'], 
+                          fname=request.POST['first_name'], 
+                          lname=request.POST['last_name'], 
                           picture=None)
     new_profile.save()
     return redirect(reverse('home'))

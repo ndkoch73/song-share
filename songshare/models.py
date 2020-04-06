@@ -46,7 +46,8 @@ class Profile(models.Model):
     content_type = models.CharField(max_length=50, blank=True)
     def __str__(self):
         return 'Profile(user=' + str(self.user) + \
-               ' bio=' + str(self.bio) + ')'
+               ' bio=' + str(self.bio) + \
+                ' auth_token=' + self.auth_token + ')'
 
 # Song class (essential)
 class Song(models.Model):

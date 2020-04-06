@@ -90,6 +90,9 @@ class PlaylistPictureForm(forms.ModelForm):
             raise forms.ValidationError('File too big (max size is {0} bytes)'.format(MAX_UPLOAD_SIZE))
         return picture
 
+class SpotifyUsernameForm(forms.Form):
+    username = forms.CharField(max_length=400, label="Spotify Username")
+
 """
 class ArtistPictureForm(forms.ModelForm):
     class Meta:
