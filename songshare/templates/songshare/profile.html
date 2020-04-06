@@ -35,15 +35,15 @@
             <div class="column">
               <div class="ui verticle segment">
                 
-                  {% if profile.auth_token %}
+                  {% if is_dj %}
                   <button class="ui red submit button" id="id_start_new_stream_button"> Start New Stream</button>
                   {% else %}
-                  <button class="ui green submit button" id="id_link_song_share_button"> 
-                    <a href="{% url 'authenticate' %}"> Link to Spotify </a>
+                  <a href="{% url 'authenticate' %}"> <button class="ui green submit button" id="id_link_song_share_button"> 
+                    Link to Spotify 
                     <div class="ui small image">
                     <img src="/static/songshare/spotifylogo.png">
                     </div>
-                  </button>
+                  </button></a>
 
                   {% endif %}
               </div>
