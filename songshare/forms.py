@@ -18,7 +18,6 @@ MAX_UPLOAD_SIZE = 2500000
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=20, widget=forms.TextInput(attrs={'placeholder':'username'}))
     password = forms.CharField(max_length=200, widget=forms.PasswordInput())
-
     def clean(self):
         cleaned_data = super().clean()
         username = cleaned_data.get('username')
@@ -76,7 +75,7 @@ class RegistrationForm(forms.Form):
 class ProfilePictureForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ( 'picture','bio')
+        fields = ( 'picture',)
 
     def clean_picture(self):
         picture = self.cleaned_data['picture']
@@ -102,6 +101,9 @@ class PlaylistPictureForm(forms.ModelForm):
         if picture.size > MAX_UPLOAD_SIZE:
             raise forms.ValidationError('File too big (max size is {0} bytes)'.format(MAX_UPLOAD_SIZE))
         return picture
+
+class SpotifyUsernameForm(forms.Form):
+    username = forms.CharField(max_length=400, label="Spotify Username")
 
 """
 class ArtistPictureForm(forms.ModelForm):

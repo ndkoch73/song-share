@@ -123,6 +123,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+MEDIA_ROOT =  os.path.join(BASE_DIR, 'static/images')
 
 # cliend id and secret key for the spotify developer API
 # these need to be protected once this is in production
@@ -137,3 +138,7 @@ SPOTIPY_MODIFY_PLAYBACK_SCOPE = 'user-modify-playback-state'
 REDIRECT_HOME_URL = 'http://localhost:8000/songshare/home'
 
 REDIRECT_AUTHENTICATION_URL = 'http://localhost:8000/songshare/authenticate'
+
+LOGIN_REDIRECT_URL = "/login"
+LOGIN_URL = "/login"
+

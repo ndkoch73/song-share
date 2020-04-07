@@ -8,8 +8,8 @@
           </span>
           <br>
           <div class="ui small image">
-            {% if profile.picture %}
-              <img src="{% url 'photo' profile.id %}" alt="{{profile.text}}" width="100px" id="id_profile_picture">
+            {% if c_user.picture %}
+              <img src="{% url 'photo' c_user.id %}" width="100px" id="id_profile_picture">
             {% else %}
               <img src="default.jpg" width="200px"  id="id_user_picture">
             {% endif %}
@@ -26,7 +26,13 @@
                     {{field.label_tag}}
                     {{field}}
                   </div>
-                  {% endfor %}    
+                  {% endfor %} 
+                  <div class="field">
+                    <label for="id_bio">
+                      Bio:
+                    </label>
+                    <input type="text" name="bio" maxlength="200" required="" id="id_bio" value={{c_user.bio}}>
+                  </div>
                   {% csrf_token %}
                   <input class="ui gray submit button" type="submit" value="Submit" id="id_update_profile_button">
                 </div>	
@@ -34,17 +40,22 @@
             </div>
             <div class="column">
               <div class="ui verticle segment">
-                
-                  {% if profile.is_dj %}
-                  <button class="ui red submit button" id="id_start_new_stream_button"> Start New Stream</button>
+                  {% if c_user.is_dj == True and c_user.live == True %}
+                    <button class="ui red submit button" id="id_start_new_stream_button"> 
+                        <a href="{% url 'clear-stream' %}"> <span style="color:black;">Stop  Stream</span></a>
+                    </button>
+                  {% elif c_user.is_dj == True and c_user.live == False  %}
+                    <button class="ui red submit button" id="id_start_new_stream_button"> 
+                      <a href="{% url 'dj-stream' %}"> <span style="color:black;">Start New Stream</span></a>
+                    </button>
                   {% else %}
                   <button class="ui green submit button" id="id_link_song_share_button"> 
-                    <a href="{% url 'authenticate' %}"> Link to Spotify 
-                    <div class="ui small image">
-                    <img src="/static/songshare/spotifylogo.png">
-                    </div>
+                    <a href="{% url 'authenticate' %}"> Link to Spotify Premium
+                      <div class="ui small image">
+                        <img src="/static/songshare/spotifylogo.png" width="100px" id="id_spotify_logo">
+                      </div>
+                    </a>
                   </button>
-
                   {% endif %}
               </div>
             </div>
@@ -66,10 +77,6 @@
             </div>
           </div>
           {% endfor %}
-          <div class="row">
-            {% block stream %} 
-            {% endblock %}
-          </div>
         </div>
       </div>
       
