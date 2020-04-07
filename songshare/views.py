@@ -25,15 +25,12 @@ from songshare.models import *
 
 import json
 
+@login_required
 def home_page(request):
-    try:
-        c_user = Profile.objects.get(user=request.user)
-        print(c_user)
-        context = {'c_user': c_user}
-        return render(request,'songshare/user_home.html', context)
-    except:
-        raise Http404
-# renders current user's profile page
+    c_user = Profile.objects.get(user=request.user)
+    print(c_user)
+    context = {'c_user': c_user}
+    return render(request,'songshare/user_home.html', context)
 
 @login_required
 def profile_page_action(request):
@@ -82,7 +79,7 @@ def profile_page_action(request):
     
 
     context['form']  = ProfilePictureForm()
-    context['is_dj'] = c_user.auth_token != ''
+    context['is_dj'] = c_user.auth_token_code != ''
     print(context)
     print(Profile.objects.all())
     return render(request, 'songshare/profile.html', context)
@@ -165,15 +162,14 @@ def update_follow(request, id):
 
 @login_required
 def authenticate_action(request):
-    code = request.GET.get('code')
+    try:
+        code = request.GET.get('code')
     except:
         print("malformed url. URL should be encoded with the http:.../?code=...")
     current_user_profile = Profile.objects.get(user=request.user)
     current_user_profile.auth_token_code = code
     current_user_profile.save()
     return redirect(reverse('home'))
-
-
 
 def listener_stream(request, id):
     context = {}
@@ -367,9 +363,9 @@ def register_action(request):
     
     # testing
     dj_status= False
-    fname = request.POST['first_name']
-    lname = request.POST['last_name']
-    name = fname+' ' + lname
+    fname = request.POST['fname']
+    lname = request.POST['lname']
+    name = fname + ' ' + lname
 
     new_profile = Profile(user=request.user, 
                           spotify_username=form.cleaned_data['spotify_username'],
