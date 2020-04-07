@@ -37,9 +37,10 @@
                     <a href="{% url 'listener-stream' dj.id %}">
 					<i class="circle red icon" id="id_is_live_{{dj.id}}"></i>
 					{{dj.fname}} {{dj.lname}} is {{dj.live}} live 
-					{% else %}
+                    {% else %}
+                    <a href="{% url 'profile-view' dj.id %}">
 					<i class="circle outline icon" id="id_is_not_live_{{dj.id}}"></i>
-					{{dj.fname}} {{dj.lname}} is not live
+					{{dj.fname}} {{dj.lname}} is not live </a>
 					{% endif %}
                 </div>
             </div>

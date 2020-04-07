@@ -19,7 +19,7 @@ from songshare.forms import *
 from songshare.models import *
 
 
-from django.contrib.postgres.search import TrigramSimilarity
+# from django.contrib.postgres.search import TrigramSimilarity
 
 import json
 
@@ -220,12 +220,12 @@ def dj_search(request):
         search = request.POST['search']
         print(search)
         context['search']=  search
-        context['djs'] = Profile.objects.order_by('live')
+        context['djs'] = Profile.objects.filter(name=search)
         try: 
             print("hit")
             similarity = Profile.objects.annotate(similarity=TrigramSimilarity('name', search),).filter(similarity__gt=0.1).order_by('-similarity')
             print("hit")
-            context['djs'] = similarity
+            # context['djs'] = similarity
         except:
             print("whoops")
         
@@ -370,8 +370,6 @@ def register_action(request):
     
     # testing
     dj_status= False
-    if (new_user.id == 2):
-        dj_status = True
     fname = request.POST['first_name']
     lname = request.POST['last_name']
     name = fname+' ' + lname
