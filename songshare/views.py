@@ -9,11 +9,13 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.db import transaction
 
 from django.core import serializers
-
 from django.utils import timezone
 from datetime import datetime
+
+import spotipy
 
 from songshare.forms import *
 from songshare.models import *
@@ -82,7 +84,7 @@ def profile_page_action(request):
     
 
     context['form']  = ProfilePictureForm()
-    
+    context['is_dj'] = c_user.auth_token != ''
     print(context)
     print(Profile.objects.all())
     return render(request, 'songshare/profile.html', context)
@@ -165,10 +167,27 @@ def update_follow(request, id):
 
 @login_required
 def authenticate_action(request):
-    context = {}
-    if request.method == "GET":
-        return render(request, 'songshare/authenticate.html', context)
-    return redirect('authenticate')
+    if request.user.profile_set.all()[0].auth_token != '':
+        return redirect(reverse('profile-create'))
+    
+    if request.method == 'GET':
+        return render(request, 'songshare/spotify_username.html', {'form': SpotifyUsernameForm()})
+    
+    form = SpotifyUsernameForm(request.POST)
+    if not form.is_valid():
+        return redirect(reverse('profile-create'))
+
+    print("Authenticating user with username " + form.cleaned_data['username'])
+    profile = request.user.profile_set.all()[0]
+    profile.auth_token = spotipy.util.prompt_for_user_token(form.cleaned_data['username'], 
+                                                                                scope='user-modify-playback-state',
+                                                                                client_id='1be1732addea44de8fac42a6013de5df',
+                                                                                client_secret='66c0bdea75b9413bb49569324192dbcb',
+                                                                                redirect_uri='http://localhost:8000')
+    
+    profile.save()
+    
+    return redirect(reverse('profile-create'))
 
 
 
@@ -259,10 +278,6 @@ def stream_off(request):
 
 
 
-
-
-
-
 def login_action(request):
     """ Login flow for user authentication.
     Validates login form using username and password fields.
@@ -336,8 +351,7 @@ def logout_action(request):
     return redirect(reverse('login'))
 
 
-
-
+@transaction.atomic
 def register_action(request):
     """ Register flow
     Validates the User registration form using the appropriate fields, and 
@@ -394,4 +408,12 @@ DUMMY_LIVEDJ ={
     'lname': 'dj',
     'bio': 'DUMMY',
 }
+
+"""
+NOTE: - I think it's a good idea to seperate the current user's profile page and 
+        the profile pages of other users. The profile_page_action method redirects
+        a user to their own profile. The goto_profile method will redirect the user
+        to their own profile if they click their own link, or to other user profiles.
+        Obviously we will work on the names of the html once we decide on urls.py
+"""
 
