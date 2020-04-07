@@ -1,9 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings
 
-# Create your models here.
-from django.db import models
-from django.contrib.auth.models import User
+import spotipy.util as spotipyutil
+import spotipy.oauth2 as oauth2
 
 """
 Note:
@@ -37,16 +37,47 @@ class Profile(models.Model):
         used to verify that the user's profile picture is indeed a picture
     """
     user = models.ForeignKey(User, default=None, on_delete=models.PROTECT)
-    auth_token = models.CharField(max_length=200)
+    spotify_username = models.CharField(max_length=200)
     fname = models.CharField(max_length=20)
     lname = models.CharField(max_length=20)
     bio = models.CharField(max_length=200)
     following = models.ManyToManyField(User, related_name='following')
     picture = models.FileField(blank=True)
     content_type = models.CharField(max_length=50, blank=True)
+    auth_token_code = models.CharField(max_length=256, blank=True)
+
     def __str__(self):
         return 'Profile(user=' + str(self.user) + \
                ' bio=' + str(self.bio) + ')'
+
+    def create_oauth_url(self,scope=None, client_id=None,
+                          client_secret=None, redirect_uri=None,
+                          cache_path=None):
+        cache_path = cache_path or ".cache-" + self.spotify_username
+        sp_oauth = oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri,
+                                    scope=scope, cache_path=cache_path)
+        token_info = sp_oauth.get_cached_token()
+        if not token_info:
+            auth_url = sp_oauth.get_authorize_url()
+            return auth_url
+        else:
+            return token_info
+
+    def get_auth_token(self,scope=None, client_id=None,
+                          client_secret=None, redirect_uri=None,
+                          cache_path=None):
+        cache_path = cache_path or ".cache-" + self.spotify_username
+        sp_oauth = oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri,
+                                    scope=scope, cache_path=cache_path)
+        token_info = sp_oauth.get_cached_token()
+        if not token_info:
+            token = sp_oauth.get_access_token(self.auth_token_code, as_dict=False)
+        else:
+            return token_info["access_token"]
+        if token:
+            return token
+        else:
+            return None
 
 # Song class (essential)
 class Song(models.Model):

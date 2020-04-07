@@ -17,7 +17,4 @@ urlpatterns = [
     path('profile-create', views.profile_page_action, name="profile-create"),
     path('profile-view', views.goto_profile, name="profile-view"),
     path('authenticate', views.authenticate_action, name="authenticate"),
-
-
-
 ]

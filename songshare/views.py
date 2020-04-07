@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.db import transaction
+from django.conf import settings
 
 from django.core import serializers
 from django.utils import timezone
@@ -18,11 +19,12 @@ from datetime import datetime
 from songshare.forms import *
 from songshare.models import *
 
+import spotipy
 import json
 
 def home_page(request):
     return render(request,'songshare/user_home.html', {})
-# renders current user's profile page
+    # renders current user's profile page
 
 
 @login_required
@@ -130,12 +132,14 @@ def update_follow(request, id):
 
 def authenticate_action(request):
     context = {}
-    if request.method == "GET":
-        return render(request, 'songshare/authenticate.html', context)
-    return redirect('authenticate')
-
-
-
+    try:
+        code = request.GET.get('code')
+    except:
+        print("malformed url. URL should be encoded with the http:.../?code=...")
+    current_user_profile = Profile.objects.get(user=request.user)
+    current_user_profile.auth_token_code = code
+    current_user_profile.save()
+    return redirect(reverse('home'))
 
 def profile_view(request):
     pass
@@ -254,10 +258,17 @@ def register_action(request):
                             password=form.cleaned_data['password'])
     login(request, new_user)
     new_profile = Profile(user=request.user, 
-                          auth_token='',
+                          spotify_username=form.cleaned_data['spotify_username'],
                           fname=request.POST['fname'], 
                           lname=request.POST['lname'], 
                           picture=None)
+    if form.cleaned_data['spotify_username'] != "":
+        auth_url = new_profile.create_oauth_url(scope=settings.SPOTIPY_MODIFY_PLAYBACK_SCOPE,
+                                    client_id=settings.SPOTIPY_CLIENT_ID,
+                                    client_secret=settings.SPOTIPY_CLIENT_SECRET,
+                                    redirect_uri=settings.REDIRECT_AUTHENTICATION_URL)
+        new_profile.save()
+        return redirect(auth_url)
     new_profile.save()
     return redirect(reverse('home'))
 
