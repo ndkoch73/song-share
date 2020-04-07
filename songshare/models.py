@@ -37,9 +37,12 @@ class Profile(models.Model):
         used to verify that the user's profile picture is indeed a picture
     """
     user = models.ForeignKey(User, default=None, on_delete=models.PROTECT)
+    is_dj = models.BooleanField(default=False)
+    is_live = models.BooleanField(default=False, name='live')
     auth_token = models.CharField(max_length=200)
     fname = models.CharField(max_length=20)
     lname = models.CharField(max_length=20)
+    name = models.CharField(max_length=42)
     bio = models.CharField(max_length=200)
     following = models.ManyToManyField(User, related_name='following')
     picture = models.FileField(blank=True)
@@ -74,6 +77,33 @@ class Song(models.Model):
     def __str__(self):
         return 'Song(artist=' + str(self.artist) + ' album=' + str(self.album) + ')'
 
+# Song class (essential)
+class Song(models.Model):
+    """
+    A class used to encapsulate a song provided by Spotify API
+    ...
+    Attributes
+    ----------
+    artist : models.CharField
+        the artist of the song (might need an additional field to reference
+        an artist profile via uri)
+    album : models.CharField
+        the album of the song (might need an additional field to reference
+        an album profile via uri)
+    vote_count : models.IntegerField
+        vote count for the song
+    uri : models.CharField
+        reference to the song provided by the Spotify API
+    """
+    artist = models.CharField(max_length=200)
+    album = models.CharField(max_length=200)
+    vote_count = models.IntegerField(blank=True, null=True)
+    uri = models.CharField(max_length=200)
+    def __str__(self):
+        return 'Song(artist=' + str(self.artist) + ' album=' + str(self.album) + ')'
+      
+
+
 # Playlist class (essential)
 class Playlist(models.Model):
     """
@@ -105,7 +135,8 @@ class Playlist(models.Model):
 
     def __str__(self):
         return 'Playlist(user=' + str(self.user) + ' songs=' + str(self.songs) + ')'
-      
+
+
 # Post Model (optional for now)
 class Post(models.Model):
     """

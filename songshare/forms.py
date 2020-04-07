@@ -13,7 +13,7 @@ MAX_UPLOAD_SIZE = 2500000
 # login form 
 class LoginForm(forms.Form):
 	username = forms.CharField(max_length = 20, widget=forms.TextInput(attrs={'placeholder': 'username'}))
-	password = forms.CharField(max_length = 200, widget = forms.PasswordInput())
+	password = forms.CharField(max_length = 200, widget = forms.PasswordInput(), label='password')
 
 	def clean(self):
 			cleaned_data = super().clean()
@@ -63,7 +63,7 @@ MAX_UPLOAD_SIZE = 2500000
 class ProfilePictureForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ( 'picture','bio')
+        fields = ( 'picture',)
 
     def clean_picture(self):
         picture = self.cleaned_data['picture']

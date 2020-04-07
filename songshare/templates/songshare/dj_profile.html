@@ -1,33 +1,70 @@
 {% extends 'songshare/default_sidebar.html' %}
 
 {% block mainpage %}
-
-	<span id="id_name_of_page" style="color:black;text-align:center;"> Profile Page for {{profile.user.first_name}} {{profile.user.last_name}}</span><br>
-		<div>
-			{% if profile.profile_picture %}
-            	<img src="{% url 'photo' profile.id %}" alt="{{profile.text}}" width="200px"  id="id_user_picture">
-            {% else %}
-            	<img src="default.jpg" width="200px"  id="id_user_picture">
-        	{% endif %}
-		</div>
-		<div>
-			{{form.picture.label_tag}} 
-		</div>
-		{{form.bio.label_tag}}
-		<label type="text" id="id_user_bio" readonly>{{bio}}</label>
-		<br>
-
-		{% if unfollow %}
-		<form action="{% url 'unfollow' profile.id %}"  method="post">
-			{% csrf_token %}
-			<button type="submit" id="id_unfollow">unfollow</button>
-		</form>
+<div class="main ui container">
+      
+	<h2 class="ui dividing header">
+	  <span id="id_name_of_page" style="color:black;text-align:center;"> Profile Page for {{name}}
+	  </span>
+	  <br>
+	  <div class="ui small image">
+		{% if profile.picture %}
+		  <img src="{% url 'photo' profile.id %}" alt="{{profile.text}}" width="100px" id="id_profile_picture">
 		{% else %}
-		<form action="{% url 'follow' profile.id %}"  method="post">
-			{% csrf_token %}
-			<button type="submit" id="id_follow">follow</button>
-		</form>
+		  <img src="default.jpg" width="200px"  id="id_user_picture">
 		{% endif %}
+	  </div>
+	</h2>
+	<div class="ui three column grid" id="id-profile">
+	  
+	  <div class="row">
+		<div class="column">
+			<div class="ui segment">
+				<div class="field">
+					<label for="id_bio"> Bio: </label>
+					<div class="ui input">
+						<input  type="text" name="bio" required id="id_bio" value={{profile.bio}} readonly>
+				
+					</div>
+				</div>
+				<br>
+				<div class="field">
+					<form class="ui form" enctype="multipart/form-data" method="post" action="{% url 'follow' profile.id %}" class="add-form">
+						{% csrf_token %}
+						{% if following == True %}
+						<button class="ui blue button">
+							Unfollow
+						</button>
+						{% else %}
+						<button class="ui orange button">
+							Follow
+						</button>
+						{% endif %}
+					</form>
+				</div>
+
+			
+			</div>
+		</div>	
+	  </div>
+	  {% if profile.live == True %}
+	  <div class="row">
+		<div class="column">
+			<div class="ui segment">
+				<div class="field">
+					<button class="ui orange button">
+						<a href="{% url 'listener-stream' profile.id %}"> 
+							<span style="color: white;"> Go to Stream </span>
+						</a>
+					</button>
+				</div>
+			</div>
+		</div>
+	  </div>
+	  {% endif %}
+	</div>
+  </div>
+  
 
 {% endblock %}
 

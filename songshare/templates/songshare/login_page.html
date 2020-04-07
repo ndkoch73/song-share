@@ -36,6 +36,11 @@
                             {% csrf_token %}
                             <button class="ui blue submit button" type="submit" id="id_login_button">Log In</button>
                         </form>
+                        {% if message %}
+                        <div class="ui error message">
+                            <label id="id_invalid_login"> {{message}} </label>
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="middle aligned column">
                         <div class="ui horizontal divider">Or</div>
