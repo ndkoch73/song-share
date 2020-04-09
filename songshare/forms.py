@@ -14,6 +14,27 @@ import spotipy
 
 MAX_UPLOAD_SIZE = 2500000
 
+# spotify registration form
+# TODO: this copies code from the registration form, if possible it would be 
+#       ideal to use the code from the registration form but only use the spotify_username
+#       field.
+class SpotifyRegistrationForm(forms.Form):
+    spotify_username = forms.CharField(max_length=100, label="Spotify Username",
+                        widget=forms.TextInput(attrs={'placeholder': 'Username'}))
+    def clean_spotify_username(self):
+        spotify_username = self.cleaned_data.get('spotify_username')
+        if spotify_username == "":
+            return spotify_username
+        client_credentials_manager = SpotifyClientCredentials(
+            client_id=settings.SPOTIPY_CLIENT_ID,
+            client_secret=settings.SPOTIPY_CLIENT_SECRET)
+        sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+        try:
+            user = sp.user(spotify_username)
+        except spotipy.client.SpotifyException:
+            raise forms.ValidationError("Username within Spotify does not exist")
+        return spotify_username
+
 # login form 
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=20, widget=forms.TextInput(attrs={'placeholder':'username'}))

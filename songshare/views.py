@@ -30,6 +30,8 @@ def home_page(request):
     c_user = Profile.objects.get(user=request.user)
     print(c_user)
     context = {'c_user': c_user}
+    # pass the spotify registration form if the user is not a dj
+    context['spotify_registration_form'] = SpotifyRegistrationForm()
     return render(request,'songshare/user_home.html', context)
 
 @login_required
@@ -44,9 +46,6 @@ def profile_page_action(request):
     """
     context = {}
     # current user
-    
-
-
     try:
         c_user = Profile.objects.get(user=request.user)
         picture_form  = ProfilePictureForm()
@@ -54,10 +53,6 @@ def profile_page_action(request):
         return redirect('home')
     if request.method == 'POST':
         c_user.bio = request.POST['bio']
-    
-    
-    
-    
     # the users that follow the current user
     following = list(c_user.following.all())
     context['c_user'] = c_user
@@ -75,15 +70,11 @@ def profile_page_action(request):
         c_user.picture = pic
         print('picture exists')
         c_user.save()
-    
-    
-
     context['form']  = ProfilePictureForm()
     context['is_dj'] = c_user.auth_token_code != ''
     print(context)
     print(Profile.objects.all())
     return render(request, 'songshare/profile.html', context)
-
 
 @login_required
 def goto_profile(request, id):

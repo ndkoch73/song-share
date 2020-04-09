@@ -1,10 +1,8 @@
-
 #front-page{
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   min-height: 1080px;
 }
-
 
 .pushable > .ui.fixed.menu {
   padding-left: 260px;

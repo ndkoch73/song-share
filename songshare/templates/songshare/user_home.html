@@ -1,5 +1,31 @@
 {% extends 'songshare/default_sidebar.html' %}
 <!-- This is after login -->
+{% block under-title-content %}
+<div class="ui cards">
+	<div class="card">
+		<div class="content">
+			<div class="header">New to Song Share and want to be a DJ?</div>
+			<div class="description">
+				<p>
+					Song Share uses your Spotify account to make live changes to your 
+					playback queue.
+				</p>
+				<p>
+					Simply ensure you have spotify premium and use your 
+					username to register.
+				</p>
+			</div>
+		</div>
+		<div class="ui bottom attached button" onclick="openModal()">
+			<div class="" style="color: #1DB954;">
+				<i class="spotify icon"></i>
+				Register with Spotify
+			</div>
+		</div>
+	</div>
+</div>	
+{% endblock %}
+
 {% block mainpage %}
 <!-- <div class="ui vertical segement"> -->
 	<div class="main ui container">
@@ -30,6 +56,47 @@
 		</div>
 	</div>
 <!-- </div> -->
-
-
+<div class="ui modal">
+	<i class="close icon"></i>
+	<div class="header">
+		Register your account with spotify
+	</div>
+	<div class="register content">
+		<div class="description">
+		<div class="ui header">Song Share requires that you have a spotify premium account</div>
+		<p>If you do not have a premium account, you may sign up for one <a href="https://www.spotify.com/us/premium/">here</a></p>
+		<p>Enter your spotify username below and we'll handle the rest!</p>
+		<p></p>
+		</div>
+		<form class="ui form" method="POST" action="{% url 'register' %}">
+			<div class="six wide field">
+				{{spotify_registration_form.spotify_username.label_tag}}
+				<div class="ui left icon input">
+					{{spotify_registration_form.spotify_username}}
+					<i class="spotify icon"></i>
+				</div>
+			</div>
+			{% if form.errors %}
+				{% for field in form %}
+					{% for error in field.errors %}
+					<div class="ui error message">
+						<i class="close icon" onclick="closeError()"></i>
+						{{error}}
+					</div>
+					{% endfor %}
+				{% endfor %}
+			{% endif %}
+			{% for error in form.non_field_errors %}
+			<div class="ui error message">
+				<i class="close icon" onclick="closeError()"></i>
+				{{error}}
+			</div>
+			{% endfor %}
+			<button class="ui positive right labeled icon button" type="submit">Register
+				<i class="checkmark icon"></i>
+			</button>
+			{% csrf_token %}
+		</form>
+	</div>
+</div>
 {% endblock %}
