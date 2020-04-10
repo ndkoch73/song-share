@@ -1,5 +1,5 @@
-function openModal(){
-  $('.ui.modal').modal('show');
+function openModal(identifier){
+  $('.ui.modal'+'.'+identifier).modal('show');
 }
 
 function closeError(){

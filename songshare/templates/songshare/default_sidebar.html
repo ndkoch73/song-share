@@ -12,9 +12,14 @@
 		<a class="item" href="{% url 'profile-create' %}" id="id_nav_profile"> 
 			Your Profile 
 		</a>
-		{% if c_user.is_dj == True  %}
+		{% if c_user.is_dj and c_user.is_live %}
 		<a class="item" href="{% url 'dj-stream' %}" id="id_nav_profile"> 
 			Your Stream 
+		</a>
+		{% endif %}
+		{% if c_user.is_dj == True and not c_user.is_live %}
+		<a class="item" onclick="openModal('create-stream')" id="id_nav_create_stream">
+			Start Stream
 		</a>
 		{% endif %}
 		<a class="item" href="{% url 'logout' %}" id="id_nav_logout"> 
@@ -31,10 +36,47 @@
 			{% block under-title-content %}
 			{% endblock %}
 		</div>
-	 	{% block mainpage %}
+		{% block mainpage %}
+			{% if stream_creation_form %}
+				{% if spotify_registration_form.errors %}
+					{% for field in spotify_registration_form %}
+						{% for error in field.errors %}
+						<div class="ui error message">
+							<i class="close icon" onclick="closeError()"></i>
+							{{error}}
+						</div>
+						{% endfor %}
+					{% endfor %}
+				{% endif %}
+			{% endif %}
 		{% endblock %}
 	</div>
   </div>
+
+<div class="ui modal create-stream">
+	<i class="close icon"></i>
+	<div class="header">
+		Start your Stream
+	</div>
+	<div class="register content">
+		<div class="description">
+		<div class="ui header">Simply choose a new name for your stream!</div>
+		<p></p>
+		</div>
+		<form class="ui form" method="POST" action="{% url 'create-stream' %}">
+			<div class="six wide field">
+				{{stream_creation_form.stream_name.label_tag}}
+				<div class="ui eight wide input">
+					{{stream_creation_form.stream_name}}
+				</div>
+			</div>
+			<button class="ui positive right labeled icon button" type="submit">Create Stream
+				<i class="checkmark icon"></i>
+			</button>
+			{% csrf_token %}
+		</form>
+	</div>
+</div>
 {% endblock %}
 
 

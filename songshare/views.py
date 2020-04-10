@@ -31,7 +31,10 @@ def home_page(request):
     print(c_user)
     context['c_user'] = c_user
     # pass the spotify registration form if the user is not a dj
-    context['spotify_registration_form'] = SpotifyRegistrationForm()
+    if not c_user.is_dj:
+        context['spotify_registration_form'] = SpotifyRegistrationForm()
+    elif c_user.is_dj and not c_user.is_live:
+        context['stream_creation_form'] = CreateStreamForm()
     return render(request,'songshare/user_home.html', context)
 
 @login_required
@@ -174,22 +177,6 @@ def listener_stream(request, id):
         context['dj'] = f_user
         context['c_user'] = c_user
         return render(request, 'songshare/listener_stream.html', context)
-    except:
-        raise Http404
-
-
-# Starts the stream sets flags such as is live
-def dj_stream(request):
-    context = {}
-    user = request.user
-    user_id = user.id
-    try:
-        profile = Profile.objects.get(pk=user_id)
-        c_user = Profile.objects.get(user=request.user)
-        profile.live =  True
-        profile.save()
-        context['c_user'] = c_user
-        return render(request, 'songshare/dj_stream.html', context)
     except:
         raise Http404
 
@@ -385,7 +372,7 @@ def register_action(request):
                           fname=request.POST['fname'], 
                           lname=request.POST['lname'], 
                           is_dj=dj_status,
-                          live=False,
+                          is_live=False,
                           name=name,
                           picture=None)
     if form.cleaned_data['spotify_username'] != "":
@@ -397,6 +384,30 @@ def register_action(request):
         return redirect(auth_url)
     new_profile.save()
     return redirect(reverse('home'))
+
+def create_stream_action(request):
+    if request.method == "GET":
+        # again this should never be the case because we are
+        # getting the information from a modal so there is no
+        # get request
+        return Http404
+    context = {}
+    stream_creation_form = CreateStreamForm(request.POST)
+    context['stream_creation_form'] = stream_creation_form
+    c_user = Profile.objects.get(user=request.user)
+    context['c_user'] = c_user
+    if not stream_creation_form.is_valid():
+        return render(request,'songshare/user_home.html',context)
+    stream_name = stream_creation_form.cleaned_data['stream_name']
+    new_stream = Stream(name=stream_name,
+                        dj=c_user)
+    new_stream.save()
+    c_user.is_live = True
+    c_user.save()
+    context['stream'] = new_stream
+    return render(request,'songshare/stream_page.html')
+    
+
 
 DUMMY_LIVEDJ ={
     'id': 1,
