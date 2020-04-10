@@ -50,8 +50,8 @@ class Profile(models.Model):
     auth_token_code = models.CharField(max_length=256, blank=True)
 
     def __str__(self):
-        return 'Profile(user=' + str(self.user) +' bio=' + str(self.bio) + ')'
-
+        return str(self.fname) + " " + str(self.lname) + " with spotify username: "\
+            + str(self.spotify_username) + " and is_dj: " + str(self.is_dj) + "\n"
     def create_oauth_url(self,scope=None, client_id=None,
                           client_secret=None, redirect_uri=None,
                           cache_path=None):

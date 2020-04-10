@@ -15,7 +15,6 @@ from django.conf import settings
 from django.core import serializers
 from django.utils import timezone
 from datetime import datetime
-
 import spotipy
 
 from songshare.forms import *
@@ -27,9 +26,10 @@ import json
 
 @login_required
 def home_page(request):
+    context = {}
     c_user = Profile.objects.get(user=request.user)
     print(c_user)
-    context = {'c_user': c_user}
+    context['c_user'] = c_user
     # pass the spotify registration form if the user is not a dj
     context['spotify_registration_form'] = SpotifyRegistrationForm()
     return render(request,'songshare/user_home.html', context)
@@ -159,6 +159,7 @@ def authenticate_action(request):
         print("malformed url. URL should be encoded with the http:.../?code=...")
     current_user_profile = Profile.objects.get(user=request.user)
     current_user_profile.auth_token_code = code
+    current_user_profile.is_dj = True
     current_user_profile.save()
     return redirect(reverse('home'))
 
@@ -245,7 +246,28 @@ def stream_on(request):
 def stream_off(request):
     pass
 
-
+def register_user_with_spotify(request):
+    if request.method == "GET":
+        # should never be the case that this is a get request.
+        return Http404
+    context = {}
+    spotify_registration_form = SpotifyRegistrationForm(request.POST)
+    context['spotify_registration_form'] = spotify_registration_form
+    c_user = Profile.objects.get(user=request.user)
+    context['c_user'] = c_user
+    if not spotify_registration_form.is_valid():
+        context['spotify_username_error'] = "Username within Spotify does not exist"
+        return render(request,'songshare/user_home.html',context)
+    # TODO: need to have some type of safegaud such that a user that has already 
+    #       registred with spotify can not try and register again.
+    spotify_username = spotify_registration_form.cleaned_data['spotify_username']
+    c_user.spotify_username = spotify_username
+    c_user.save()
+    auth_url = c_user.create_oauth_url(scope=settings.SPOTIPY_MODIFY_PLAYBACK_SCOPE,
+                                    client_id=settings.SPOTIPY_CLIENT_ID,
+                                    client_secret=settings.SPOTIPY_CLIENT_SECRET,
+                                    redirect_uri=settings.REDIRECT_AUTHENTICATION_URL)
+    return redirect(auth_url)
 
 
 def login_action(request):

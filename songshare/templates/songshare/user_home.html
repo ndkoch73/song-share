@@ -1,29 +1,42 @@
 {% extends 'songshare/default_sidebar.html' %}
 <!-- This is after login -->
 {% block under-title-content %}
-<div class="ui cards">
-	<div class="card">
-		<div class="content">
-			<div class="header">New to Song Share and want to be a DJ?</div>
-			<div class="description">
-				<p>
-					Song Share uses your Spotify account to make live changes to your 
-					playback queue.
-				</p>
-				<p>
-					Simply ensure you have spotify premium and use your 
-					username to register.
-				</p>
+	{% if c_user.is_dj == False %}
+		<div class="ui cards">
+			<div class="card">
+				<div class="content">
+					<div class="header">New to Song Share and want to be a DJ?</div>
+					<div class="description">
+						<p>
+							Song Share uses your Spotify account to make live changes to your 
+							playback queue.
+						</p>
+						<p>
+							Simply ensure you have spotify premium and use your 
+							username to register.
+						</p>
+					</div>
+				</div>
+				<div class="ui bottom attached button" onclick="openModal()">
+					<div class="" style="color: #1DB954;">
+						<i class="spotify icon"></i>
+						Register with Spotify
+					</div>
+				</div>
 			</div>
 		</div>
-		<div class="ui bottom attached button" onclick="openModal()">
-			<div class="" style="color: #1DB954;">
-				<i class="spotify icon"></i>
-				Register with Spotify
-			</div>
-		</div>
-	</div>
-</div>	
+		
+		{% if spotify_registration_form.errors %}
+			{% for field in spotify_registration_form %}
+				{% for error in field.errors %}
+				<div class="ui error message">
+					<i class="close icon" onclick="closeError()"></i>
+					{{error}}
+				</div>
+				{% endfor %}
+			{% endfor %}
+		{% endif %}
+	{% endif %}
 {% endblock %}
 
 {% block mainpage %}
@@ -68,7 +81,7 @@
 		<p>Enter your spotify username below and we'll handle the rest!</p>
 		<p></p>
 		</div>
-		<form class="ui form" method="POST" action="{% url 'register' %}">
+		<form class="ui form" method="POST" action="{% url 'spotify-user-spotify' %}">
 			<div class="six wide field">
 				{{spotify_registration_form.spotify_username.label_tag}}
 				<div class="ui left icon input">
@@ -76,22 +89,6 @@
 					<i class="spotify icon"></i>
 				</div>
 			</div>
-			{% if form.errors %}
-				{% for field in form %}
-					{% for error in field.errors %}
-					<div class="ui error message">
-						<i class="close icon" onclick="closeError()"></i>
-						{{error}}
-					</div>
-					{% endfor %}
-				{% endfor %}
-			{% endif %}
-			{% for error in form.non_field_errors %}
-			<div class="ui error message">
-				<i class="close icon" onclick="closeError()"></i>
-				{{error}}
-			</div>
-			{% endfor %}
 			<button class="ui positive right labeled icon button" type="submit">Register
 				<i class="checkmark icon"></i>
 			</button>

@@ -18,4 +18,5 @@ urlpatterns = [
     path('profile-view/<int:id>', views.goto_profile, name="profile-view"),
     path('authenticate', views.authenticate_action, name="authenticate"),
     path('clear-stream', views.clear_stream_action, name= "clear-stream"),
+    path('register-user-spotify',views.register_user_with_spotify,name="spotify-user-spotify"),
 ]

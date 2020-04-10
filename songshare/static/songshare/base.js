@@ -3,7 +3,5 @@ function openModal(){
 }
 
 function closeError(){
-    $('.message .close').on('click', function() {
-      $(this).closest('.message').transition('fade');
-    });
+    $('.message .close').closest('.message').transition('fade');
 }
