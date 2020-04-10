@@ -18,7 +18,4 @@ urlpatterns = [
     path('profile-view/<int:id>', views.goto_profile, name="profile-view"),
     path('authenticate', views.authenticate_action, name="authenticate"),
     path('clear-stream', views.clear_stream_action, name= "clear-stream"),
-
-
-
 ]

@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.db import transaction
+from django.conf import settings
 
 from django.core import serializers
 from django.utils import timezone
@@ -20,22 +21,16 @@ import spotipy
 from songshare.forms import *
 from songshare.models import *
 
-
 # from django.contrib.postgres.search import TrigramSimilarity
 
 import json
 
+@login_required
 def home_page(request):
-    
-    try:
-        c_user = Profile.objects.get(user=request.user)
-        print(c_user)
-        context = {'c_user': c_user}
-        return render(request,'songshare/user_home.html', context)
-    except:
-        raise Http404
-# renders current user's profile page
-
+    c_user = Profile.objects.get(user=request.user)
+    print(c_user)
+    context = {'c_user': c_user}
+    return render(request,'songshare/user_home.html', context)
 
 @login_required
 def profile_page_action(request):
@@ -86,6 +81,9 @@ def profile_page_action(request):
     context['form']  = ProfilePictureForm()
     context['is_dj'] = c_user.auth_token != ''
     print(c_user.live)
+    print(context)
+    print(Profile.objects.all())
+
     return render(request, 'songshare/profile.html', context)
 
 
@@ -166,29 +164,14 @@ def update_follow(request, id):
 
 @login_required
 def authenticate_action(request):
-    if request.user.profile_set.all()[0].auth_token != '':
-        return redirect(reverse('profile-create'))
-    
-    if request.method == 'GET':
-        return render(request, 'songshare/spotify_username.html', {'form': SpotifyUsernameForm()})
-    
-    form = SpotifyUsernameForm(request.POST)
-    if not form.is_valid():
-        return redirect(reverse('profile-create'))
-
-    print("Authenticating user with username " + form.cleaned_data['username'])
-    profile = request.user.profile_set.all()[0]
-    profile.auth_token = spotipy.util.prompt_for_user_token(form.cleaned_data['username'], 
-                                                                                scope='user-modify-playback-state',
-                                                                                client_id='1be1732addea44de8fac42a6013de5df',
-                                                                                client_secret='66c0bdea75b9413bb49569324192dbcb',
-                                                                                redirect_uri='http://localhost:8000')
-    
-    profile.save()
-    
-    return redirect(reverse('profile-create'))
-
-
+    try:
+        code = request.GET.get('code')
+    except:
+        print("malformed url. URL should be encoded with the http:.../?code=...")
+    current_user_profile = Profile.objects.get(user=request.user)
+    current_user_profile.auth_token_code = code
+    current_user_profile.save()
+    return redirect(reverse('home'))
 
 def listener_stream(request, id):
     context = {}
@@ -221,7 +204,6 @@ def dj_stream(request):
         return render(request, 'songshare/dj_stream.html', context)
     except:
         raise Http404
-
 
 def clear_stream_action(request):
     context = {}
@@ -380,8 +362,8 @@ def register_action(request):
     new_user = User.objects.create_user(username=form.cleaned_data['username'], 
                                         password=form.cleaned_data['password'],
                                         email=form.cleaned_data['email'],
-                                        first_name=form.cleaned_data['first_name'],
-                                        last_name=form.cleaned_data['last_name'])
+                                        first_name=form.cleaned_data['fname'],
+                                        last_name=form.cleaned_data['lname'])
     new_user.save()
     new_user = authenticate(username=form.cleaned_data['username'], 
                             password=form.cleaned_data['password'])
@@ -389,18 +371,25 @@ def register_action(request):
     
     # testing
     dj_status= False
-    fname = request.POST['first_name']
-    lname = request.POST['last_name']
-    name = fname+' ' + lname
+    fname = request.POST['fname']
+    lname = request.POST['lname']
+    name = fname + ' ' + lname
 
     new_profile = Profile(user=request.user, 
+                          spotify_username=form.cleaned_data['spotify_username'],
+                          fname=request.POST['fname'], 
+                          lname=request.POST['lname'], 
                           is_dj=dj_status,
                           live=False,
-                          auth_token="",
-                          fname=request.POST['first_name'], 
-                          lname=request.POST['last_name'], 
                           name=name,
                           picture=None)
+    if form.cleaned_data['spotify_username'] != "":
+        auth_url = new_profile.create_oauth_url(scope=settings.SPOTIPY_MODIFY_PLAYBACK_SCOPE,
+                                    client_id=settings.SPOTIPY_CLIENT_ID,
+                                    client_secret=settings.SPOTIPY_CLIENT_SECRET,
+                                    redirect_uri=settings.REDIRECT_AUTHENTICATION_URL)
+        new_profile.save()
+        return redirect(auth_url)
     new_profile.save()
     return redirect(reverse('home'))
 

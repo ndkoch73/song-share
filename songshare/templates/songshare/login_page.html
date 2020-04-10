@@ -36,11 +36,22 @@
                             {% csrf_token %}
                             <button class="ui blue submit button" type="submit" id="id_login_button">Log In</button>
                         </form>
-                        {% if message %}
-                        <div class="ui error message">
-                            <label id="id_invalid_login"> {{message}} </label>
-                        </div>
+                        {% if form.errors %}
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                <div class="ui error message">
+                                    <i class="close icon"></i>
+                                    {{error}}
+                                </div>
+                                {% endfor %}
+                            {% endfor %}
                         {% endif %}
+                        {% for error in form.non_field_errors %}
+                        <div class="ui error message">
+                            <i class="close icon"></i>
+                            {{error}}
+                        </div>
+                        {% endfor %}
                     </div>
                     <div class="middle aligned column">
                         <div class="ui horizontal divider">Or</div>

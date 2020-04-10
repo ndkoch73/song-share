@@ -18,18 +18,18 @@
                     <div class="column">
                         <form class="ui form" method="POST" action="{% url 'register' %}">
                             <div class="field">
-                                {{form.first_name.label_tag}}
+                                {{form.fname.label_tag}}
                                 <div class="ui input">
                                     <!-- <input type="password"> -->
-                                    {{form.first_name}}
+                                    {{form.fname}}
                                     
                                 </div>
                             </div>
                             <div class="field">
-                                {{form.last_name.label_tag}}
+                                {{form.lname.label_tag}}
                                 <div class="ui input">
                                     <!-- <input type="password"> -->
-                                    {{form.last_name}}
+                                    {{form.lname}}
                                     
                                 </div>
                             </div>
@@ -65,9 +65,32 @@
                                     <i class="lock icon"></i>
                                 </div>
                             </div>
+                            <div class="field">
+                                {{form.spotify_username.label_tag}}
+                                <div class="ui left icon input">
+                                    {{form.spotify_username}}
+                                    <i class="spotify icon"></i>
+                                </div>
+                            </div>
                             {% csrf_token %}
                             <button class="ui blue submit button" type="submit" id="id_register_button">Register</button>
                         </form>
+                        {% if form.errors %}
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                <div class="ui error message">
+                                    <i class="close icon"></i>
+                                    {{error}}
+                                </div>
+                                {% endfor %}
+                            {% endfor %}
+                        {% endif %}
+                        {% for error in form.non_field_errors %}
+                        <div class="ui error message">
+                            <i class="close icon"></i>
+                            {{error}}
+                        </div>
+                        {% endfor %}
                     </div>
                     <div class="middle aligned column">
                         <div class="ui horizontal divider">Or</div>
