@@ -19,4 +19,5 @@ urlpatterns = [
     path('clear-stream', views.clear_stream_action, name= "clear-stream"),
     path('register-user-spotify',views.register_user_with_spotify,name="spotify-user-spotify"),
     path('create-stream',views.create_stream_action,name="create-stream"),
+    path('dj-stream',views.dj_stream_action,name="dj-stream"),
 ]
