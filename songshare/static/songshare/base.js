@@ -1,3 +1,7 @@
-$('.message .close').on('click', function() {
-  $(this).closest('.message').transition('fade');
-});
+function openModal(identifier){
+  $('.ui.modal'+'.'+identifier).modal('show');
+}
+
+function closeError(){
+    $('.message .close').closest('.message').transition('fade');
+}

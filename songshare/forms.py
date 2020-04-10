@@ -5,6 +5,7 @@ from django.conf import settings
 
 from songshare.models import Profile
 from songshare.models import Playlist
+from songshare.models import Stream
 
 from spotipy.oauth2 import SpotifyClientCredentials
 import spotipy
@@ -13,6 +14,38 @@ import spotipy
 #from songshare.models import Album
 
 MAX_UPLOAD_SIZE = 2500000
+
+class CreateStreamForm(forms.Form):
+    stream_name = forms.CharField(max_length=256, label="Stream Name", 
+                widget=forms.TextInput(attrs={'placeholder': 'stream name'}))
+    def clean_stream_name(self):
+        stream_name = self.cleaned_data.get('stream_name')
+        try:
+            Stream.objects.get(name=stream_name)
+            raise forms.ValidationError("Stream is currently live with the same name")
+        except:
+            return stream_name
+
+# spotify registration form
+# TODO: this copies code from the registration form, if possible it would be 
+#       ideal to use the code from the registration form but only use the spotify_username
+#       field
+class SpotifyRegistrationForm(forms.Form):
+    spotify_username = forms.CharField(max_length=100, label="Spotify Username",
+                        widget=forms.TextInput(attrs={'placeholder': 'Username'}))
+    def clean_spotify_username(self):
+        spotify_username = self.cleaned_data.get('spotify_username')
+        if spotify_username == "":
+            return spotify_username
+        client_credentials_manager = SpotifyClientCredentials(
+            client_id=settings.SPOTIPY_CLIENT_ID,
+            client_secret=settings.SPOTIPY_CLIENT_SECRET)
+        sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+        try:
+            user = sp.user(spotify_username)
+        except spotipy.client.SpotifyException:
+            raise forms.ValidationError("Username within Spotify does not exist")
+        return spotify_username
 
 # login form 
 class LoginForm(forms.Form):
