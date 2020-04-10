@@ -184,6 +184,9 @@ def clear_stream_action(request):
     context = {}
     return render(request, 'songshare/dj_stream.html', context)
 
+def dj_stream_action(request):
+    context = {}
+    return render(request,'songshare/stream_page.html',context)
 
 def dj_search(request):
     context = {}
