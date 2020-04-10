@@ -79,7 +79,8 @@ def profile_page_action(request):
     
 
     context['form']  = ProfilePictureForm()
-    context['is_dj'] = c_user.auth_token != ''
+    context['is_dj'] = c_user.auth_token_code != ''
+    c_user.is_dj = c_user.auth_token_code != ''
     print(c_user.live)
     print(context)
     print(Profile.objects.all())
@@ -214,6 +215,26 @@ def clear_stream_action(request):
     return redirect('profile-create')
 
 
+def similarity(queryString, Profile_String):
+
+    return 0
+
+def search_alo(queryString):
+    import collections
+    allProfiles = Profile.objects.all()
+    length = len(allProfiles)
+    hm= collections.OrderedDict()
+    for p in allProfiles :
+        hm[p] = similarity(queryString, p.name)
+    
+    return hm
+        
+
+
+
+
+
+
 def dj_search(request):
     context = {}
     c_user = Profile.objects.get(user=request.user)
@@ -225,15 +246,16 @@ def dj_search(request):
         # print(request.POST)
         search = request.POST['search']
         print(search)
+        print(search_alo(search))
         context['search']=  search
-        context['djs'] = Profile.objects.filter(name=search)
-        try: 
-            print("hit")
-            similarity = Profile.objects.annotate(similarity=TrigramSimilarity('name', search),).filter(similarity__gt=0.1).order_by('-similarity')
-            print("hit")
-            # context['djs'] = similarity
-        except:
-            print("whoops")
+        context['djs'] = Profile.objects.filter(name__startswith=search)
+        # try: 
+        #     print("hit")
+        #     similarity = Profile.objects.annotate(similarity=TrigramSimilarity('name', search),).filter(similarity__gt=0.1).order_by('-similarity')
+        #     print("hit")
+        #     # context['djs'] = similarity
+        # except:
+        #     print("whoops")
         
         return render(request, 'songshare/dj_search.html', context)
     
