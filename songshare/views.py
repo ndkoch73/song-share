@@ -246,12 +246,11 @@ def register_user_with_spotify(request):
     c_user = Profile.objects.get(user=request.user)
     context['c_user'] = c_user
     if not spotify_registration_form.is_valid():
-        context['spotify_username_error'] = "Username within Spotify does not exist"
         return render(request,'songshare/user_home.html',context)
     # TODO: need to have some type of safegaud such that a user that has already 
     #       registred with spotify can not try and register again.
-    spotify_username = spotify_registration_form.cleaned_data['spotify_username']
-    c_user.spotify_username = spotify_username
+    spotify_email = spotify_registration_form.cleaned_data['spotify_email']
+    c_user.spotify_email = spotify_email
     c_user.save()
     auth_url = c_user.create_oauth_url(scope=settings.SPOTIPY_MODIFY_PLAYBACK_SCOPE,
                                     client_id=settings.SPOTIPY_CLIENT_ID,
@@ -371,14 +370,14 @@ def register_action(request):
     name = fname + ' ' + lname
 
     new_profile = Profile(user=request.user, 
-                          spotify_username=form.cleaned_data['spotify_username'],
+                          spotify_email=form.cleaned_data['spotify_email'],
                           fname=request.POST['fname'], 
                           lname=request.POST['lname'], 
                           is_dj=dj_status,
                           is_live=False,
                           name=name,
                           picture=None)
-    if form.cleaned_data['spotify_username'] != "":
+    if form.cleaned_data['spotify_email'] != "":
         auth_url = new_profile.create_oauth_url(scope=settings.SPOTIPY_MODIFY_PLAYBACK_SCOPE,
                                     client_id=settings.SPOTIPY_CLIENT_ID,
                                     client_secret=settings.SPOTIPY_CLIENT_SECRET,

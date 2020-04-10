@@ -37,7 +37,7 @@ class Profile(models.Model):
         used to verify that the user's profile picture is indeed a picture
     """
     user = models.ForeignKey(User, default=None, on_delete=models.PROTECT)
-    spotify_username = models.CharField(max_length=200)
+    spotify_email = models.EmailField(max_length=200)
     is_dj = models.BooleanField(default=False)
     is_live = models.BooleanField(default=False)
     fname = models.CharField(max_length=20)
@@ -50,12 +50,12 @@ class Profile(models.Model):
     auth_token_code = models.CharField(max_length=256, blank=True)
 
     def __str__(self):
-        return str(self.fname) + " " + str(self.lname) + " with spotify username: "\
-            + str(self.spotify_username) + " and is_dj: " + str(self.is_dj) + "\n"
+        return str(self.fname) + " " + str(self.lname) + " with spotify email: "\
+            + str(self.spotify_email) + " and is_dj: " + str(self.is_dj) + "\n"
     def create_oauth_url(self,scope=None, client_id=None,
                           client_secret=None, redirect_uri=None,
                           cache_path=None):
-        cache_path = cache_path or ".cache-" + self.spotify_username
+        cache_path = cache_path or ".cache-" + self.spotify_email
         sp_oauth = oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri,
                                     scope=scope, cache_path=cache_path)
         token_info = sp_oauth.get_cached_token()
@@ -68,7 +68,7 @@ class Profile(models.Model):
     def get_auth_token(self,scope=None, client_id=None,
                           client_secret=None, redirect_uri=None,
                           cache_path=None):
-        cache_path = cache_path or ".cache-" + self.spotify_username
+        cache_path = cache_path or ".cache-" + self.spotify_email
         sp_oauth = oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri,
                                     scope=scope, cache_path=cache_path)
         token_info = sp_oauth.get_cached_token()

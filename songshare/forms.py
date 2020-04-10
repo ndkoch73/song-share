@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.conf import settings
+from django.core.validators import validate_email
 
 from songshare.models import Profile
 from songshare.models import Playlist
@@ -28,24 +29,18 @@ class CreateStreamForm(forms.Form):
 
 # spotify registration form
 # TODO: this copies code from the registration form, if possible it would be 
-#       ideal to use the code from the registration form but only use the spotify_username
+#       ideal to use the code from the registration form but only use the spotify_email
 #       field
 class SpotifyRegistrationForm(forms.Form):
-    spotify_username = forms.CharField(max_length=100, label="Spotify Username",
-                        widget=forms.TextInput(attrs={'placeholder': 'Username'}))
-    def clean_spotify_username(self):
-        spotify_username = self.cleaned_data.get('spotify_username')
-        if spotify_username == "":
-            return spotify_username
-        client_credentials_manager = SpotifyClientCredentials(
-            client_id=settings.SPOTIPY_CLIENT_ID,
-            client_secret=settings.SPOTIPY_CLIENT_SECRET)
-        sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+    spotify_email = forms.EmailField(max_length=100, label="Spotify Email",
+                        widget=forms.TextInput(attrs={'placeholder': 'Email'}))
+    def clean_spotify_email(self):
+        spotify_email = self.cleaned_data.get('spotify_email')
         try:
-            user = sp.user(spotify_username)
-        except spotipy.client.SpotifyException:
-            raise forms.ValidationError("Username within Spotify does not exist")
-        return spotify_username
+            validate_email(spotify_email)
+            return spotify_email
+        except:
+            raise forms.ValidationError("Please enter a valid email address")
 
 # login form 
 class LoginForm(forms.Form):
@@ -73,8 +68,8 @@ class RegistrationForm(forms.Form):
     email = forms.CharField(max_length = 50, widget = forms.EmailInput())
     fname = forms.CharField(max_length = 20, label="First Name")
     lname = forms.CharField(max_length = 20, label="Last Name")
-    spotify_username = forms.CharField(max_length=100, label="Spotify Username",
-                        widget=forms.TextInput(attrs={'placeholder': 'Username'}),
+    spotify_email = forms.CharField(max_length=100, label="Spotify Email",
+                        widget=forms.TextInput(attrs={'placeholder': 'Email'}),
                         required=False)
 
     def clean(self):
@@ -91,19 +86,14 @@ class RegistrationForm(forms.Form):
             raise forms.ValidationError("Username is already taken")
         return username
     
-    def clean_spotify_username(self):
-        spotify_username = self.cleaned_data.get('spotify_username')
-        if spotify_username == "":
-            return spotify_username
-        client_credentials_manager = SpotifyClientCredentials(
-            client_id=settings.SPOTIPY_CLIENT_ID,
-            client_secret=settings.SPOTIPY_CLIENT_SECRET)
-        sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+    def clean_spotify_email(self):
+        spotify_email = self.cleaned_data.get('spotify_email')
         try:
-            user = sp.user(spotify_username)
-        except spotipy.client.SpotifyException:
-            raise forms.ValidationError("Username within Spotify does not exist")
-        return spotify_username
+            validate_email(spotify_email)
+            return spotify_email
+        except:
+            raise forms.ValidationError("Please enter a valid email address")
+
 
 class ProfilePictureForm(forms.ModelForm):
     class Meta:

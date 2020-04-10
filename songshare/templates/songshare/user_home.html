@@ -83,9 +83,9 @@
 		</div>
 		<form class="ui form" method="POST" action="{% url 'spotify-user-spotify' %}">
 			<div class="six wide field">
-				{{spotify_registration_form.spotify_username.label_tag}}
+				{{spotify_registration_form.spotify_email.label_tag}}
 				<div class="ui left icon input">
-					{{spotify_registration_form.spotify_username}}
+					{{spotify_registration_form.spotify_email}}
 					<i class="spotify icon"></i>
 				</div>
 			</div>
