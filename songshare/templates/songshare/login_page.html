@@ -40,7 +40,7 @@
                             {% for field in form %}
                                 {% for error in field.errors %}
                                 <div class="ui error message">
-                                    <i class="close icon"></i>
+                                    <i class="close icon" onclick="closeError()"></i>
                                     {{error}}
                                 </div>
                                 {% endfor %}
@@ -48,7 +48,7 @@
                         {% endif %}
                         {% for error in form.non_field_errors %}
                         <div class="ui error message">
-                            <i class="close icon"></i>
+                            <i class="close icon" onclick="closeError()"></i>
                             {{error}}
                         </div>
                         {% endfor %}

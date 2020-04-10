@@ -15,7 +15,6 @@ from django.conf import settings
 from django.core import serializers
 from django.utils import timezone
 from datetime import datetime
-
 import spotipy
 
 from songshare.forms import *
@@ -27,9 +26,15 @@ import json
 
 @login_required
 def home_page(request):
+    context = {}
     c_user = Profile.objects.get(user=request.user)
     print(c_user)
-    context = {'c_user': c_user}
+    context['c_user'] = c_user
+    # pass the spotify registration form if the user is not a dj
+    if not c_user.is_dj:
+        context['spotify_registration_form'] = SpotifyRegistrationForm()
+    elif c_user.is_dj and not c_user.is_live:
+        context['stream_creation_form'] = CreateStreamForm()
     return render(request,'songshare/user_home.html', context)
 
 @login_required
@@ -44,9 +49,6 @@ def profile_page_action(request):
     """
     context = {}
     # current user
-    
-
-
     try:
         c_user = Profile.objects.get(user=request.user)
         picture_form  = ProfilePictureForm()
@@ -54,10 +56,6 @@ def profile_page_action(request):
         return redirect('home')
     if request.method == 'POST':
         c_user.bio = request.POST['bio']
-    
-    
-    
-    
     # the users that follow the current user
     following = list(c_user.following.all())
     context['c_user'] = c_user
@@ -75,15 +73,11 @@ def profile_page_action(request):
         c_user.picture = pic
         print('picture exists')
         c_user.save()
-    
-    
-
     context['form']  = ProfilePictureForm()
     context['is_dj'] = c_user.auth_token_code != ''
     print(context)
     print(Profile.objects.all())
     return render(request, 'songshare/profile.html', context)
-
 
 @login_required
 def goto_profile(request, id):
@@ -168,6 +162,7 @@ def authenticate_action(request):
         print("malformed url. URL should be encoded with the http:.../?code=...")
     current_user_profile = Profile.objects.get(user=request.user)
     current_user_profile.auth_token_code = code
+    current_user_profile.is_dj = True
     current_user_profile.save()
     return redirect(reverse('home'))
 
@@ -182,22 +177,6 @@ def listener_stream(request, id):
         context['dj'] = f_user
         context['c_user'] = c_user
         return render(request, 'songshare/listener_stream.html', context)
-    except:
-        raise Http404
-
-
-# Starts the stream sets flags such as is live
-def dj_stream(request):
-    context = {}
-    user = request.user
-    user_id = user.id
-    try:
-        profile = Profile.objects.get(pk=user_id)
-        c_user = Profile.objects.get(user=request.user)
-        profile.live =  True
-        profile.save()
-        context['c_user'] = c_user
-        return render(request, 'songshare/dj_stream.html', context)
     except:
         raise Http404
 
@@ -254,7 +233,28 @@ def stream_on(request):
 def stream_off(request):
     pass
 
-
+def register_user_with_spotify(request):
+    if request.method == "GET":
+        # should never be the case that this is a get request.
+        return Http404
+    context = {}
+    spotify_registration_form = SpotifyRegistrationForm(request.POST)
+    context['spotify_registration_form'] = spotify_registration_form
+    c_user = Profile.objects.get(user=request.user)
+    context['c_user'] = c_user
+    if not spotify_registration_form.is_valid():
+        context['spotify_username_error'] = "Username within Spotify does not exist"
+        return render(request,'songshare/user_home.html',context)
+    # TODO: need to have some type of safegaud such that a user that has already 
+    #       registred with spotify can not try and register again.
+    spotify_username = spotify_registration_form.cleaned_data['spotify_username']
+    c_user.spotify_username = spotify_username
+    c_user.save()
+    auth_url = c_user.create_oauth_url(scope=settings.SPOTIPY_MODIFY_PLAYBACK_SCOPE,
+                                    client_id=settings.SPOTIPY_CLIENT_ID,
+                                    client_secret=settings.SPOTIPY_CLIENT_SECRET,
+                                    redirect_uri=settings.REDIRECT_AUTHENTICATION_URL)
+    return redirect(auth_url)
 
 
 def login_action(request):
@@ -372,7 +372,7 @@ def register_action(request):
                           fname=request.POST['fname'], 
                           lname=request.POST['lname'], 
                           is_dj=dj_status,
-                          live=False,
+                          is_live=False,
                           name=name,
                           picture=None)
     if form.cleaned_data['spotify_username'] != "":
@@ -384,6 +384,30 @@ def register_action(request):
         return redirect(auth_url)
     new_profile.save()
     return redirect(reverse('home'))
+
+def create_stream_action(request):
+    if request.method == "GET":
+        # again this should never be the case because we are
+        # getting the information from a modal so there is no
+        # get request
+        return Http404
+    context = {}
+    stream_creation_form = CreateStreamForm(request.POST)
+    context['stream_creation_form'] = stream_creation_form
+    c_user = Profile.objects.get(user=request.user)
+    context['c_user'] = c_user
+    if not stream_creation_form.is_valid():
+        return render(request,'songshare/user_home.html',context)
+    stream_name = stream_creation_form.cleaned_data['stream_name']
+    new_stream = Stream(name=stream_name,
+                        dj=c_user)
+    new_stream.save()
+    c_user.is_live = True
+    c_user.save()
+    context['stream'] = new_stream
+    return render(request,'songshare/stream_page.html')
+    
+
 
 DUMMY_LIVEDJ ={
     'id': 1,
