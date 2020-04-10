@@ -85,8 +85,7 @@ def profile_page_action(request):
 
     context['form']  = ProfilePictureForm()
     context['is_dj'] = c_user.auth_token != ''
-    print(context)
-    print(Profile.objects.all())
+    print(c_user.live)
     return render(request, 'songshare/profile.html', context)
 
 
@@ -197,7 +196,10 @@ def listener_stream(request, id):
         p_user = User.objects.get(id=id)
         f_user = Profile.objects.get(user=p_user)
         c_user = Profile.objects.get(user=request.user)
+        print(f_user)
+        print(c_user)
         if (c_user.user == f_user.user):
+            print('here')
             return redirect(reverse('dj_stream'))
         context['dj'] = f_user
         context['c_user'] = c_user
@@ -212,10 +214,9 @@ def dj_stream(request):
     user = request.user
     user_id = user.id
     try:
-        profile = Profile.objects.get(pk=user_id)
         c_user = Profile.objects.get(user=request.user)
-        profile.live =  True
-        profile.save()
+        c_user.live =  True
+        c_user.save()
         context['c_user'] = c_user
         return render(request, 'songshare/dj_stream.html', context)
     except:
@@ -224,7 +225,11 @@ def dj_stream(request):
 
 def clear_stream_action(request):
     context = {}
-    return render(request, 'songshare/dj_stream.html', context)
+    c_user = Profile.objects.get(user=request.user)
+    context['c_user'] = c_user
+    c_user.live = False
+    c_user.save()
+    return redirect('profile-create')
 
 
 def dj_search(request):
