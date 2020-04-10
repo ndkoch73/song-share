@@ -214,6 +214,9 @@ def search_alo(queryString):
 
 
 
+def dj_stream_action(request):
+    context = {}
+    return render(request,'songshare/stream_page.html',context)
 
 def dj_search(request):
     context = {}
