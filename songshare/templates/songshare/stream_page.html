@@ -1,0 +1,55 @@
+{% extends 'songshare/default_sidebar.html' %}
+
+{% block mainpage %}
+	<div class="main ui container">
+		<h2 class="ui dividing header">
+			<span id="id_name_of_page" style="color:black;text-align:center;"> Your Stream </span>
+			<br>
+		</h2>
+		<div class="ui three column grid">
+			<div class="row">
+				<div class="column">
+
+						<h2 class="ui dividing header">
+								<span id="id_name_of_page" style="color:black;text-align:center;"> Now Playing </span>
+								<br>
+						</h2>
+						<div class="ui segment">
+							<div class="field">
+								<div class="ui small image">
+									{% if current_song %}
+									<img src={{current_song}} width="100px" id="id_spotify_logo">
+									{% else %}
+									<img src="/static/songshare/spotifylogo.png" width="100px" id="id_spotify_logo">
+									{% endif %}
+								</div>
+							</div>
+							<div class="field">
+								{% if current_song %}
+								{current_song}
+								{% else %}
+									
+								{% endif %}
+							</div>
+						</div>
+
+						<div class="">
+						
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="column">
+
+				</div>
+			</div>
+		</div>
+
+	</div>
+	<script >getStreamSongs()</script>
+	<span id="id_next_up_songs">
+	<table id="listener_stream_songs">
+	</table>
+
+
+{% endblock %}
