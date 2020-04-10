@@ -39,7 +39,7 @@ class Profile(models.Model):
     user = models.ForeignKey(User, default=None, on_delete=models.PROTECT)
     spotify_username = models.CharField(max_length=200)
     is_dj = models.BooleanField(default=False)
-    is_live = models.BooleanField(default=False, name='live')
+    is_live = models.BooleanField(default=False)
     fname = models.CharField(max_length=20)
     lname = models.CharField(max_length=20)
     name = models.CharField(max_length=42)
@@ -50,8 +50,8 @@ class Profile(models.Model):
     auth_token_code = models.CharField(max_length=256, blank=True)
 
     def __str__(self):
-        return 'Profile(user=' + str(self.user) +' bio=' + str(self.bio) + ')'
-
+        return str(self.fname) + " " + str(self.lname) + " with spotify username: "\
+            + str(self.spotify_username) + " and is_dj: " + str(self.is_dj) + "\n"
     def create_oauth_url(self,scope=None, client_id=None,
                           client_secret=None, redirect_uri=None,
                           cache_path=None):
@@ -194,6 +194,11 @@ class Comment(models.Model):
 
     def __str__(self):
         return 'Comment(user=' + str(self.user) + ' text=' + str(self.text) + ')'
+
+class Stream(models.Model):
+    name = models.CharField(max_length=256)
+    dj = models.ForeignKey(Profile, default=None, on_delete=models.PROTECT)
+    listeners = models.ManyToManyField(Profile, related_name="listening")
 
 """
 Note:
