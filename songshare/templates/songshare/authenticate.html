@@ -6,6 +6,10 @@
     <div class="one column centered row" id="login-header">
         <div class="ui huge header">
             <span id="id_name_of_site" style="color:green;">Spotify</span>
+            <br>
+        </div>
+        <div class="ui centered image">
+            <img src="/static/songshare/spotifylogo.png" width="100px" id="id_spotify_logo">
         </div>
     </div>
     <div class="four wide column">
@@ -33,6 +37,7 @@
                         {% csrf_token %}
                         <div class="ui blue submit button">Login</div>
                     </form>
+                    
                 </div>
             </div>
         </div>
