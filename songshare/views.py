@@ -211,9 +211,22 @@ def dj_search(request):
         
         return render(request, 'songshare/dj_search.html', context)
     
+def clean_search_query(result):
+    items = result['tracks']['items']
+    L = []
+    for item in items:
+        L.append({'album': item['album'], 'name': item['name'], 'artists': item['artists'], 'uri': item['uri']})
+    
+    return L
 
+# Returns a json object of the top 10 search terms
+# Contains album, name, artists and uri fields
 def song_search(request,id):
-    pass
+    client_credentials_manager = SpotifyClientCredentials()
+    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+    results = clean_search_query(sp.search(id))
+
+    return HttpResponse(json.dumps(results), content_type='application/json')
 
 @login_required
 def get_photo(request, id):
