@@ -184,9 +184,19 @@ def clear_stream_action(request):
     context = {}
     return render(request, 'songshare/dj_stream.html', context)
 
-def dj_stream_action(request):
+def dj_stream_action(request, id):
     context = {}
-    return render(request,'songshare/stream_page.html',context)
+    stream = Stream.objects.get(pk=id)
+    c_user = Profile.objects.get(user=request.user)
+    is_stream_dj = c_user.id == id
+    context['c_user'] = c_user
+    context['stream'] = stream
+    context['is_stream_dj'] = is_stream_dj
+    if request.method == "GET":
+        context['currently_playing'] = stream.get_currently_playing()
+        context['recently_played'] = stream.get_recently_played()
+        return render(request,'songshare/stream_page.html',context)
+    return 42
 
 def dj_search(request):
     context = {}
@@ -265,7 +275,7 @@ def register_user_with_spotify(request):
     spotify_email = spotify_registration_form.cleaned_data['spotify_email']
     c_user.spotify_email = spotify_email
     c_user.save()
-    auth_url = c_user.create_oauth_url(scope=settings.SPOTIPY_MODIFY_PLAYBACK_SCOPE,
+    auth_url = c_user.create_oauth_url(scope=settings.SPOTIFY_SCOPE_ACCESS,
                                     client_id=settings.SPOTIPY_CLIENT_ID,
                                     client_secret=settings.SPOTIPY_CLIENT_SECRET,
                                     redirect_uri=settings.REDIRECT_AUTHENTICATION_URL)
@@ -282,27 +292,6 @@ def login_action(request):
         the django response object containing metadata about the request
     """
     context = {}
-    # try:
-    #     Profile.objects.get(pk=1)
-    #     new_user = User.objects.create_user(username=form.cleaned_data['username'], 
-    #                                     password=form.cleaned_data['password'],
-    #                                     email=form.cleaned_data['email'],
-    #                                     first_name=form.cleaned_data['first_name'],
-    #                                     last_name=form.cleaned_data['last_name'])
-    #     new_user.save()
-    #     new_user = authenticate(username=form.cleaned_data['username'], 
-    #                         password=form.cleaned_data['password'])
-    #     login(request, new_user)
-    #     new_profile = Profile(user=request.user, 
-    #                       is_dj=False,
-    #                       live=False,
-    #                       auth_token="",
-    #                       fname=request.POST['first_name'], 
-    #                       lname=request.POST['last_name'], 
-    #                       picture=None)
-    # except:
-    #     Profile
-
     #display the registration form on a GET request
     if request.method == 'GET':
         context['form'] = LoginForm()
@@ -391,7 +380,7 @@ def register_action(request):
                           name=name,
                           picture=None)
     if form.cleaned_data['spotify_email'] != "":
-        auth_url = new_profile.create_oauth_url(scope=settings.SPOTIPY_MODIFY_PLAYBACK_SCOPE,
+        auth_url = new_profile.create_oauth_url(scope=settings.SPOTIFY_SCOPE_ACCESS,
                                     client_id=settings.SPOTIPY_CLIENT_ID,
                                     client_secret=settings.SPOTIPY_CLIENT_SECRET,
                                     redirect_uri=settings.REDIRECT_AUTHENTICATION_URL)
@@ -419,9 +408,9 @@ def create_stream_action(request):
     new_stream.save()
     c_user.is_live = True
     c_user.save()
-    context['stream'] = new_stream
-    return render(request,'songshare/stream_page.html')
-    
+    # context['stream'] = new_stream
+    return redirect(reverse('dj-stream',args=[c_user.id]))
+    # return render(request,'songshare/stream_page.html')
 
 
 DUMMY_LIVEDJ ={

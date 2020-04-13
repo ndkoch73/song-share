@@ -88,6 +88,8 @@ class RegistrationForm(forms.Form):
     
     def clean_spotify_email(self):
         spotify_email = self.cleaned_data.get('spotify_email')
+        if spotify_email == "":
+            return spotify_email
         try:
             validate_email(spotify_email)
             return spotify_email

@@ -1,55 +1,87 @@
 {% extends 'songshare/default_sidebar.html' %}
 
-{% block mainpage %}
-	<div class="main ui container">
-		<h2 class="ui dividing header">
-			<span id="id_name_of_page" style="color:black;text-align:center;"> Your Stream </span>
-			<br>
-		</h2>
-		<div class="ui three column grid">
-			<div class="row">
-				<div class="column">
+{% block under-title-content %}
+<h2 class="ui dividing header">
+	<span id="id_name_of_page" style="color:black;text-align:center;"> Now Playing </span>
+	<br>
+</h2>
+<div class="ui card">
+	<div class="ui image">
+	  <img src={{currently_playing.album_image_urls.1.url}} class="visible content">
+	</div>
+	<div class="content">
+	  <div class="header">{{currently_playing.song_title}}</div>
+	  <div class="meta">
+		<span>{{currently_playing.album}}</span>
+		<br>
+		<span>{{currently_playing.artist}}</span>
+	  </div>
+	</div>
+  </div>
+{% endblock %}
 
-						<h2 class="ui dividing header">
-								<span id="id_name_of_page" style="color:black;text-align:center;"> Now Playing </span>
-								<br>
-						</h2>
-						<div class="ui segment">
-							<div class="field">
-								<div class="ui small image">
-									{% if current_song %}
-									<img src={{current_song}} width="100px" id="id_spotify_logo">
-									{% else %}
-									<img src="/static/songshare/spotifylogo.png" width="100px" id="id_spotify_logo">
-									{% endif %}
+{% block mainpage %}
+<div class="main ui container">
+	<h2 class="ui header">
+		<span id="id_name_of_page" style="color:black;"> {{stream.name}} 
+			<div class="sub header">
+				Hosted by <a href="{% url 'profile-view' stream.dj.id %}">DJ {{c_user.user.username}}</a>
+			</div>
+		</span>
+	</h2>
+	<br>
+	<div class="ui three column grid">
+		<div class="row">
+			<div class="column scolling content">
+				<h2 class="ui dividing header">
+					<span id="id_name_of_page" style="color:black;text-align:center;"> Recently Played </span>
+					<br>
+				</h2>
+				{% for track in recently_played %}
+				<div class="ui segment">
+					<div style="display: flex;flex-direction: row;">
+						<div class="ui small image">
+							<img src={{track.track.album.images.2.url}}>
+						</div>
+						<div class="segment left aligned" style="align-items: flex-end;">
+							<div class="ui header">
+								{{track.track.name}}
+								<div class="sub header">{{track.track.album.name}}
+									<br>
+									{{track.track.artists.0.name}}
 								</div>
 							</div>
-							<div class="field">
-								{% if current_song %}
-								{current_song}
-								{% else %}
-									
-								{% endif %}
-							</div>
 						</div>
-
-						<div class="">
-						
+					</div>
+					<div class="field">
+						{% if current_song %}
+						{current_song}
+						{% else %}
+						{% endif %}
 					</div>
 				</div>
-			</div>
-			<div class="row">
-				<div class="column">
-
+				{% endfor %}
+				<div class="">
+					
 				</div>
 			</div>
+			<div class="column">
+				<h2 class="ui dividing header">
+						<span id="id_name_of_page" style="color:black;text-align:center;"> Requested Songs </span>
+						<br>
+					</h2>
+			</div>
+			<div class="column">
+				<h2 class="ui dividing header">
+						<span id="id_name_of_page" style="color:black;text-align:center;"> Search For Songs </span>
+						<br>
+					</h2>
+			</div>
 		</div>
-
 	</div>
-	<script >getStreamSongs()</script>
-	<span id="id_next_up_songs">
-	<table id="listener_stream_songs">
-	</table>
+</div>
 
-
+<script >getStreamSongs()</script>
+<span id="id_next_up_songs">
+<table id="listener_stream_songs"></table>
 {% endblock %}

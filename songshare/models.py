@@ -4,6 +4,7 @@ from django.conf import settings
 
 import spotipy.util as spotipyutil
 import spotipy.oauth2 as oauth2
+import spotipy
 
 """
 Note:
@@ -200,6 +201,27 @@ class Stream(models.Model):
     dj = models.ForeignKey(Profile, default=None, on_delete=models.PROTECT)
     listeners = models.ManyToManyField(Profile, related_name="listening")
 
+
+    def get_currently_playing(self):
+        sp = spotipy.Spotify(auth=self.dj.get_auth_token(scope=settings.SPOTIFY_SCOPE_ACCESS,
+                                            client_id=settings.SPOTIPY_CLIENT_ID,
+                                            client_secret=settings.SPOTIPY_CLIENT_SECRET,
+                                            redirect_uri=settings.REDIRECT_AUTHENTICATION_URL))
+        current_data = sp.currently_playing()
+        result  = {}
+        result['album'] = current_data['item']['album']['name']
+        result['album_image_urls'] = current_data['item']['album']['images']
+        result['artist'] = current_data['item']['artists'][0]['name']
+        result['song_title'] = current_data['item']['name']
+        return result
+    
+    def get_recently_played(self):
+        sp = spotipy.Spotify(auth=self.dj.get_auth_token(scope=settings.SPOTIFY_SCOPE_ACCESS,
+                                            client_id=settings.SPOTIPY_CLIENT_ID,
+                                            client_secret=settings.SPOTIPY_CLIENT_SECRET,
+                                            redirect_uri=settings.REDIRECT_AUTHENTICATION_URL))
+        recently_played = sp.current_user_recently_played(limit=settings.RECENT_SONG_LIMIT)
+        return recently_played['items']
 """
 Note:
     These encapsulate profiles that cannot be followed, but the information
