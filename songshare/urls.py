@@ -23,4 +23,7 @@ urlpatterns = [
     path('end-stream',views.end_stream_action,name='end-stream'),
     path('join-stream/<int:id>',views.join_stream_action,name='join-stream'),
     path('leave-stream/<int:id>',views.leave_stream_action,name='leave-stream'),
+    path('dj-stream/<int:id>/request-song/<str:song_uri>',views.request_song_action,name="request-song"),
+    path('dj-stream/<int:id>/get-currently-playing',views.get_currently_playing,name="get-currently-playing"),
+    path('dj-stream/<int:id>/get-recently-played',views.get_recently_played,name="get-recently-played"),
 ]

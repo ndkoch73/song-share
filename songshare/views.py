@@ -28,7 +28,6 @@ import json
 def home_page(request):
     context = {}
     c_user = Profile.objects.get(user=request.user)
-    print(c_user)
     context['c_user'] = c_user
     context['streams'] = Stream.objects.all().filter(is_streaming=True)
     # pass the spotify registration form if the user is not a dj
@@ -185,21 +184,25 @@ def clear_stream_action(request):
     context = {}
     return render(request, 'songshare/dj_stream.html', context)
 
-def dj_stream_action(request, id):
-    context = {}
+def get_stream(id):
     stream = Stream.objects.all().filter(dj=Profile.objects.get(pk=id),is_streaming=True)
     if stream == None:
-        # error and need to return user to the home page
+        return None
+    return stream[0]
+
+def dj_stream_action(request, id):
+    context = {}
+    stream = get_stream(id)
+    if stream == None:
         return Http404
-    stream = stream[0]
     c_user = Profile.objects.get(user=request.user)
     is_stream_dj = c_user.id == id
     context['c_user'] = c_user
     context['stream'] = stream
     context['is_stream_dj'] = is_stream_dj
     if request.method == "GET":
-        context['currently_playing'] = stream.get_currently_playing()
-        context['recently_played'] = stream.get_recently_played()
+        # context['currently_playing'] = stream.get_currently_playing()
+        # context['recently_played'] = stream.get_recently_played()
         return render(request,'songshare/stream_page.html',context)
     return 42
 
@@ -230,8 +233,7 @@ def clean_search_query(result):
     items = result['tracks']['items']
     L = []
     for item in items:
-        L.append({'album': item['album'], 'name': item['name'], 'artists': item['artists'], 'uri': item['uri']})
-    
+        L.append({'album': item['album'], 'name': item['name'],'artists': item['artists'], 'uri': item['uri']})
     return L
 
 # Returns a json object of the top 10 search terms
@@ -252,7 +254,6 @@ def get_photo(request, id):
     # But someone could have delete the picture leaving the DB with a bad references.
     if not profile.picture:
         raise Http404
-
     return HttpResponse(profile.picture, content_type=profile.content_type)
 
 
@@ -396,9 +397,6 @@ def register_action(request):
 
 def create_stream_action(request):
     if request.method == "GET":
-        # again this should never be the case because we are
-        # getting the information from a modal so there is no
-        # get request
         return Http404
     context = {}
     stream_creation_form = CreateStreamForm(request.POST)
@@ -411,8 +409,8 @@ def create_stream_action(request):
     new_stream = Stream(name=stream_name,
                         dj=c_user,
                         is_streaming=True)
-    if new_stream.get_currently_playing() == None:
-        # user needs to have a active spotify session
+    current_song = new_stream.get_currently_playing()
+    if current_song == None:
         context['errors'] = [{'message':'Must currently have an active spotify session'}]
         return render(request,'songshare/user_home.html',context)
     new_stream.save()
@@ -427,10 +425,9 @@ def end_stream_action(request):
     if request.method == "GET":
         return Http404
     c_user = Profile.objects.get(user=request.user)
-    stream = Stream.objects.all().filter(dj=c_user,is_streaming=True)
+    stream = get_stream(c_user.id)
     if stream == None:
         return Http404
-    stream = stream[0]
     stream.is_streaming = False
     stream.save()
     c_user.is_live = False
@@ -440,11 +437,9 @@ def end_stream_action(request):
 def join_stream_action(request, id):
     if request.method == "GET":
         return Http404
-    stream_dj = Profile.objects.get(pk=id)
-    stream = Stream.objects.all().filter(dj=stream_dj,is_streaming=True)
+    stream = get_stream(id)
     if stream == None:
         return Http404
-    stream = stream[0]
     listener_profile = Profile.objects.get(user=request.user)
     stream.listeners.add(listener_profile)
     stream.save()
@@ -453,22 +448,34 @@ def join_stream_action(request, id):
 def leave_stream_action(request, id):
     if request.method == "GET":
         return Http404
-    stream_dj = Profile.objects.get(pk=id)
-    stream = Stream.objects.all().filter(dj=stream_dj,is_streaming=True)
+    stream = get_stream(id)
     if stream == None:
         return Http404
-    stream = stream[0]
     listener_profile = Profile.objects.get(user=request.user)
     stream.listeners.remove(listener_profile)
     stream.save()
     return redirect(reverse('home'))
 
-DUMMY_LIVEDJ ={
-    'id': 1,
-    'is_dj': True,
-    'live': True,
-    'auth_token': None,
-    'fname': 'dummy',
-    'lname': 'dj',
-    'bio': 'DUMMY',
-}
+def get_currently_playing(request,id):
+    if request.method == "POST":
+        return Http404
+    stream = get_stream(id)
+    if stream == None:
+        return Http404
+    results = stream.get_currently_playing().to_json()
+    return HttpResponse(json.dumps(results), content_type='application/json')
+
+def get_recently_played(request,id):
+    if request.method == "POST":
+        return Http404
+    stream = get_stream(id)
+    if stream == None:
+        return Http404
+    results = stream.get_recently_played()
+    response = []
+    for item in results:
+        response.append(item.to_json())
+    return HttpResponse(json.dumps(response), content_type='application/json')
+    
+def request_song_action(request,id,song_uri):
+    return 42

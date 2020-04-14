@@ -1,23 +1,15 @@
 {% extends 'songshare/default_sidebar.html' %}
 
 {% block under-title-content %}
+{% load static %}
+<script src="{% static 'songshare/dj_stream.js' %}" type="text/javascript"></script>
+
 <h2 class="ui dividing header">
 	<span id="id_name_of_page" style="color:black;text-align:center;"> Now Playing </span>
 	<br>
 </h2>
-<div class="ui card">
-	<div class="ui image">
-		<img src={{currently_playing.album_image_urls.1.url}} class="visible content">
-	</div>
-	<div class="content">
-		<div class="header">{{currently_playing.song_title}}</div>
-		<div class="meta">
-		<span>{{currently_playing.album}}</span>
-		<br>
-		<span>{{currently_playing.artist}}</span>
-		</div>
-	</div>
-</div>
+<div id="currently_playing_container"></div>
+<br>
 {% if is_stream_dj %}
 	<form method="POST" action="{% url 'end-stream' %}">
 		<button class="ui fluid red button">End Stream</button>
@@ -41,7 +33,7 @@
 	<h2 class="ui header">
 		<span id="id_name_of_page" style="color:black;"> {{stream.name}} 
 			<div class="sub header">
-				Hosted by <a href="{% url 'profile-view' stream.dj.id %}">DJ {{c_user.user.username}}</a>
+				Hosted by <a href="{% url 'profile-view' stream.dj.id %}">DJ {{stream.dj.user.username}}</a>
 			</div>
 		</span>
 	</h2>
@@ -53,7 +45,8 @@
 					<span id="id_name_of_page" style="color:black;text-align:center;"> Recently Played </span>
 					<br>
 				</h2>
-				{% for track in recently_played %}
+				<div id="recently_played_container"></div>
+				<!-- {% for track in recently_played %}
 				<div class="ui segment">
 					<div style="display: flex;flex-direction: row;">
 						<div class="ui small image">
@@ -70,9 +63,8 @@
 						</div>
 					</div>
 				</div>
-				{% endfor %}
+				{% endfor %} -->
 			</div>
-
 			{% if not is_stream_dj %}
 			<div class="column">
 				<h2 class="ui dividing header">
