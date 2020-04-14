@@ -1,8 +1,6 @@
 {% extends 'songshare/default_sidebar.html' %}
 
 {% block under-title-content %}
-
-{% if stream.is_streaming %}
 <h2 class="ui dividing header">
 	<span id="id_name_of_page" style="color:black;text-align:center;"> Now Playing </span>
 	<br>
@@ -25,12 +23,17 @@
 		<button class="ui fluid red button">End Stream</button>
 		{% csrf_token %}
 	</form>
-{% endif %}
-
+	<br>
+	<div class="ui center aligned icon header">
+		<i class="users icon"></i>
+		{{stream.listeners.count}} currently listening
+	</div>
 {% else %}
-<!-- this is the case where the stream is not live  -->
+	<form method="POST" action="{% url 'leave-stream' stream.dj.id %}">
+		<button class="ui fluid red button">Leave Stream</button>
+		{% csrf_token %}
+	</form>
 {% endif %}
-
 {% endblock %}
 
 {% block mainpage %}
@@ -107,8 +110,4 @@
 		</div>
 	</div>
 </div>
-
-<!-- <script >getStreamSongs()</script>
-<span id="id_next_up_songs">
-<table id="listener_stream_songs"></table> -->
 {% endblock %}

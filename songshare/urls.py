@@ -21,4 +21,6 @@ urlpatterns = [
     path('create-stream',views.create_stream_action,name="create-stream"),
     path('dj-stream/<int:id>',views.dj_stream_action,name="dj-stream"),
     path('end-stream',views.end_stream_action,name='end-stream'),
+    path('join-stream/<int:id>',views.join_stream_action,name='join-stream'),
+    path('leave-stream/<int:id>',views.leave_stream_action,name='leave-stream'),
 ]

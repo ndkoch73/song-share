@@ -201,6 +201,7 @@ class Stream(models.Model):
     dj = models.ForeignKey(Profile, default=None, on_delete=models.PROTECT)
     listeners = models.ManyToManyField(Profile, related_name="listening")
     is_streaming = models.BooleanField(default=True)
+    requested_songs = models.ManyToManyField(Song)
 
     def get_currently_playing(self):
         sp = spotipy.Spotify(auth=self.dj.get_auth_token(scope=settings.SPOTIFY_SCOPE_ACCESS,

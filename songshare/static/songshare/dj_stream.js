@@ -22,7 +22,7 @@ function clear_search(){
 }
 
 function add_searched_songs(response){
-    console.log(response)
+    $('#searched_songs_container').empty();
     $(response).each(function(){
         searched_song_container_id = '#searched_songs_container';
         song_html = get_searched_song_html(this);

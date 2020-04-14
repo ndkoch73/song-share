@@ -424,6 +424,8 @@ def create_stream_action(request):
 # stream will only be available to the DJ this is handled in the 
 # dj_stream action with the parameter is_stream_dj
 def end_stream_action(request):
+    if request.method == "GET":
+        return Http404
     c_user = Profile.objects.get(user=request.user)
     stream = Stream.objects.all().filter(dj=c_user,is_streaming=True)
     if stream == None:
@@ -435,6 +437,32 @@ def end_stream_action(request):
     c_user.save()
     return redirect(reverse('home'))
 
+def join_stream_action(request, id):
+    if request.method == "GET":
+        return Http404
+    stream_dj = Profile.objects.get(pk=id)
+    stream = Stream.objects.all().filter(dj=stream_dj,is_streaming=True)
+    if stream == None:
+        return Http404
+    stream = stream[0]
+    listener_profile = Profile.objects.get(user=request.user)
+    stream.listeners.add(listener_profile)
+    stream.save()
+    return redirect(reverse('dj-stream',args=[id]))
+
+def leave_stream_action(request, id):
+    if request.method == "GET":
+        return Http404
+    stream_dj = Profile.objects.get(pk=id)
+    stream = Stream.objects.all().filter(dj=stream_dj,is_streaming=True)
+    if stream == None:
+        return Http404
+    stream = stream[0]
+    listener_profile = Profile.objects.get(user=request.user)
+    stream.listeners.remove(listener_profile)
+    stream.save()
+    return redirect(reverse('home'))
+
 DUMMY_LIVEDJ ={
     'id': 1,
     'is_dj': True,
@@ -444,12 +472,3 @@ DUMMY_LIVEDJ ={
     'lname': 'dj',
     'bio': 'DUMMY',
 }
-
-"""
-NOTE: - I think it's a good idea to seperate the current user's profile page and 
-        the profile pages of other users. The profile_page_action method redirects
-        a user to their own profile. The goto_profile method will redirect the user
-        to their own profile if they click their own link, or to other user profiles.
-        Obviously we will work on the names of the html once we decide on urls.py
-"""
-
