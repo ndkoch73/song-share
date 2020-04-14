@@ -30,6 +30,7 @@ def home_page(request):
     c_user = Profile.objects.get(user=request.user)
     print(c_user)
     context['c_user'] = c_user
+    context['streams'] = Stream.objects.all().filter(is_streaming=True)
     # pass the spotify registration form if the user is not a dj
     if not c_user.is_dj:
         context['spotify_registration_form'] = SpotifyRegistrationForm()
@@ -186,7 +187,11 @@ def clear_stream_action(request):
 
 def dj_stream_action(request, id):
     context = {}
-    stream = Stream.objects.get(pk=id)
+    stream = Stream.objects.all().filter(dj=Profile.objects.get(pk=id),is_streaming=True)
+    if stream == None:
+        # error and need to return user to the home page
+        return Http404
+    stream = stream[0]
     c_user = Profile.objects.get(user=request.user)
     is_stream_dj = c_user.id == id
     context['c_user'] = c_user
@@ -404,14 +409,31 @@ def create_stream_action(request):
         return render(request,'songshare/user_home.html',context)
     stream_name = stream_creation_form.cleaned_data['stream_name']
     new_stream = Stream(name=stream_name,
-                        dj=c_user)
+                        dj=c_user,
+                        is_streaming=True)
+    if new_stream.get_currently_playing() == None:
+        # user needs to have a active spotify session
+        context['errors'] = [{'message':'Must currently have an active spotify session'}]
+        return render(request,'songshare/user_home.html',context)
     new_stream.save()
     c_user.is_live = True
     c_user.save()
-    # context['stream'] = new_stream
     return redirect(reverse('dj-stream',args=[c_user.id]))
-    # return render(request,'songshare/stream_page.html')
 
+# do not need an id parameter because the button for ending the
+# stream will only be available to the DJ this is handled in the 
+# dj_stream action with the parameter is_stream_dj
+def end_stream_action(request):
+    c_user = Profile.objects.get(user=request.user)
+    stream = Stream.objects.all().filter(dj=c_user,is_streaming=True)
+    if stream == None:
+        return Http404
+    stream = stream[0]
+    stream.is_streaming = False
+    stream.save()
+    c_user.is_live = False
+    c_user.save()
+    return redirect(reverse('home'))
 
 DUMMY_LIVEDJ ={
     'id': 1,

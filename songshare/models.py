@@ -200,7 +200,7 @@ class Stream(models.Model):
     name = models.CharField(max_length=256)
     dj = models.ForeignKey(Profile, default=None, on_delete=models.PROTECT)
     listeners = models.ManyToManyField(Profile, related_name="listening")
-
+    is_streaming = models.BooleanField(default=True)
 
     def get_currently_playing(self):
         sp = spotipy.Spotify(auth=self.dj.get_auth_token(scope=settings.SPOTIFY_SCOPE_ACCESS,
@@ -208,6 +208,8 @@ class Stream(models.Model):
                                             client_secret=settings.SPOTIPY_CLIENT_SECRET,
                                             redirect_uri=settings.REDIRECT_AUTHENTICATION_URL))
         current_data = sp.currently_playing()
+        if current_data == None:
+            return None
         result  = {}
         result['album'] = current_data['item']['album']['name']
         result['album_image_urls'] = current_data['item']['album']['images']

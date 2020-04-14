@@ -1,23 +1,36 @@
 {% extends 'songshare/default_sidebar.html' %}
 
 {% block under-title-content %}
+
+{% if stream.is_streaming %}
 <h2 class="ui dividing header">
 	<span id="id_name_of_page" style="color:black;text-align:center;"> Now Playing </span>
 	<br>
 </h2>
 <div class="ui card">
 	<div class="ui image">
-	  <img src={{currently_playing.album_image_urls.1.url}} class="visible content">
+		<img src={{currently_playing.album_image_urls.1.url}} class="visible content">
 	</div>
 	<div class="content">
-	  <div class="header">{{currently_playing.song_title}}</div>
-	  <div class="meta">
+		<div class="header">{{currently_playing.song_title}}</div>
+		<div class="meta">
 		<span>{{currently_playing.album}}</span>
 		<br>
 		<span>{{currently_playing.artist}}</span>
-	  </div>
+		</div>
 	</div>
-  </div>
+</div>
+{% if is_stream_dj %}
+	<form method="POST" action="{% url 'end-stream' %}">
+		<button class="ui fluid red button">End Stream</button>
+		{% csrf_token %}
+	</form>
+{% endif %}
+
+{% else %}
+<!-- this is the case where the stream is not live  -->
+{% endif %}
+
 {% endblock %}
 
 {% block mainpage %}
