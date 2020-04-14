@@ -231,11 +231,11 @@ def clean_search_query(result):
 
 # Returns a json object of the top 10 search terms
 # Contains album, name, artists and uri fields
-def song_search(request,id):
-    client_credentials_manager = SpotifyClientCredentials()
+def song_search(request,search_query):
+    client_credentials_manager = SpotifyClientCredentials(client_id=settings.SPOTIPY_CLIENT_ID,
+                                                        client_secret=settings.SPOTIPY_CLIENT_SECRET)
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-    results = clean_search_query(sp.search(id))
-
+    results = clean_search_query(sp.search(search_query))
     return HttpResponse(json.dumps(results), content_type='application/json')
 
 @login_required

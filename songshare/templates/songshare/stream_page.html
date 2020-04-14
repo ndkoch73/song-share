@@ -32,7 +32,7 @@
 	<br>
 	<div class="ui three column grid">
 		<div class="row">
-			<div class="column scolling content">
+			<div class="column content">
 				<h2 class="ui dividing header">
 					<span id="id_name_of_page" style="color:black;text-align:center;"> Recently Played </span>
 					<br>
@@ -53,35 +53,49 @@
 							</div>
 						</div>
 					</div>
-					<div class="field">
-						{% if current_song %}
-						{current_song}
-						{% else %}
-						{% endif %}
-					</div>
 				</div>
 				{% endfor %}
-				<div class="">
-					
-				</div>
 			</div>
+
+			{% if not is_stream_dj %}
 			<div class="column">
 				<h2 class="ui dividing header">
 						<span id="id_name_of_page" style="color:black;text-align:center;"> Requested Songs </span>
 						<br>
 					</h2>
 			</div>
-			<div class="column">
+			{% else %}
+			<div class="ten wide column">
 				<h2 class="ui dividing header">
-						<span id="id_name_of_page" style="color:black;text-align:center;"> Search For Songs </span>
+						<span id="id_name_of_page" style="color:black;text-align:center;"> Requested Songs </span>
 						<br>
 					</h2>
 			</div>
+			{% endif %}
+
+			{% if not is_stream_dj %}
+			<div class="column">
+				<h2 class="ui dividing header">
+					<span id="id_name_of_page" style="color:black;text-align:center;"> Song Search </span>
+					<br>
+				</h2>
+				<div class="ui category search">
+					<div class="ui input">
+						<input class="prompt" type="text" placeholder="Search for songs" id="song_search_input">
+					</div>
+					<button class="circular ui button" onclick="search_for_song()"><i class="search icon"></i></button>
+					<button class="circular ui button" onclick="clear_search()"><i class="close icon"></i></button>
+				</div>
+				<br>
+				<div class="ui cards scrolling content" id="searched_songs_container"></div>
+			</div>
+			{% else %}
+			{% endif %}
 		</div>
 	</div>
 </div>
 
-<script >getStreamSongs()</script>
+<!-- <script >getStreamSongs()</script>
 <span id="id_next_up_songs">
-<table id="listener_stream_songs"></table>
+<table id="listener_stream_songs"></table> -->
 {% endblock %}
