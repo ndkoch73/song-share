@@ -478,4 +478,63 @@ def get_recently_played(request,id):
     return HttpResponse(json.dumps(response), content_type='application/json')
     
 def request_song_action(request,id,song_uri):
-    return 42
+    if request.method == "GET":
+        return Http404
+    stream = get_stream(id)
+    if stream == None:
+        return Http404
+    client_credentials_manager = SpotifyClientCredentials(client_id=settings.SPOTIPY_CLIENT_ID,
+                                                        client_secret=settings.SPOTIPY_CLIENT_SECRET)
+    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+    results = sp.track(song_uri)
+    requested_song = Song(artist=Song.clean_artists(results['artists']),
+                        album=results['album']['name'],
+                        name=results['name'],
+                        vote_count=0,
+                        uri=song_uri,
+                        image_url=results['album']['images'][2]['url'],
+                        request_status='pending')
+    requested_song.save()
+    stream.requested_songs.add(requested_song)
+    stream.save()
+    result = {'is_stream_dj':False, 'requested_songs':[requested_song.to_json()]}
+    return HttpResponse(json.dumps(result), content_type='application/json')
+
+def get_requested_songs(request,id):
+    if request.method == "POST":
+        return Http404
+    stream = get_stream(id)
+    is_stream_dj = stream.dj == Profile.objects.get(user=request.user)
+    if stream == None:
+        return Http404
+    results = {'is_stream_dj':is_stream_dj, 'requested_songs':[]}
+    for item in stream.requested_songs.all():
+        results['requested_songs'].append(item.to_json())
+    return HttpResponse(json.dumps(results), content_type='application/json')
+
+def add_song_to_queue(request,id,song_uri):
+    if request.method == "GET":
+        return Http404
+    stream = get_stream(id)
+    is_stream_dj = stream.dj == Profile.objects.get(user=request.user)
+    if stream == None:
+        return Http404
+    song = stream.requested_songs.get(uri=song_uri)
+    stream.add_to_queue(song)
+    song.request_status = 'accepted'
+    song.save()
+    stream.save()
+    return HttpResponse(json.dumps({}), content_type='application/json')
+
+def remove_requested_song(request,id,song_uri):
+    if request.method == "GET":
+        return Http404
+    stream = get_stream(id)
+    is_stream_dj = stream.dj == Profile.objects.get(user=request.user)
+    if stream == None:
+        return Http404
+    song = stream.requested_songs.get(uri=song_uri)
+    song.request_status = 'rejected'
+    song.save()
+    stream.save()
+    return HttpResponse(json.dumps({}), content_type='application/json')

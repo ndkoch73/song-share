@@ -106,6 +106,8 @@ class Song(models.Model):
     vote_count = models.IntegerField(blank=True, null=True)
     uri = models.CharField(max_length=200)
     image_url = models.CharField(max_length=500)
+    # can take three values 'accepted','denied','pending'
+    request_status = models.CharField(max_length=10) 
 
     @classmethod
     def clean_artists(cls,artists):
@@ -118,6 +120,9 @@ class Song(models.Model):
     def __str__(self):
         return 'Song(artist=' + str(self.artist) + ' album=' + str(self.album) + ')'
     def to_json(self):
+        if self.request_status:
+            return {'artist':self.artist,'album':self.album,'name':self.name,
+                    'uri':self.uri,'image_url':self.image_url, 'request_status':self.request_status}
         return {'artist':self.artist,'album':self.album,'name':self.name,'uri':self.uri,'image_url':self.image_url}
 
 # Playlist class (essential)
@@ -250,6 +255,13 @@ class Stream(models.Model):
                         uri=result['uri'],
                         image_url=result['album']['images'][1]['url'])
         return current_song
+    
+    def add_to_queue(self,song):
+        sp = spotipy.Spotify(auth=self.dj.get_auth_token(scope=settings.SPOTIFY_SCOPE_ACCESS,
+                                            client_id=settings.SPOTIPY_CLIENT_ID,
+                                            client_secret=settings.SPOTIPY_CLIENT_SECRET,
+                                            redirect_uri=settings.REDIRECT_AUTHENTICATION_URL))
+        sp.add_to_queue(song.uri)
 
 """
 Note:

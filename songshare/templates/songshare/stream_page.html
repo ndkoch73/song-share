@@ -46,38 +46,22 @@
 					<br>
 				</h2>
 				<div id="recently_played_container"></div>
-				<!-- {% for track in recently_played %}
-				<div class="ui segment">
-					<div style="display: flex;flex-direction: row;">
-						<div class="ui small image">
-							<img src={{track.track.album.images.2.url}}>
-						</div>
-						<div class="segment left aligned" style="align-items: flex-end;">
-							<div class="ui header">
-								{{track.track.name}}
-								<div class="sub header">{{track.track.album.name}}
-									<br>
-									{{track.track.artists.0.name}}
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				{% endfor %} -->
 			</div>
 			{% if not is_stream_dj %}
 			<div class="column">
 				<h2 class="ui dividing header">
-						<span id="id_name_of_page" style="color:black;text-align:center;"> Requested Songs </span>
-						<br>
-					</h2>
+					<span id="id_name_of_page" style="color:black;text-align:center;"> Requested Songs </span>
+					<br>
+				</h2>
+				<div id="requested_songs_container"></div>
 			</div>
 			{% else %}
 			<div class="ten wide column">
 				<h2 class="ui dividing header">
-						<span id="id_name_of_page" style="color:black;text-align:center;"> Requested Songs </span>
-						<br>
-					</h2>
+					<span id="id_name_of_page" style="color:black;text-align:center;"> Requested Songs </span>
+					<br>
+				</h2>
+				<div id="requested_songs_container"></div>
 			</div>
 			{% endif %}
 

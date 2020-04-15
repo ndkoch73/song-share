@@ -26,4 +26,7 @@ urlpatterns = [
     path('dj-stream/<int:id>/request-song/<str:song_uri>',views.request_song_action,name="request-song"),
     path('dj-stream/<int:id>/get-currently-playing',views.get_currently_playing,name="get-currently-playing"),
     path('dj-stream/<int:id>/get-recently-played',views.get_recently_played,name="get-recently-played"),
+    path('dj-stream/<int:id>/get-requested-songs',views.get_requested_songs,name="get-requested-songs"),
+    path('dj-stream/<int:id>/add-to-queue/<str:song_uri>',views.add_song_to_queue,name="add-to-queue"),
+    path('dj-stream/<int:id>/remove-requested-song/<str:song_uri>',views.remove_requested_song,name='remove-requested-song'),
 ]

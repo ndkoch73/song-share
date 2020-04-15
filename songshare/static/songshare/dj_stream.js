@@ -42,6 +42,32 @@ function get_recently_played(){
     });
 }
 
+function add_song_to_queue(song_uri){
+    $.ajax({
+        url: window.location.pathname + "/add-to-queue/" + encodeURIComponent(song_uri),
+        type: "POST",
+        data: "csrfmiddlewaretoken="+getCSRFToken(),
+        dataType: "json",
+        success: get_requested_songs,
+        error: function(response){
+            console.log(response)
+        }
+    });
+}
+
+function deny_song(song_uri){
+    $.ajax({
+        url: window.location.pathname + "/remove-requested-song/" + encodeURIComponent(song_uri),
+        type: "POST",
+        data: "csrfmiddlewaretoken="+getCSRFToken(),
+        dataType: "json",
+        success: get_requested_songs,
+        error: function(response){
+            console.log(response)
+        }
+    });
+}
+
 function add_recently_played(response){
     var t = $('#recently_played_container').html().split('<div class="ui segment">');
     t = t.slice(1,t.length)
@@ -91,8 +117,117 @@ function request_song(song_uri){
         url: window.location.pathname + "/request-song/" + encodeURIComponent(song_uri),
         type: "POST",
         data: "csrfmiddlewaretoken="+getCSRFToken(),
-        dataType: "json"
+        dataType: "json",
+        success: add_requested_song,
+        error: function(response){
+            console.log(response)
+        }
     });
+}
+
+function get_requested_songs(){
+    $.ajax({
+        url: window.location.pathname + "/get-requested-songs",
+        type: "GET",
+        data: "csrfmiddlewaretoken="+getCSRFToken(),
+        dataType: "json",
+        success: add_requested_song,
+        error: function(response){
+            console.log(response)
+        }
+    });
+}
+
+function add_requested_song(response){
+    var current_requested_html = $('#requested_songs_container').html();
+    var new_requested_html = ""
+    var is_stream_dj = response['is_stream_dj']
+    $(response['requested_songs']).each(function(){
+        new_requested_html += get_requested_song_html(this,is_stream_dj)
+    });
+    if(current_requested_html != new_requested_html){
+        $('#requested_songs_container').empty()
+        $('#requested_songs_container').html(new_requested_html)
+    }
+}
+
+function get_requested_song_html(song,is_stream_dj){
+    if(song.request_status == 'accepted'){
+        button_status_html = `
+                    <div class="center aligned column">` +
+                        '<button class="disabled circular ui green button" style="opacity: 1 !important"><i class="check icon"></i>Accept</button>' +
+                        '<button class="disabled circular ui red button"><i class="close icon"></i>Deny</button>' +
+                    `</div>
+                </div>
+            </div>
+            `
+        status_label_html = '<span class="ui green right corner label"><i class="check icon"></i></span>'
+    } else if(song.request_status == 'rejected'){
+        button_status_html = `
+                    <div class="center aligned column">` +
+                    '<button class="disabled circular ui green button"><i class="check icon"></i>Accept</button>' +
+                    '<button class="disabled circular ui red button" style="opacity: 1 !important"><i class="close icon"></i>Deny</button>' +
+                `</div>
+            </div>
+        </div>    
+        `
+        status_label_html = '<span class="ui red right corner label"><i class="close icon"></i></span>'
+    } else {
+        button_status_html = `
+                    <div class="center aligned column">` +
+                    '<button class="circular ui green button" ' + 
+                        'onclick="add_song_to_queue(' + "'" + song.uri + "'" + ')"><i class="check icon"></i>Accept</button>' +
+                    '<button class="circular ui red button" ' + 
+                        'onclick="deny_song(' + "'" + song.uri + "'" + ')"><i class="close icon"></i>Deny</button>' +
+                `</div>
+            </div>
+        </div>
+        `
+        status_label_html = '<span class="ui grey right corner label"><i class="hourglass half icon"></i></span>'
+    }
+    if(!is_stream_dj){
+        return `
+                <div class="ui raised segment">` + 
+                    status_label_html + 
+                    `<div class="ui two column stackable grid">
+                        <div class="three wide column"> ` + 
+                            '<div class="ui image">' + 
+                                '<img src="'+ song.image_url + '">' + 
+                            '</div>' +     
+                        `</div>
+                        <div class="twelve wide column">` + 
+                            '<div class="ui header">' +
+                                song.name +
+                                '<div class="sub header">' + song.album +
+                                    '<br>' + 
+                                    song.artist +
+                                '</div>' + 
+                            '</div>' +
+                        `</div>
+                    </div>
+                </div>
+        `
+    } else {
+        main_html = `
+                    <div class="ui segment">
+                        <div class="ui three column stackable grid">
+                            <div class="two wide column"> ` + 
+                                '<div class="ui small image">' + 
+                                    '<img src="'+ song.image_url + '">' + 
+                                '</div>' +     
+                            `</div>
+                            <div class="eight wide column">` + 
+                                '<div class="ui header">' +
+                                    song.name +
+                                    '<div class="sub header">' + song.album +
+                                        '<br>' + 
+                                        song.artist +
+                                    '</div>' + 
+                                '</div>' +
+                            '</div>' + 
+                            button_status_html
+        return main_html
+    }
 }
 
 function clear_search(){
@@ -167,8 +302,10 @@ function getCSRFToken() {
 function refresh_songs(){
     get_currently_playing()
     get_recently_played()
+    get_requested_songs()
 }
 
 window.onload = refresh_songs;
 window.setInterval(get_currently_playing, 10*1000);
 window.setInterval(get_recently_played,15*1000)
+window.setInterval(get_requested_songs,5*1000)
