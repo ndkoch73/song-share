@@ -1,0 +1,89 @@
+{% extends 'songshare/default_sidebar.html' %}
+
+{% block under-title-content %}
+{% load static %}
+<script src="{% static 'songshare/dj_stream.js' %}" type="text/javascript"></script>
+
+<h2 class="ui dividing header">
+	<span id="id_name_of_page" style="color:black;text-align:center;"> Now Playing </span>
+	<br>
+</h2>
+<div id="currently_playing_container"></div>
+<br>
+{% if is_stream_dj %}
+	<form method="POST" action="{% url 'end-stream' %}">
+		<button class="ui fluid red button">End Stream</button>
+		{% csrf_token %}
+	</form>
+	<br>
+	<div class="ui center aligned icon header">
+		<i class="users icon"></i>
+		{{stream.listeners.count}} currently listening
+	</div>
+{% else %}
+	<form method="POST" action="{% url 'leave-stream' stream.dj.id %}">
+		<button class="ui fluid red button">Leave Stream</button>
+		{% csrf_token %}
+	</form>
+{% endif %}
+{% endblock %}
+
+{% block mainpage %}
+<div class="main ui container">
+	<h2 class="ui header">
+		<span id="id_name_of_page" style="color:black;"> {{stream.name}} 
+			<div class="sub header">
+				Hosted by <a href="{% url 'profile-view' stream.dj.id %}">DJ {{stream.dj.user.username}}</a>
+			</div>
+		</span>
+	</h2>
+	<br>
+	<div class="ui three column grid">
+		<div class="row">
+			<div class="column content">
+				<h2 class="ui dividing header">
+					<span id="id_name_of_page" style="color:black;text-align:center;"> Recently Played </span>
+					<br>
+				</h2>
+				<div id="recently_played_container"></div>
+			</div>
+			{% if not is_stream_dj %}
+			<div class="column">
+				<h2 class="ui dividing header">
+					<span id="id_name_of_page" style="color:black;text-align:center;"> Requested Songs </span>
+					<br>
+				</h2>
+				<div id="requested_songs_container"></div>
+			</div>
+			{% else %}
+			<div class="ten wide column">
+				<h2 class="ui dividing header">
+					<span id="id_name_of_page" style="color:black;text-align:center;"> Requested Songs </span>
+					<br>
+				</h2>
+				<div id="requested_songs_container"></div>
+			</div>
+			{% endif %}
+
+			{% if not is_stream_dj %}
+			<div class="column">
+				<h2 class="ui dividing header">
+					<span id="id_name_of_page" style="color:black;text-align:center;"> Song Search </span>
+					<br>
+				</h2>
+				<div class="ui category search">
+					<div class="ui input">
+						<input class="prompt" type="text" placeholder="Search for songs" id="song_search_input">
+					</div>
+					<button class="circular ui button" onclick="search_for_song()"><i class="search icon"></i></button>
+					<button class="circular ui button" onclick="clear_search()"><i class="close icon"></i></button>
+				</div>
+				<br>
+				<div class="ui cards scrolling content" id="searched_songs_container"></div>
+			</div>
+			{% else %}
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% endblock %}
