@@ -40,11 +40,11 @@
             </div>
             <div class="column">
               <div class="ui verticle segment">
-                  {% if c_user.is_dj == True and c_user.live == True %}
+                  {% if c_user.is_dj == True and c_user.is_live == True %}
                     <button class="ui red submit button" id="id_start_new_stream_button"> 
                         <a href="{% url 'clear-stream' %}"> <span style="color:black;">Stop  Stream</span></a>
                     </button>
-                  {% elif c_user.is_dj == True and c_user.live == False  %}
+                  {% elif c_user.is_dj == True and c_user.is_live == False  %}
                     <button class="ui green submit button" id="id_start_new_stream_button"> 
                       <a href="{% url 'dj-stream' %}"> <span style="color:black;">Start New Stream</span></a>
                     </button>

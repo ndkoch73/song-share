@@ -76,7 +76,7 @@ def profile_page_action(request):
     context['form']  = ProfilePictureForm()
     context['is_dj'] = c_user.auth_token_code != ''
     c_user.is_dj = c_user.auth_token_code != ''
-    print(c_user.live)
+    print(c_user.is_live)
     print(context)
     print(Profile.objects.all())
 
@@ -179,7 +179,7 @@ def listener_stream(request, id):
         print(c_user)
         if (c_user.user == f_user.user):
             print('here')
-            return redirect(reverse('dj_stream'))
+            return redirect(reverse('dj-stream'))
         context['dj'] = f_user
         context['c_user'] = c_user
         return render(request, 'songshare/listener_stream.html', context)
@@ -216,6 +216,15 @@ def search_alo(queryString):
 
 def dj_stream_action(request):
     context = {}
+    try:		
+        c_user = Profile.objects.get(user=request.user)	
+        c_user.live =  True	
+        c_user.save()	
+        context['c_user'] = c_user	
+        return render(request, 'songshare/dj_stream.html', context)	
+    except:	
+        raise Http404	
+
     return render(request,'songshare/stream_page.html',context)
 
 def dj_search(request):
@@ -244,7 +253,7 @@ def dj_search(request):
     
 
 def song_search(request,id):
-    pass
+    return 
 
 @login_required
 def get_photo(request, id):
