@@ -33,14 +33,16 @@
                     <label id="id_name"> {{dj.fname}} {{dj.lname}}</label>
                 </div>
                 <div class="segment" id="id_dj_search_{{dj.id}}">
-                    {% if dj.live == True %}
+                    {% if dj.is_live == True %}
                     <a href="{% url 'listener-stream' dj.id %}">
-					<i class="circle red icon" id="id_is_live_{{dj.id}}"></i>
-					{{dj.fname}} {{dj.lname}} is {{dj.live}} live 
+					    <i class="circle red icon" id="id_is_live_{{dj.id}}"></i>
+                        {{dj.fname}} {{dj.lname}} 
+                    </a> 
+                    is live 
                     {% else %}
                     <a href="{% url 'profile-view' dj.id %}">
 					<i class="circle outline icon" id="id_is_not_live_{{dj.id}}"></i>
-					{{dj.fname}} {{dj.lname}} is not live </a>
+					{{dj.fname}} {{dj.lname}} is not live 
 					{% endif %}
                 </div>
             </div>
