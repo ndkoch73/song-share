@@ -53,7 +53,7 @@
 					<span id="id_name_of_page" style="color:black;text-align:center;"> Requested Songs </span>
 					<br>
 				</h2>
-				<div id="requested_songs_container"></div>
+				<div class="scrolling-content" id="requested_songs_container"></div>
 			</div>
 			{% else %}
 			<div class="ten wide column">
@@ -61,7 +61,7 @@
 					<span id="id_name_of_page" style="color:black;text-align:center;"> Requested Songs </span>
 					<br>
 				</h2>
-				<div id="requested_songs_container"></div>
+				<div class="scrolling-content" id="requested_songs_container"></div>
 			</div>
 			{% endif %}
 
@@ -79,7 +79,7 @@
 					<button class="circular ui button" onclick="clear_search()"><i class="close icon"></i></button>
 				</div>
 				<br>
-				<div class="ui cards scrolling content" id="searched_songs_container"></div>
+				<div class="ui cards scrolling-content" id="searched_songs_container"></div>
 			</div>
 			{% else %}
 			{% endif %}

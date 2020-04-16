@@ -12,3 +12,8 @@
   padding-left: 160px;
   padding-top: 40px;
 }
+
+.scrolling-content {
+  max-height: 75vh; 
+  overflow-y: auto;
+}

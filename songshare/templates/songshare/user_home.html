@@ -51,23 +51,6 @@
 {% block mainpage %}
 <div class="main ui container">
 	<h2 class="ui dividing header">
-		<label>Recent Streams</label>
-	</h2>
-	<div>
-		<script>getRecent()</script>
-		<table id="id_recent_streams">
-		</table>
-	</div>
-	<h2 class="ui dividing header">
-			<label>Popular Streams</label>
-	</h2>
-	<div>
-		<script>getPopular()</script>
-		<table id="id_popular_streams">
-		</table>
-	</div>
-
-	<h2 class="ui dividing header">
 		<label>Currently Streaming</label>
 	</h2>
 	{% for stream in streams %}

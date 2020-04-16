@@ -115,7 +115,8 @@ class Song(models.Model):
         for i in range(0,len(artists)):
             result += artists[i]['name']
             if i != len(artists) - 1:
-                artists += " & "
+                result += " & "
+        print(result)
         return result
     def __str__(self):
         return 'Song(artist=' + str(self.artist) + ' album=' + str(self.album) + ')'
