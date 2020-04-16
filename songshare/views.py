@@ -28,8 +28,8 @@ import json
 def home_page(request):
     context = {}
     c_user = Profile.objects.get(user=request.user)
-    print(c_user)
     context['c_user'] = c_user
+    context['streams'] = Stream.objects.all().filter(is_streaming=True)
     # pass the spotify registration form if the user is not a dj
     if not c_user.is_dj:
         context['spotify_registration_form'] = SpotifyRegistrationForm()
@@ -184,9 +184,27 @@ def clear_stream_action(request):
     context = {}
     return render(request, 'songshare/dj_stream.html', context)
 
-def dj_stream_action(request):
+def get_stream(id):
+    stream = Stream.objects.all().filter(dj=Profile.objects.get(pk=id),is_streaming=True)
+    if stream == None:
+        return None
+    return stream[0]
+
+def dj_stream_action(request, id):
     context = {}
-    return render(request,'songshare/stream_page.html',context)
+    stream = get_stream(id)
+    if stream == None:
+        return Http404
+    c_user = Profile.objects.get(user=request.user)
+    is_stream_dj = c_user.id == id
+    context['c_user'] = c_user
+    context['stream'] = stream
+    context['is_stream_dj'] = is_stream_dj
+    if request.method == "GET":
+        # context['currently_playing'] = stream.get_currently_playing()
+        # context['recently_played'] = stream.get_recently_played()
+        return render(request,'songshare/stream_page.html',context)
+    return 42
 
 def dj_search(request):
     context = {}
@@ -215,17 +233,16 @@ def clean_search_query(result):
     items = result['tracks']['items']
     L = []
     for item in items:
-        L.append({'album': item['album'], 'name': item['name'], 'artists': item['artists'], 'uri': item['uri']})
-    
+        L.append({'album': item['album'], 'name': item['name'],'artists': item['artists'], 'uri': item['uri']})
     return L
 
 # Returns a json object of the top 10 search terms
 # Contains album, name, artists and uri fields
-def song_search(request,id):
-    client_credentials_manager = SpotifyClientCredentials()
+def song_search(request,search_query):
+    client_credentials_manager = SpotifyClientCredentials(client_id=settings.SPOTIPY_CLIENT_ID,
+                                                        client_secret=settings.SPOTIPY_CLIENT_SECRET)
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-    results = clean_search_query(sp.search(id))
-
+    results = clean_search_query(sp.search(search_query))
     return HttpResponse(json.dumps(results), content_type='application/json')
 
 @login_required
@@ -237,7 +254,6 @@ def get_photo(request, id):
     # But someone could have delete the picture leaving the DB with a bad references.
     if not profile.picture:
         raise Http404
-
     return HttpResponse(profile.picture, content_type=profile.content_type)
 
 
@@ -265,7 +281,7 @@ def register_user_with_spotify(request):
     spotify_email = spotify_registration_form.cleaned_data['spotify_email']
     c_user.spotify_email = spotify_email
     c_user.save()
-    auth_url = c_user.create_oauth_url(scope=settings.SPOTIPY_MODIFY_PLAYBACK_SCOPE,
+    auth_url = c_user.create_oauth_url(scope=settings.SPOTIFY_SCOPE_ACCESS,
                                     client_id=settings.SPOTIPY_CLIENT_ID,
                                     client_secret=settings.SPOTIPY_CLIENT_SECRET,
                                     redirect_uri=settings.REDIRECT_AUTHENTICATION_URL)
@@ -282,27 +298,6 @@ def login_action(request):
         the django response object containing metadata about the request
     """
     context = {}
-    # try:
-    #     Profile.objects.get(pk=1)
-    #     new_user = User.objects.create_user(username=form.cleaned_data['username'], 
-    #                                     password=form.cleaned_data['password'],
-    #                                     email=form.cleaned_data['email'],
-    #                                     first_name=form.cleaned_data['first_name'],
-    #                                     last_name=form.cleaned_data['last_name'])
-    #     new_user.save()
-    #     new_user = authenticate(username=form.cleaned_data['username'], 
-    #                         password=form.cleaned_data['password'])
-    #     login(request, new_user)
-    #     new_profile = Profile(user=request.user, 
-    #                       is_dj=False,
-    #                       live=False,
-    #                       auth_token="",
-    #                       fname=request.POST['first_name'], 
-    #                       lname=request.POST['last_name'], 
-    #                       picture=None)
-    # except:
-    #     Profile
-
     #display the registration form on a GET request
     if request.method == 'GET':
         context['form'] = LoginForm()
@@ -391,7 +386,7 @@ def register_action(request):
                           name=name,
                           picture=None)
     if form.cleaned_data['spotify_email'] != "":
-        auth_url = new_profile.create_oauth_url(scope=settings.SPOTIPY_MODIFY_PLAYBACK_SCOPE,
+        auth_url = new_profile.create_oauth_url(scope=settings.SPOTIFY_SCOPE_ACCESS,
                                     client_id=settings.SPOTIPY_CLIENT_ID,
                                     client_secret=settings.SPOTIPY_CLIENT_SECRET,
                                     redirect_uri=settings.REDIRECT_AUTHENTICATION_URL)
@@ -402,9 +397,6 @@ def register_action(request):
 
 def create_stream_action(request):
     if request.method == "GET":
-        # again this should never be the case because we are
-        # getting the information from a modal so there is no
-        # get request
         return Http404
     context = {}
     stream_creation_form = CreateStreamForm(request.POST)
@@ -415,30 +407,134 @@ def create_stream_action(request):
         return render(request,'songshare/user_home.html',context)
     stream_name = stream_creation_form.cleaned_data['stream_name']
     new_stream = Stream(name=stream_name,
-                        dj=c_user)
+                        dj=c_user,
+                        is_streaming=True)
+    current_song = new_stream.get_currently_playing()
+    if current_song == None:
+        context['errors'] = [{'message':'Must currently have an active spotify session'}]
+        return render(request,'songshare/user_home.html',context)
     new_stream.save()
     c_user.is_live = True
     c_user.save()
-    context['stream'] = new_stream
-    return render(request,'songshare/stream_page.html')
+    return redirect(reverse('dj-stream',args=[c_user.id]))
+
+# do not need an id parameter because the button for ending the
+# stream will only be available to the DJ this is handled in the 
+# dj_stream action with the parameter is_stream_dj
+def end_stream_action(request):
+    if request.method == "GET":
+        return Http404
+    c_user = Profile.objects.get(user=request.user)
+    stream = get_stream(c_user.id)
+    if stream == None:
+        return Http404
+    stream.is_streaming = False
+    stream.save()
+    c_user.is_live = False
+    c_user.save()
+    return redirect(reverse('home'))
+
+def join_stream_action(request, id):
+    if request.method == "GET":
+        return Http404
+    stream = get_stream(id)
+    if stream == None:
+        return Http404
+    listener_profile = Profile.objects.get(user=request.user)
+    stream.listeners.add(listener_profile)
+    stream.save()
+    return redirect(reverse('dj-stream',args=[id]))
+
+def leave_stream_action(request, id):
+    if request.method == "GET":
+        return Http404
+    stream = get_stream(id)
+    if stream == None:
+        return Http404
+    listener_profile = Profile.objects.get(user=request.user)
+    stream.listeners.remove(listener_profile)
+    stream.save()
+    return redirect(reverse('home'))
+
+def get_currently_playing(request,id):
+    if request.method == "POST":
+        return Http404
+    stream = get_stream(id)
+    if stream == None:
+        return Http404
+    results = stream.get_currently_playing().to_json()
+    return HttpResponse(json.dumps(results), content_type='application/json')
+
+def get_recently_played(request,id):
+    if request.method == "POST":
+        return Http404
+    stream = get_stream(id)
+    if stream == None:
+        return Http404
+    results = stream.get_recently_played()
+    response = []
+    for item in results:
+        response.append(item.to_json())
+    return HttpResponse(json.dumps(response), content_type='application/json')
     
+def request_song_action(request,id,song_uri):
+    if request.method == "GET":
+        return Http404
+    stream = get_stream(id)
+    if stream == None:
+        return Http404
+    client_credentials_manager = SpotifyClientCredentials(client_id=settings.SPOTIPY_CLIENT_ID,
+                                                        client_secret=settings.SPOTIPY_CLIENT_SECRET)
+    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+    results = sp.track(song_uri)
+    requested_song = Song(artist=Song.clean_artists(results['artists']),
+                        album=results['album']['name'],
+                        name=results['name'],
+                        vote_count=0,
+                        uri=song_uri,
+                        image_url=results['album']['images'][2]['url'],
+                        request_status='pending')
+    requested_song.save()
+    stream.requested_songs.add(requested_song)
+    stream.save()
+    result = {'is_stream_dj':False, 'requested_songs':[requested_song.to_json()]}
+    return HttpResponse(json.dumps(result), content_type='application/json')
 
+def get_requested_songs(request,id):
+    if request.method == "POST":
+        return Http404
+    stream = get_stream(id)
+    is_stream_dj = stream.dj == Profile.objects.get(user=request.user)
+    if stream == None:
+        return Http404
+    results = {'is_stream_dj':is_stream_dj, 'requested_songs':[]}
+    for item in stream.requested_songs.all():
+        results['requested_songs'].append(item.to_json())
+    return HttpResponse(json.dumps(results), content_type='application/json')
 
-DUMMY_LIVEDJ ={
-    'id': 1,
-    'is_dj': True,
-    'live': True,
-    'auth_token': None,
-    'fname': 'dummy',
-    'lname': 'dj',
-    'bio': 'DUMMY',
-}
+def add_song_to_queue(request,id,song_uri):
+    if request.method == "GET":
+        return Http404
+    stream = get_stream(id)
+    is_stream_dj = stream.dj == Profile.objects.get(user=request.user)
+    if stream == None:
+        return Http404
+    song = stream.requested_songs.get(uri=song_uri)
+    stream.add_to_queue(song)
+    song.request_status = 'accepted'
+    song.save()
+    stream.save()
+    return HttpResponse(json.dumps({}), content_type='application/json')
 
-"""
-NOTE: - I think it's a good idea to seperate the current user's profile page and 
-        the profile pages of other users. The profile_page_action method redirects
-        a user to their own profile. The goto_profile method will redirect the user
-        to their own profile if they click their own link, or to other user profiles.
-        Obviously we will work on the names of the html once we decide on urls.py
-"""
-
+def remove_requested_song(request,id,song_uri):
+    if request.method == "GET":
+        return Http404
+    stream = get_stream(id)
+    is_stream_dj = stream.dj == Profile.objects.get(user=request.user)
+    if stream == None:
+        return Http404
+    song = stream.requested_songs.get(uri=song_uri)
+    song.request_status = 'rejected'
+    song.save()
+    stream.save()
+    return HttpResponse(json.dumps({}), content_type='application/json')

@@ -4,6 +4,7 @@ from django.conf import settings
 
 import spotipy.util as spotipyutil
 import spotipy.oauth2 as oauth2
+import spotipy
 
 """
 Note:
@@ -101,10 +102,28 @@ class Song(models.Model):
     """
     artist = models.CharField(max_length=200)
     album = models.CharField(max_length=200)
+    name = models.CharField(max_length=200)
     vote_count = models.IntegerField(blank=True, null=True)
     uri = models.CharField(max_length=200)
+    image_url = models.CharField(max_length=500)
+    # can take three values 'accepted','denied','pending'
+    request_status = models.CharField(max_length=10) 
+
+    @classmethod
+    def clean_artists(cls,artists):
+        result = ""
+        for i in range(0,len(artists)):
+            result += artists[i]['name']
+            if i != len(artists) - 1:
+                artists += " & "
+        return result
     def __str__(self):
         return 'Song(artist=' + str(self.artist) + ' album=' + str(self.album) + ')'
+    def to_json(self):
+        if self.request_status:
+            return {'artist':self.artist,'album':self.album,'name':self.name,
+                    'uri':self.uri,'image_url':self.image_url, 'request_status':self.request_status}
+        return {'artist':self.artist,'album':self.album,'name':self.name,'uri':self.uri,'image_url':self.image_url}
 
 # Playlist class (essential)
 class Playlist(models.Model):
@@ -199,6 +218,50 @@ class Stream(models.Model):
     name = models.CharField(max_length=256)
     dj = models.ForeignKey(Profile, default=None, on_delete=models.PROTECT)
     listeners = models.ManyToManyField(Profile, related_name="listening")
+    is_streaming = models.BooleanField(default=True)
+    requested_songs = models.ManyToManyField(Song, related_name="requested_songs")
+    
+    def get_recently_played(self):
+        sp = spotipy.Spotify(auth=self.dj.get_auth_token(scope=settings.SPOTIFY_SCOPE_ACCESS,
+                                            client_id=settings.SPOTIPY_CLIENT_ID,
+                                            client_secret=settings.SPOTIPY_CLIENT_SECRET,
+                                            redirect_uri=settings.REDIRECT_AUTHENTICATION_URL))
+        recently_played = sp.current_user_recently_played(limit=settings.RECENT_SONG_LIMIT)
+        recently_played = recently_played['items']
+        results = []
+        for song in recently_played:
+            artists = Song.clean_artists(song['track']['artists'])
+            recent_song = Song(artist=artists,
+                            album=song['track']['album']['name'],
+                            name=song['track']['name'],
+                            uri=song['track']['uri'],
+                            image_url=song['track']['album']['images'][2]['url'])
+            results.append(recent_song)
+        return results
+
+    def get_currently_playing(self):
+        sp = spotipy.Spotify(auth=self.dj.get_auth_token(scope=settings.SPOTIFY_SCOPE_ACCESS,
+                                            client_id=settings.SPOTIPY_CLIENT_ID,
+                                            client_secret=settings.SPOTIPY_CLIENT_SECRET,
+                                            redirect_uri=settings.REDIRECT_AUTHENTICATION_URL))
+        result = sp.currently_playing()
+        if result == None:
+            return None
+        result = result['item']
+        artists = Song.clean_artists(result['artists'])
+        current_song = Song(artist=artists,
+                        album=result['album']['name'],
+                        name=result['name'],
+                        uri=result['uri'],
+                        image_url=result['album']['images'][1]['url'])
+        return current_song
+    
+    def add_to_queue(self,song):
+        sp = spotipy.Spotify(auth=self.dj.get_auth_token(scope=settings.SPOTIFY_SCOPE_ACCESS,
+                                            client_id=settings.SPOTIPY_CLIENT_ID,
+                                            client_secret=settings.SPOTIPY_CLIENT_SECRET,
+                                            redirect_uri=settings.REDIRECT_AUTHENTICATION_URL))
+        sp.add_to_queue(song.uri)
 
 """
 Note:

@@ -37,38 +37,83 @@
 			{% endfor %}
 		{% endif %}
 	{% endif %}
+
+	{% if errors %}
+		{% for error in errors %}
+			<div class="ui fluid error message">
+				<i class="close icon" onclick="closeError()"></i>
+				{{error.message}}
+			</div>
+		{% endfor %}
+	{% endif %}
 {% endblock %}
 
 {% block mainpage %}
-<!-- <div class="ui vertical segement"> -->
-	<div class="main ui container">
-		<h2 class="ui dividing header">
-			<label>Recent Streams</label>
-		</h2>
-		<div>
-			<script>getRecent()</script>
-			<table id="id_recent_streams">
-			</table>
-		</div>
-		<h2 class="ui dividing header">
-				<label>Popular Streams</label>
-		</h2>
-		<div>
-			<script>getPopular()</script>
-			<table id="id_popular_streams">
-			</table>
-		</div>
+<div class="main ui container">
+	<h2 class="ui dividing header">
+		<label>Recent Streams</label>
+	</h2>
+	<div>
+		<script>getRecent()</script>
+		<table id="id_recent_streams">
+		</table>
+	</div>
+	<h2 class="ui dividing header">
+			<label>Popular Streams</label>
+	</h2>
+	<div>
+		<script>getPopular()</script>
+		<table id="id_popular_streams">
+		</table>
+	</div>
 
-		<h2 class="ui dividing header">
-			<label>Favorite Streams</label>
-		</h2>
-		<div>
-			<script>getFavorite()</script>
-			<table id="id_favorite_streams">
-			</table>
+	<h2 class="ui dividing header">
+		<label>Currently Streaming</label>
+	</h2>
+	{% for stream in streams %}
+	<div class="ui grid">
+		<div class="four wide column">
+			<div class="ui card">
+				<div class="content">
+					<span class="header" href="#">{{stream.name}}</span>
+					{% if c_user.picture %}
+					<img src="{% url 'photo' profile.id %}"  style="height: 64px; width: 64px;">
+					{% else %}
+					<img src="https://cdn1.iconfinder.com/data/icons/user-pictures/100/unknown-512.png"  style="height: 64px; width: 64px;">
+					{% endif %}
+					<br><br>
+					<div class="meta">
+						<span>Hosted by <a href="{% url 'profile-view' stream.dj.id %}">DJ {{stream.dj.user.username}}</a></span>
+					</div>
+					<div class="meta">
+						<i class="users icon"></i>
+						<span>{{stream.listeners.count}} listeners</span>
+					</div>
+					{% if not c_user == stream.dj %}
+						{% if c_user in stream.listeners.all %}
+							<a class="fluid positive ui button" href="{% url 'dj-stream' stream.dj.id %}">
+								<i class="spotify icon"></i>
+								Go To Stream
+							</a>
+						{% else %}
+							<form method="POST" action="{% url 'join-stream' stream.dj.id %}">
+								<button class="fluid positive ui button">
+									<i class="spotify icon"></i>
+									Join Stream
+								</button>
+								{% csrf_token %}
+							</form>
+						{% endif %}
+					{% else %}
+					<!-- maybe add something here for the DJ but not neccessary -->
+					{% endif %}
+				</div>
+			</div>
 		</div>
 	</div>
-<!-- </div> -->
+	{% endfor %}
+</div>
+
 <div class="ui modal register-spotify">
 	<i class="close icon"></i>
 	<div class="header">

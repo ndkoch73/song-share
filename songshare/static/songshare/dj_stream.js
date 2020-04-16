@@ -1,0 +1,311 @@
+function search_for_song(){
+    search_query = $("#song_search_input").val()
+    if(search_query == ""){
+        return;
+    }
+    $("#song_search_input").val('')
+    $.ajax({
+        url: "/songshare/song-search/"+encodeURIComponent(search_query),
+        type: "POST",
+        data: "csrfmiddlewaretoken="+getCSRFToken(),
+        dataType: "json",
+        success: add_searched_songs,
+        error: function(response){
+            console.log(response);
+        }
+    });
+}
+
+function get_currently_playing(){
+    $.ajax({
+        url: window.location.pathname + "/get-currently-playing",
+        type: "GET",
+        data: "csrfmiddlewaretoken="+getCSRFToken(),
+        dataType: "json",
+        success: add_currently_playing,
+        error: function(response){
+            console.log(response)
+        }
+    });
+}
+
+function get_recently_played(){
+    $.ajax({
+        url: window.location.pathname + "/get-recently-played",
+        type: "GET",
+        data: "csrfmiddlewaretoken="+getCSRFToken(),
+        dataType: "json",
+        success: add_recently_played,
+        error: function(response){
+            console.log(response)
+        }
+    });
+}
+
+function add_song_to_queue(song_uri){
+    $.ajax({
+        url: window.location.pathname + "/add-to-queue/" + encodeURIComponent(song_uri),
+        type: "POST",
+        data: "csrfmiddlewaretoken="+getCSRFToken(),
+        dataType: "json",
+        success: get_requested_songs,
+        error: function(response){
+            console.log(response)
+        }
+    });
+}
+
+function deny_song(song_uri){
+    $.ajax({
+        url: window.location.pathname + "/remove-requested-song/" + encodeURIComponent(song_uri),
+        type: "POST",
+        data: "csrfmiddlewaretoken="+getCSRFToken(),
+        dataType: "json",
+        success: get_requested_songs,
+        error: function(response){
+            console.log(response)
+        }
+    });
+}
+
+function add_recently_played(response){
+    var t = $('#recently_played_container').html().split('<div class="ui segment">');
+    t = t.slice(1,t.length)
+    current_songs_html = ""
+    $(t).each(function(){
+        current_songs_html += '<div class="ui segment">' + this;
+    });
+    new_songs_html = ""
+    $(response).each(function(){
+        new_songs_html += get_recently_played_html(this);
+    });
+    if (new_songs_html != current_songs_html){
+        $('#recently_played_container').empty();
+        $('#recently_played_container').html(new_songs_html)
+    }
+}
+
+function get_recently_played_html(song){
+    return  '<div class="ui segment">' + 
+                '<div style="display: flex;flex-direction: row;">' + 
+                    '<div class="ui small image">' + 
+                        '<img src="'+ song.image_url + '">' + 
+                    '</div>' + 
+                    '<div class="segment left aligned" style="align-items: flex-end;">' + 
+                        '<div class="ui header">' +
+                            song.name +
+                            '<div class="sub header">' + song.album +
+                                '<br>' + 
+                                song.artist +
+                            '</div>' + 
+                        '</div>' +
+                    '</div>' +
+                '</div>' + 
+            '</div>'
+}
+
+function add_currently_playing(response){
+    var currently_playing_html = get_currently_playing_html(response)
+    if (currently_playing_html != $('#currently_playing_container').html()){
+        $('#currently_playing_container').empty()
+        $('#currently_playing_container').html(currently_playing_html);
+    }
+}
+
+function request_song(song_uri){
+    $.ajax({
+        url: window.location.pathname + "/request-song/" + encodeURIComponent(song_uri),
+        type: "POST",
+        data: "csrfmiddlewaretoken="+getCSRFToken(),
+        dataType: "json",
+        success: add_requested_song,
+        error: function(response){
+            console.log(response)
+        }
+    });
+}
+
+function get_requested_songs(){
+    $.ajax({
+        url: window.location.pathname + "/get-requested-songs",
+        type: "GET",
+        data: "csrfmiddlewaretoken="+getCSRFToken(),
+        dataType: "json",
+        success: add_requested_song,
+        error: function(response){
+            console.log(response)
+        }
+    });
+}
+
+function add_requested_song(response){
+    var current_requested_html = $('#requested_songs_container').html();
+    var new_requested_html = ""
+    var is_stream_dj = response['is_stream_dj']
+    $(response['requested_songs']).each(function(){
+        new_requested_html += get_requested_song_html(this,is_stream_dj)
+    });
+    if(current_requested_html != new_requested_html){
+        $('#requested_songs_container').empty()
+        $('#requested_songs_container').html(new_requested_html)
+    }
+}
+
+function get_requested_song_html(song,is_stream_dj){
+    if(song.request_status == 'accepted'){
+        button_status_html = `
+                    <div class="center aligned column">` +
+                        '<button class="disabled circular ui green button" style="opacity: 1 !important"><i class="check icon"></i>Accept</button>' +
+                        '<button class="disabled circular ui red button"><i class="close icon"></i>Deny</button>' +
+                    `</div>
+                </div>
+            </div>
+            `
+        status_label_html = '<span class="ui green right corner label"><i class="check icon"></i></span>'
+    } else if(song.request_status == 'rejected'){
+        button_status_html = `
+                    <div class="center aligned column">` +
+                    '<button class="disabled circular ui green button"><i class="check icon"></i>Accept</button>' +
+                    '<button class="disabled circular ui red button" style="opacity: 1 !important"><i class="close icon"></i>Deny</button>' +
+                `</div>
+            </div>
+        </div>    
+        `
+        status_label_html = '<span class="ui red right corner label"><i class="close icon"></i></span>'
+    } else {
+        button_status_html = `
+                    <div class="center aligned column">` +
+                    '<button class="circular ui green button" ' + 
+                        'onclick="add_song_to_queue(' + "'" + song.uri + "'" + ')"><i class="check icon"></i>Accept</button>' +
+                    '<button class="circular ui red button" ' + 
+                        'onclick="deny_song(' + "'" + song.uri + "'" + ')"><i class="close icon"></i>Deny</button>' +
+                `</div>
+            </div>
+        </div>
+        `
+        status_label_html = '<span class="ui grey right corner label"><i class="hourglass half icon"></i></span>'
+    }
+    if(!is_stream_dj){
+        return `
+                <div class="ui raised segment">` + 
+                    status_label_html + 
+                    `<div class="ui two column stackable grid">
+                        <div class="three wide column"> ` + 
+                            '<div class="ui image">' + 
+                                '<img src="'+ song.image_url + '">' + 
+                            '</div>' +     
+                        `</div>
+                        <div class="twelve wide column">` + 
+                            '<div class="ui header">' +
+                                song.name +
+                                '<div class="sub header">' + song.album +
+                                    '<br>' + 
+                                    song.artist +
+                                '</div>' + 
+                            '</div>' +
+                        `</div>
+                    </div>
+                </div>
+        `
+    } else {
+        main_html = `
+                    <div class="ui segment">
+                        <div class="ui three column stackable grid">
+                            <div class="two wide column"> ` + 
+                                '<div class="ui small image">' + 
+                                    '<img src="'+ song.image_url + '">' + 
+                                '</div>' +     
+                            `</div>
+                            <div class="eight wide column">` + 
+                                '<div class="ui header">' +
+                                    song.name +
+                                    '<div class="sub header">' + song.album +
+                                        '<br>' + 
+                                        song.artist +
+                                    '</div>' + 
+                                '</div>' +
+                            '</div>' + 
+                            button_status_html
+        return main_html
+    }
+}
+
+function clear_search(){
+    $('#searched_songs_container').empty();
+}
+
+function add_searched_songs(response){
+    $('#searched_songs_container').empty();
+    $(response).each(function(){
+        searched_song_container_id = '#searched_songs_container';
+        song_html = get_searched_song_html(this);
+        $(searched_song_container_id).append(song_html);
+    });
+}
+
+function get_currently_playing_html(song){
+    return  '<div class="ui card">' + 
+                '<div class="ui image">' + 
+                    '<img src="' + song.image_url + '">' +
+                '</div>' + 
+                '<div class="content">' + 
+                    '<div class="header">' + song.name + '</div>' + 
+                    '<div class="meta">' + 
+                        '<span>'+ song.album + '</span>' + 
+                        '<br>' + 
+                        '<span>'+ song.artist + '</span>' + 
+                    '</div>' + 
+                '</div>' + 
+            '</div>'
+}
+
+function get_searched_song_html(searched_song){
+    artists = ""
+    for(var i = 0; i < searched_song.artists.length; i++){
+        artists += searched_song.artists[i].name;
+        if(i != searched_song.artists.length - 1){
+            artists += ' & ';
+        }
+    }
+    return  '<div class="ui fluid card">' + 
+                '<div style="display: flex;flex-direction: row;">' + 
+                    '<div class="ui small image">' + 
+                        '<img src="' + searched_song.album.images[2].url + '">' +
+                    '</div>' + 
+                    '<div class="segment left aligned">' + 
+                        '<div class="ui small header" style="padding-top: 3%;">' + 
+                            searched_song.name + 
+                            '<div class="sub header">' + searched_song.album.name + 
+                            '<br>' + 
+                            artists + 
+                        '</div>' + 
+                    '</div>' +
+                '</div>' +
+            '</div>' + 
+            '<div class="ui bottom attached button" onclick="request_song(' + "'" + searched_song.uri + "'" + ')">' + 
+                '<i class="add icon"></i>' + 
+                'Request Song' + 
+            '</div>'
+}
+
+function getCSRFToken() {
+    var cookies = document.cookie.split(";");
+    for (var i = 0; i < cookies.length; i++) {
+        c = cookies[i].trim();
+        if (c.startsWith("csrftoken=")) {
+            return c.substring("csrftoken=".length, c.length);
+        }
+    }
+    return "unknown";
+}
+
+function refresh_songs(){
+    get_currently_playing()
+    get_recently_played()
+    get_requested_songs()
+}
+
+window.onload = refresh_songs;
+window.setInterval(get_currently_playing, 10*1000);
+window.setInterval(get_recently_played,15*1000)
+window.setInterval(get_requested_songs,5*1000)

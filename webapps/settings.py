@@ -131,8 +131,11 @@ SPOTIPY_CLIENT_ID = '4f8a77d7836949868c6487a0142d28d2'
 
 SPOTIPY_CLIENT_SECRET = '63135bafa188430991566a01dac77e26'
 
+RECENT_SONG_LIMIT = 7
+
 # different scopes that we will be requesting from the user
-SPOTIPY_MODIFY_PLAYBACK_SCOPE = 'user-modify-playback-state'
+SPOTIFY_SCOPE_ACCESS = 'user-modify-playback-state' + ' ' + 'user-read-currently-playing' + \
+    ' ' + 'user-read-recently-played'
 
 # different urls for redirections
 REDIRECT_HOME_URL = 'http://localhost:8000/songshare/home'
