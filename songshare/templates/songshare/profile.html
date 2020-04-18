@@ -47,6 +47,7 @@
                   {% elif c_user.is_dj == True and c_user.is_live == False  %}
                     <button class="ui green submit button" id="id_start_new_stream_button"> 
                       <a href="{% url 'dj-stream' %}"> <span style="color:black;">Start New Stream</span></a>
+
                     </button>
                   {% else %}
                   <button class="ui green submit button" id="id_link_song_share_button"> 
