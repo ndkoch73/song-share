@@ -490,12 +490,11 @@ def request_song_action(request,id,song_uri):
     requested_song = Song(artist=Song.clean_artists(results['artists']),
                         album=results['album']['name'],
                         name=results['name'],
-                        vote_count=0,
                         uri=song_uri,
                         image_url=results['album']['images'][2]['url'],
-                        request_status='pending')
+                        request_status='pending',
+                        parent=stream)
     requested_song.save()
-    stream.requested_songs.add(requested_song)
     stream.save()
     result = {'is_stream_dj':False, 'requested_songs':[requested_song.to_json()]}
     return HttpResponse(json.dumps(result), content_type='application/json')
@@ -538,3 +537,43 @@ def remove_requested_song(request,id,song_uri):
     song.save()
     stream.save()
     return HttpResponse(json.dumps({}), content_type='application/json')
+
+@login_required
+def vote(request):
+    # check that the correct parameters have been sent
+    if request.method != 'POST' or ('song' not in request.POST):
+        return redirect(reverse("home"))
+
+    # This checks whether the song is in the stream. Note: each song has only one parent playlist
+    song = Song.objects.filter(id=request.POST['song'])
+    if not song.exists():
+        raise Http404 
+    song = song[0]
+
+    # get the stream
+    stream = song.parent
+
+    # add to voters list
+    song.voters.add(request.user.profile_set.all()[0])
+
+    return redirect(reverse("dj-stream", args=[stream.id]))
+
+@login_required
+def unvote(request):
+    # check that the correct parameters have been sent
+    if request.method != 'POST' or ('song' not in request.POST):
+        return redirect(reverse("home"))
+
+    # This checks whether the song is in the stream. Note: each song has only one parent playlist
+    song = Song.objects.filter(id=request.POST['song'])
+    if not song.exists():
+        raise Http404 
+    song = song[0]
+
+    # get the stream
+    stream = song.parent
+
+    # remove from voters list
+    song[0].voters.remove(request.user.profile_set[0])
+
+    return redirect(reverse("dj-stream", args=[stream.id]))

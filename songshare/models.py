@@ -82,48 +82,6 @@ class Profile(models.Model):
         else:
             return None
 
-# Song class (essential)
-class Song(models.Model):
-    """
-    A class used to encapsulate a song provided by Spotify API
-    ...
-    Attributes
-    ----------
-    artist : models.CharField
-        the artist of the song (might need an additional field to reference
-        an artist profile via uri)
-    album : models.CharField
-        the album of the song (might need an additional field to reference
-        an album profile via uri)
-    vote_count : models.IntegerField
-        vote count for the song
-    uri : models.CharField
-        reference to the song provided by the Spotify API
-    """
-    artist = models.CharField(max_length=200)
-    album = models.CharField(max_length=200)
-    name = models.CharField(max_length=200)
-    vote_count = models.IntegerField(blank=True, null=True)
-    uri = models.CharField(max_length=200)
-    image_url = models.CharField(max_length=500)
-    # can take three values 'accepted','denied','pending'
-    request_status = models.CharField(max_length=10) 
-
-    @classmethod
-    def clean_artists(cls,artists):
-        result = ""
-        for i in range(0,len(artists)):
-            result += artists[i]['name']
-            if i != len(artists) - 1:
-                artists += " & "
-        return result
-    def __str__(self):
-        return 'Song(artist=' + str(self.artist) + ' album=' + str(self.album) + ')'
-    def to_json(self):
-        if self.request_status:
-            return {'artist':self.artist,'album':self.album,'name':self.name,
-                    'uri':self.uri,'image_url':self.image_url, 'request_status':self.request_status}
-        return {'artist':self.artist,'album':self.album,'name':self.name,'uri':self.uri,'image_url':self.image_url}
 
 # Playlist class (essential)
 class Playlist(models.Model):
@@ -219,7 +177,6 @@ class Stream(models.Model):
     dj = models.ForeignKey(Profile, default=None, on_delete=models.PROTECT)
     listeners = models.ManyToManyField(Profile, related_name="listening")
     is_streaming = models.BooleanField(default=True)
-    requested_songs = models.ManyToManyField(Song, related_name="requested_songs")
     
     def get_recently_played(self):
         sp = spotipy.Spotify(auth=self.dj.get_auth_token(scope=settings.SPOTIFY_SCOPE_ACCESS,
@@ -262,6 +219,51 @@ class Stream(models.Model):
                                             client_secret=settings.SPOTIPY_CLIENT_SECRET,
                                             redirect_uri=settings.REDIRECT_AUTHENTICATION_URL))
         sp.add_to_queue(song.uri)
+
+# Song class (essential)
+class Song(models.Model):
+    """
+    A class used to encapsulate a song provided by Spotify API
+    ...
+    Attributes
+    ----------
+    artist : models.CharField
+        the artist of the song (might need an additional field to reference
+        an artist profile via uri)
+    album : models.CharField
+        the album of the song (might need an additional field to reference
+        an album profile via uri)
+    vote_count : models.IntegerField
+        vote count for the song
+    uri : models.CharField
+        reference to the song provided by the Spotify API
+    """
+    artist = models.CharField(max_length=200)
+    album = models.CharField(max_length=200)
+    name = models.CharField(max_length=200)
+    voters = models.ManyToManyField(Profile)
+    uri = models.CharField(max_length=200)
+    image_url = models.CharField(max_length=500)
+    # can take three values 'accepted','denied','pending'
+    request_status = models.CharField(max_length=10) 
+    parent = models.ForeignKey(Stream, on_delete=models.CASCADE, related_name="requested_songs")
+
+    @classmethod
+    def clean_artists(cls,artists):
+        result = ""
+        for i in range(0,len(artists)):
+            result += artists[i]['name']
+            if i != len(artists) - 1:
+                artists += " & "
+        return result
+    def __str__(self):
+        return 'Song(artist=' + str(self.artist) + ' album=' + str(self.album) + ')'
+    def to_json(self):
+        if self.request_status:
+            return {'artist':self.artist,'album':self.album,'name':self.name,
+                    'uri':self.uri,'image_url':self.image_url, 'request_status':self.request_status}
+        return {'artist':self.artist,'album':self.album,'name':self.name,'uri':self.uri,'image_url':self.image_url}
+
 
 """
 Note:
