@@ -24,6 +24,17 @@ from songshare.models import *
 
 import json
 
+
+# Search functionaily testing
+from difflib import SequenceMatcher
+
+from django.db.models import Q
+from functools import reduce # Needed only in python 3
+from operator import or_
+
+
+
+
 @login_required
 def home_page(request):
     context = {}
@@ -227,27 +238,40 @@ def dj_stream_action(request):
 
     return render(request,'songshare/stream_page.html',context)
 
+
+
+
+
+def create_query(fulltext):
+    profile_names = Profile.objects.values_list('name', flat=True)
+
+    query = []
+    THRESHOLD = 0.25
+    for name in profile_names:
+        score = SequenceMatcher(None, name, fulltext).ratio()
+        if score == 1:
+            # Perfect Match for name
+            return [Q(name=name)]
+        if score >= THRESHOLD:
+            query.append(Q(name=name))
+
+    return query
+
+
 def dj_search(request):
     context = {}
     c_user = Profile.objects.get(user=request.user)
     context['c_user'] = c_user
-
     if request.method == "GET":
         return render(request, 'songshare/dj_search.html', context)
     else:
         # print(request.POST)
         search = request.POST['search']
         print(search)
-        print(search_alo(search))
         context['search']=  search
-        context['djs'] = Profile.objects.filter(name__startswith=search)
-        # try: 
-        #     print("hit")
-        #     similarity = Profile.objects.annotate(similarity=TrigramSimilarity('name', search),).filter(similarity__gt=0.1).order_by('-similarity')
-        #     print("hit")
-        #     # context['djs'] = similarity
-        # except:
-        #     print("whoops")
+        queryset = Profile.objects.filter(reduce(or_, create_query(search)))
+        context['djs']= queryset
+        print(queryset)
         
         return render(request, 'songshare/dj_search.html', context)
     

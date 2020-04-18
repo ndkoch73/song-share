@@ -20,14 +20,14 @@
                     </button>
                     {% csrf_token %}
                     </form>
-                    <div class="results" id="id_dj_search">
+                    <div class="results" id="id_dj_search_results">
                     
                     </div>
                 </div>
             </div>
         </div>
         {% for dj in djs %}
-        <div class="row">
+        <div class="row" id=>
             <div class="col" >
                 <div class="segment">
                     <label id="id_name"> {{dj.fname}} {{dj.lname}}</label>
