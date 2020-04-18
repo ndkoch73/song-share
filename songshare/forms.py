@@ -5,7 +5,6 @@ from django.conf import settings
 from django.core.validators import validate_email
 
 from songshare.models import Profile
-from songshare.models import Playlist
 from songshare.models import Stream
 
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -100,21 +99,6 @@ class RegistrationForm(forms.Form):
 class ProfilePictureForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ( 'picture',)
-
-    def clean_picture(self):
-        picture = self.cleaned_data['picture']
-        if not picture:
-            raise forms.ValidationError('You must upload a picture')
-        if not picture.content_type or not picture.content_type.startswith('image'):
-            raise forms.ValidationError('File type is not image')
-        if picture.size > MAX_UPLOAD_SIZE:
-            raise forms.ValidationError('File too big (max size is {0} bytes)'.format(MAX_UPLOAD_SIZE))
-        return picture
-
-class PlaylistPictureForm(forms.ModelForm):
-    class Meta:
-        model = Playlist
         fields = ( 'picture',)
 
     def clean_picture(self):
