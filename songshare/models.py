@@ -83,39 +83,6 @@ class Profile(models.Model):
             return None
 
 
-# Playlist class (essential)
-class Playlist(models.Model):
-    """
-    A class used to represent a user Playlist created using songshare app
-    ...
-    Attributes
-    ----------
-    user : models.ForeignKey(User)
-        the owner of the playlist
-    profile : models.ForeignKey(Profile)
-        reference to the playlist owner's profile for a user to view
-    songs : models.ForeignKey(Song)
-        the songs in the playlist
-    bio : models.CharField
-        a playlist should have a description (maybe?)
-    followers : models.ManyToManyField(Profile)
-        the followers of the playlist used to reference their profile
-    picture : models.FileField(blank=True)
-        the playlist's picture
-    content_type: models.CharField
-        used to verify that the user's profile picture is indeed a picture
-    """
-    user = models.ForeignKey(User, default=None, on_delete=models.PROTECT)
-    profile = models.ForeignKey(Profile, default=None, on_delete=models.PROTECT)
-    songs = models.ForeignKey(Song, default=None, on_delete=models.PROTECT)
-    picture = models.FileField(blank=True)
-    bio = models.CharField(max_length=200)
-    content_type = models.CharField(max_length=50, blank=True)
-
-    def __str__(self):
-        return 'Playlist(user=' + str(self.user) + ' songs=' + str(self.songs) + ')'
-
-
 # Post Model (optional for now)
 class Post(models.Model):
     """
