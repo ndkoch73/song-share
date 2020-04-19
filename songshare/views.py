@@ -186,7 +186,7 @@ def clear_stream_action(request):
 
 def get_stream(id):
     stream = Stream.objects.all().filter(dj=Profile.objects.get(pk=id),is_streaming=True)
-    if stream == None:
+    if not stream.exists():
         return None
     return stream[0]
 
@@ -477,6 +477,7 @@ def get_recently_played(request,id):
         response.append(item.to_json())
     return HttpResponse(json.dumps(response), content_type='application/json')
     
+@login_required
 def request_song_action(request,id,song_uri):
     if request.method == "GET":
         return Http404
@@ -495,10 +496,12 @@ def request_song_action(request,id,song_uri):
                         request_status='pending',
                         parent=stream)
     requested_song.save()
+    requested_song.voters.add(request.user.profile_set.all()[0])
     stream.save()
     result = {'is_stream_dj':False, 'requested_songs':[requested_song.to_json()]}
     return HttpResponse(json.dumps(result), content_type='application/json')
 
+@login_required
 def get_requested_songs(request,id):
     if request.method == "POST":
         return Http404
@@ -508,9 +511,10 @@ def get_requested_songs(request,id):
         return Http404
     results = {'is_stream_dj':is_stream_dj, 'requested_songs':[]}
     for item in stream.requested_songs.all():
-        results['requested_songs'].append(item.to_json())
+        results['requested_songs'].append(item.to_json(request))
     return HttpResponse(json.dumps(results), content_type='application/json')
 
+@login_required
 def add_song_to_queue(request,id,song_uri):
     if request.method == "GET":
         return Http404
