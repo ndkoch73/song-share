@@ -546,7 +546,7 @@ def remove_requested_song(request,id,song_uri):
 def vote(request):
     # check that the correct parameters have been sent
     if request.method != 'POST' or ('song' not in request.POST):
-        return redirect(reverse("home"))
+        return HttpResponse(json.dumps({"success":False}), content_type='application/json')
 
     # This checks whether the song is in the stream. Note: each song has only one parent playlist
     song = Song.objects.filter(id=request.POST['song'])
@@ -560,13 +560,13 @@ def vote(request):
     # add to voters list
     song.voters.add(request.user.profile_set.all()[0])
 
-    return redirect(reverse("dj-stream", args=[stream.id]))
+    return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
 
 @login_required
 def unvote(request):
     # check that the correct parameters have been sent
     if request.method != 'POST' or ('song' not in request.POST):
-        return redirect(reverse("home"))
+        return HttpResponse(json.dumps({"success":False}), content_type='application/json')
 
     # This checks whether the song is in the stream. Note: each song has only one parent playlist
     song = Song.objects.filter(id=request.POST['song'])
@@ -580,4 +580,4 @@ def unvote(request):
     # remove from voters list
     song[0].voters.remove(request.user.profile_set[0])
 
-    return redirect(reverse("dj-stream", args=[stream.id]))
+    return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')

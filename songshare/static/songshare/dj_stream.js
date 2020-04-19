@@ -128,15 +128,23 @@ function request_song(song_uri){
 function vote(song_id){
     $.post(
         "/songshare/vote",
-        {csrfmiddlewaretoken:getCSRFToken(), song:song_id}
+        {csrfmiddlewaretoken:getCSRFToken(), song:song_id},
+        update_votes
     );
 }
 
 function unvote(song_id){
     $.post(
         "/songshare/unvote",
-        {csrfmiddlewaretoken:getCSRFToken(), song:song_id}
+        {csrfmiddlewaretoken:getCSRFToken(), song:song_id},
+        update_votes
     );
+}
+
+function update_votes(response){
+    if(response.success){
+        $("#votes_" + response.song).html(response.votes + " votes");
+    }
 }
 
 function get_requested_songs(){
