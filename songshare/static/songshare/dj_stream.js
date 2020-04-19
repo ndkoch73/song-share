@@ -143,7 +143,7 @@ function unvote(song_id){
 
 function update_votes(response){
     if(response.success){
-        $("#votes_" + response.song).html(response.votes + " votes");
+        $("#song_" + response.song.toString() + "_vote_count").html(response.votes.toString());
     }
 }
 
