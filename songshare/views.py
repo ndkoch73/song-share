@@ -555,7 +555,8 @@ def vote(request):
     song = song[0]
 
     # add to voters list
-    song.voters.add(request.user.profile_set.all()[0])
+    if song.request_status != 'denied':
+        song.voters.add(request.user.profile_set.all()[0])
 
     return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
 
@@ -572,6 +573,7 @@ def unvote(request):
     song = song[0]
 
     # remove from voters list
-    song.voters.remove(request.user.profile_set[0])
+    if song.request_status != 'denied':
+        song.voters.remove(request.user.profile_set.all()[0])
 
     return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
