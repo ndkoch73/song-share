@@ -153,25 +153,29 @@ function add_requested_song(response){
 
 function votes_html(song,is_stream_dj){
     if(is_stream_dj){
-        return '<div class="three wide column">\n<div class="sub header">' + song.votes.toString() + '</div>\n</div>'
+        return '<div class="ui floating blue circular label" id="song_' + song.id + '_vote_count">' + song.votes + '</div>'
     }
 
     if(!song.user_has_voted){
-        button = '<button class="circular ui green button" ' + 
-                 'onclick=""><i class="check icon"></i>Vote</button>'
+        button = `  <button class="blue circular mini ui icon button" onclick="vote(` + song.id + `)">
+                        <i class="thumbs up icon"></i>
+                    </button>
+                `
     }
     else {
-        button = '<button class="circular ui green button" ' + 
-                 'onclick=""><i class="close icon"></i>Unvote</button>'
+        button = `  <button class="blue active circular mini ui icon button" onclick="unvote(`+ song.id +`)">
+                        <i class="thumbs up icon"></i>
+                    </button>
+                `
     }
-    
-    return '<div class="three wide column">\n<div class="sub header">' + song.votes.toString() + '</div>' + button + '\n</div>'
+    return '<div class="ui floating blue circular label" id="song_' + song.id + '_vote_count">' + song.votes + '</div>' + 
+            '<div class="ui bottom right attached label" style="background-color: transparent;">' + button + '</div>'
 }
 
 function get_requested_song_html(song,is_stream_dj){
     if(song.request_status == 'accepted'){
         button_status_html = `
-                    <div class="center aligned column">` +
+                    <div class="six wide right aligned column">` +
                         '<button class="disabled circular ui green button" style="opacity: 1 !important"><i class="check icon"></i>Accept</button>' +
                         '<button class="disabled circular ui red button"><i class="close icon"></i>Deny</button>' +
                     `</div>
@@ -181,7 +185,7 @@ function get_requested_song_html(song,is_stream_dj){
         status_label_html = '<span class="ui green right corner label"><i class="check icon"></i></span>'
     } else if(song.request_status == 'rejected'){
         button_status_html = `
-                    <div class="center aligned column">` +
+                    <div class="six wide right aligned column">` +
                     '<button class="disabled circular ui green button"><i class="check icon"></i>Accept</button>' +
                     '<button class="disabled circular ui red button" style="opacity: 1 !important"><i class="close icon"></i>Deny</button>' +
                 `</div>
@@ -191,7 +195,7 @@ function get_requested_song_html(song,is_stream_dj){
         status_label_html = '<span class="ui red right corner label"><i class="close icon"></i></span>'
     } else {
         button_status_html = `
-                    <div class="center aligned column">` +
+                    <div class="six wide right aligned column">` +
                     '<button class="circular ui green button" ' + 
                         'onclick="add_song_to_queue(' + "'" + song.uri + "'" + ')"><i class="check icon"></i>Accept</button>' +
                     '<button class="circular ui red button" ' + 
@@ -206,13 +210,14 @@ function get_requested_song_html(song,is_stream_dj){
         return `
                 <div class="ui raised segment">` + 
                     status_label_html + 
+                    votes_html(song,is_stream_dj) + 
                     `<div class="ui three column stackable grid">
                         <div class="three wide column"> ` + 
                             '<div class="ui image">' + 
                                 '<img src="'+ song.image_url + '">' + 
                             '</div>' +     
                         `</div>
-                        <div class="twelve wide column">` + 
+                        <div class="nine wide column">` + 
                             '<div class="ui header">' +
                                 song.name +
                                 '<div class="sub header">' + song.album +
@@ -221,14 +226,14 @@ function get_requested_song_html(song,is_stream_dj){
                                 '</div>' + 
                             '</div>' +
                         '</div>' + 
-                        votes_html(song,is_stream_dj) +
                     `</div>
                 </div>
         `
     } else {
         main_html = `
-                    <div class="ui segment">
-                        <div class="ui four column stackable grid">
+                    <div class="ui raised segment"> ` + 
+                        votes_html(song,is_stream_dj) + 
+                        `<div class="ui four column stackable grid">
                             <div class="two wide column"> ` + 
                                 '<div class="ui small image">' + 
                                     '<img src="'+ song.image_url + '">' + 
@@ -243,7 +248,6 @@ function get_requested_song_html(song,is_stream_dj){
                                     '</div>' + 
                                 '</div>' +
                             '</div>' + 
-                            votes_html(song,is_stream_dj) + 
                             button_status_html
         return main_html
     }
