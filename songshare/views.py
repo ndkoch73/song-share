@@ -585,3 +585,7 @@ def remove_requested_song(request,id,song_uri):
     song.save()
     stream.save()
     return HttpResponse(json.dumps({}), content_type='application/json')
+
+def get_currently_streaming(request):
+    if request.method == "POST":
+        return Http404

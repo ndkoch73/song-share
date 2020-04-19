@@ -69,29 +69,27 @@ function deny_song(song_uri){
 }
 
 function add_recently_played(response){
-    var t = $('#recently_played_container').html().split('<div class="ui segment">');
-    t = t.slice(1,t.length)
-    current_songs_html = ""
-    $(t).each(function(){
-        current_songs_html += '<div class="ui segment">' + this;
-    });
-    new_songs_html = ""
+    var previously_played_html = $('#recently_played_container').html()
+    new_recently_played_html = ""
     $(response).each(function(){
-        new_songs_html += get_recently_played_html(this);
+        new_recently_played_html += get_recently_played_html(this);
     });
-    if (new_songs_html != current_songs_html){
+    previously_played_html = previously_played_html.replace(/\amp;/g,"")
+    if(previously_played_html != new_recently_played_html){
         $('#recently_played_container').empty();
-        $('#recently_played_container').html(new_songs_html)
+        $('#recently_played_container').html(new_recently_played_html)
     }
 }
 
 function get_recently_played_html(song){
-    return  '<div class="ui segment">' + 
-                '<div style="display: flex;flex-direction: row;">' + 
-                    '<div class="ui small image">' + 
-                        '<img src="'+ song.image_url + '">' + 
-                    '</div>' + 
-                    '<div class="segment left aligned" style="align-items: flex-end;">' + 
+    return `<div class="ui raised segment">` +
+                `<div class="ui two column stackable grid">
+                    <div class="three wide column"> ` + 
+                        '<div class="ui image">' + 
+                            '<img src="'+ song.image_url + '">' + 
+                        '</div>' +     
+                    `</div>
+                    <div class="twelve wide column">` + 
                         '<div class="ui header">' +
                             song.name +
                             '<div class="sub header">' + song.album +
@@ -99,14 +97,16 @@ function get_recently_played_html(song){
                                 song.artist +
                             '</div>' + 
                         '</div>' +
-                    '</div>' +
-                '</div>' + 
-            '</div>'
+                    `</div>
+                </div>
+            </div>`
 }
 
 function add_currently_playing(response){
     var currently_playing_html = get_currently_playing_html(response)
-    if (currently_playing_html != $('#currently_playing_container').html()){
+    var recent_currently_playing_html = $('#currently_playing_container').html()
+    recent_currently_playing_html = recent_currently_playing_html.replace(/\amp;/g,"")
+    if (currently_playing_html != recent_currently_playing_html){
         $('#currently_playing_container').empty()
         $('#currently_playing_container').html(currently_playing_html);
     }
@@ -131,7 +131,7 @@ function get_requested_songs(){
         type: "GET",
         data: "csrfmiddlewaretoken="+getCSRFToken(),
         dataType: "json",
-        success: add_requested_song,
+        success: update_requested_songs,
         error: function(response){
             console.log(response)
         }
@@ -139,12 +139,19 @@ function get_requested_songs(){
 }
 
 function add_requested_song(response){
+    var is_stream_dj = response['is_stream_dj']
+    new_requested_html = get_requested_song_html(response['requested_songs'][0],is_stream_dj)
+    $('#requested_songs_container').append(new_requested_html)
+}
+
+function update_requested_songs(response){
     var current_requested_html = $('#requested_songs_container').html();
     var new_requested_html = ""
     var is_stream_dj = response['is_stream_dj']
     $(response['requested_songs']).each(function(){
         new_requested_html += get_requested_song_html(this,is_stream_dj)
     });
+    current_requested_html = current_requested_html.replace(/\amp;/g,"")
     if(current_requested_html != new_requested_html){
         $('#requested_songs_container').empty()
         $('#requested_songs_container').html(new_requested_html)
