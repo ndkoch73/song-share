@@ -127,14 +127,14 @@ function request_song(song_uri){
 
 function vote(song_uri){
     $.post(
-        "vote",
+        "/songshare/vote",
         {csrfmiddlewaretoken:getCSRFToken(), song:song_uri}
     );
 }
 
 function unvote(song_uri){
     $.post(
-        "unvote",
+        "/songshare/unvote",
         {csrfmiddlewaretoken:getCSRFToken(), song:song_uri}
     );
 }
