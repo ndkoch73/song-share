@@ -125,11 +125,3 @@ function djSearch(name) {
     });
 }
 
-
-
-// The index.html does not load the list, so we call getList()
-// as soon as page is finished loading
-window.onload = getPosts;
-
-// causes list to be re-fetched every 5 seconds
-window.setInterval(getPosts, 5000);

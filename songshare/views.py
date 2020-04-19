@@ -33,6 +33,9 @@ from functools import reduce # Needed only in python 3
 from operator import or_
 
 
+def get_basic_context(request):
+    c_user = Profile.objects.get(user=request.user)
+    context['c_user'] = c_user
 
 
 @login_required
@@ -73,6 +76,7 @@ def profile_page_action(request):
     following = list(c_user.following.all())
     context['c_user'] = c_user
     context['following'] = following
+    
 
 
     # Handling pictures
@@ -125,7 +129,9 @@ def goto_profile(request, id):
             context['following'] = True
         else:
             context['following'] = False
-            print('false')
+        if profile.is_live:
+            print(Stream.objects.all())
+            
         context['name'] = name
         return render(request, 'songshare/dj_profile.html', context)
     except:
@@ -237,21 +243,46 @@ def dj_stream_action(request, id):
 
 
 
+def create_query_stream_search(fulltext):
+    try:
+        stream_names = Stream.objects.values_list('name', flat=True)
+        query = []
+        THRESHOLD = 0.2
+        for name in stream_names:
+            score = SequenceMatcher(None, name, fulltext).ratio()
+            if score == 1:
+                # Perfect Match for name
+                return [Q(name=name)]
+            if score >= THRESHOLD:
+                query1.append(Q(name=name))
+        return query
+    except:
+        raise Http404
 
 # https://stackoverflow.com/questions/48603190/django-max-similarity-trigramsimilarity-from-manytomanyfield
-def create_query(fulltext):
+def create_query_dj_search(fulltext):
     profile_names = Profile.objects.values_list('name', flat=True)
-
-    query = []
-    THRESHOLD = 0.25
+    profile_users = User.objects.values_list('username', flat=True)
+    query1 = []
+    query2 = []
+    THRESHOLD = 0.5
     for name in profile_names:
         score = SequenceMatcher(None, name, fulltext).ratio()
         if score == 1:
             # Perfect Match for name
             return [Q(name=name)]
         if score >= THRESHOLD:
-            query.append(Q(name=name))
-
+            query1.append(Q(name=name))
+        print(score)
+    for username in profile_users:
+        score = SequenceMatcher(None, username, fulltext).ratio()
+        if score == 1:
+            # Perfect Match for name
+            return [Q(user__username=username)]
+        if score >= THRESHOLD:
+            query2.append(Q(user__username=name))
+        print(score)
+    query = list(set(query1) |  set(query2))
     return query
 
 
@@ -267,14 +298,22 @@ def dj_search(request):
         print(search)
         context['search']=  search
         try:
-            queryset = Profile.objects.filter(reduce(or_, create_query(search)))
-            context['djs']= queryset
+            queryset = Stream.objects.filter(reduce(or_, create_query_stream_search(search)), is_streaming=True)
+            context['streams'] = queryset
         except:
-            context['djs'] = []
+            context['streams'] = []
+
+        try:
+            querysetdj = Profile.objects.filter(reduce(or_, create_query_dj_search(search)))
+            context['djs'] =  querysetdj
+        except:
+            context['djs'] =  []
         
-        
+        print(Stream.objects.all())
         return render(request, 'songshare/dj_search.html', context)
-    
+
+
+
 def clean_search_query(result):
     items = result['tracks']['items']
     L = []
@@ -303,14 +342,6 @@ def get_photo(request, id):
         raise Http404
     return HttpResponse(profile.picture, content_type=profile.content_type)
 
-
-@login_required
-def stream_on(request):
-    pass
-
-@login_required
-def stream_off(request):
-    pass
 
 def register_user_with_spotify(request):
     if request.method == "GET":
@@ -452,6 +483,7 @@ def create_stream_action(request):
     context['c_user'] = c_user
     if not stream_creation_form.is_valid():
         return render(request,'songshare/user_home.html',context)
+    
     stream_name = stream_creation_form.cleaned_data['stream_name']
     new_stream = Stream(name=stream_name,
                         dj=c_user,
@@ -475,8 +507,9 @@ def end_stream_action(request):
     stream = get_stream(c_user.id)
     if stream == None:
         return Http404
-    stream.is_streaming = False
-    stream.save()
+    stream.delete()
+    # stream.is_streaming = False
+    # stream.save()
     c_user.is_live = False
     c_user.save()
     return redirect(reverse('home'))

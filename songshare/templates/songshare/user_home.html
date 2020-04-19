@@ -96,8 +96,8 @@
 			<div class="ui card">
 				<div class="content">
 					<span class="header" href="#">{{stream.name}}</span>
-					{% if c_user.picture %}
-					<img src="{% url 'photo' profile.id %}"  style="height: 64px; width: 64px;">
+					{% if stream.dj.picture %}
+					<img src="{% url 'photo' stream.dj.id %}"  style="height: 64px; width: 64px;">
 					{% else %}
 					<img src="https://cdn1.iconfinder.com/data/icons/user-pictures/100/unknown-512.png"  style="height: 64px; width: 64px;">
 					{% endif %}

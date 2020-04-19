@@ -12,5 +12,11 @@ function get_currently_streaming(){
 }
 
 function update_streams(response){
+    // streams.forEach(stream => {
+    //     var stream_followers_id = "id_stream_follower" + x;
+    //     if (document.getElementById(my_id)) 
+    //     {
 
+    //     }
+    // });
 }

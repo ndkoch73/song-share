@@ -4,7 +4,7 @@
 <div class="main ui container">
       
     <h2 class="ui dividing header">
-        <span id="id_name_of_page" style="color:black;text-align:center;"> Search for DJ
+        <span id="id_name_of_page" style="color:black;text-align:center;"> Search for Stream by Stream name, DJ name, or DJ username
 
     </h2>
     <div class="ui three column grid" id="id-profile">
@@ -26,46 +26,90 @@
                 </div>
             </div>
         </div>
-        {% for dj in djs %}
-        <div class="row" id=>
-            <div class="col" >
-                <div class="ui small image">
-                    {% if dj.picture %}
-                    <img src="{% url 'photo' dj.id %}" width="100px" id="id_dj_picture_{{dj.id}}">
-                    {% else %}
-                    <img src="default.jpg" width="200px"  id="id_user_picture">
-                    {% endif %}
-                </div>
-            </div>
-            <div class="col">
-                <div class="segment">
-                    <label id="id_name"> {{dj.fname}} {{dj.lname}}</label>
-                </div>
-                <div class="segment" id="id_dj_search_{{dj.id}}">
-                    {% if dj.is_live == True %}
-                    >
-                    <a href="{% url 'listener-stream' dj.id %}">
-					    <i class="circle red icon" id="id_is_live_{{dj.id}}"></i>
-                        {{dj.fname}} {{dj.lname}} 
-                    </a> 
-                    is live 
-                    {% else %}
-
-                    <a href="{% url 'profile-view' dj.id %}">
-					<i class="circle outline icon" id="id_is_not_live_{{dj.id}}"></i>
-					{{dj.fname}} {{dj.lname}} </a> is not live 
-					{% endif %}
-                </div>
-            </div>
+        {% if streams %}
+        <div class="row">
+            <div class="ui header">Streams</div>
         </div>
+        {% endif %}
+        <div class="row">
+        {% for stream in streams %}
+            <div class="four wide column">
+                <div class="ui card">
+                    <div class="content">
+                        <span class="header" href="#"> {{stream.name}} :
+                            DJ {{stream.dj.user.username}}</span>
+                        {% if stream.dj.picture %}
+                        <img src="{% url 'photo' stream.dj.id %}"  style="height: 64px; width: 64px;">
+                        {% else %}
+                        <img src="https://cdn1.iconfinder.com/data/icons/user-pictures/100/unknown-512.png"  style="height: 64px; width: 64px;">
+                        {% endif %}
+                        <br><br>
+                        <div class="meta">
+                        {% if stream.is_streaming == True %}
+                            <div class="meta">
+                            <i class="circle red icon" id="id_is_live_{{stream.dj.id}}"></i>
+                            <span> <a href="{% url 'profile-view' stream.dj.id %}">DJ {{stream.dj.name}}</a></span>
+                            </div>
+                        {% else %}
+                        <div class="meta">
+                            <i class="circle outline icon" id="id_is_not_live_{{dj.id}}"></i>
+                            <a href="{% url 'profile-view' stream.dj.id %}">
+                                {{stream.dj.name}}
+                            </a> 
+                        </div>
+                        {% endif %}
+                        </div>
+                    </div>
+                </div>
+                       
+            </div>
         {% endfor %}
+        </div>
+        {% if djs %}
+        <div class="row">
+            <div class="ui header"> DJs </div>
+        </div>
+        {% endif %}
+        <div class="row">
+            {% for dj in djs %}
+            <div class="four wide column">
+                <div class="ui card">
+                    <div class="content">
+                        <span class="header" href="#">DJ {{dj.user.username}}</span>
+                        {% if dj.picture %}
+                        <img src="{% url 'photo' dj.id %}"  style="height: 64px; width: 64px;">
+                        {% else %}
+                        <img src="https://cdn1.iconfinder.com/data/icons/user-pictures/100/unknown-512.png"  style="height: 64px; width: 64px;">
+                        {% endif %}
+                        <br><br>
+                        <div class="meta">
+                        {% if dj.is_live == True %}
+                            <div class="meta">
+                            <i class="circle red icon" id="id_is_live_{{dj.id}}"></i>
+                            <span> <a href="{% url 'profile-view' dj.id %}">DJ {{dj.name}}</a></span>
+                            </div>
+                        {% else %}
+                        <div class="meta">
+                            <i class="circle outline icon" id="id_is_not_live_{{dj.id}}"></i>
+                            <a href="{% url 'profile-view' dj.id %}">
+                                {{dj.fname}} {{dj.lname}} 
+                            </a> 
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                    
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
 
 <!-- Refresh to check for status -->
         <!-- <script>getDJs()</script>
         <table id="dj_search">
         </table> -->
-    </div>
-</div>
 
 
 <!-- 	{% for song in songs %}
