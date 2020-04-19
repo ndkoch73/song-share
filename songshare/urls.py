@@ -31,4 +31,5 @@ urlpatterns = [
     path('dj-stream/<int:id>/remove-requested-song/<str:song_uri>',views.remove_requested_song,name='remove-requested-song'),
     path('vote',views.vote,name="vote"),
     path('unvote',views.unvote,name="unvote"),
+    path('get-currently-streaming',views.get_currently_streaming,name="get-currently-streaming"),
 ]

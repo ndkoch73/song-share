@@ -51,13 +51,33 @@
 {% block mainpage %}
 <div class="main ui container">
 	<h2 class="ui dividing header">
-		<label>Recent Streams</label>
+		<label>Live Follower Streams</label>
 	</h2>
-	<div>
-		<script>getRecent()</script>
-		<table id="id_recent_streams">
-		</table>
+	
+	<div class="ui three column grid" id="id-Streams">
+		<div class="row">
+			{% for follower in following %}
+			{% if follower.is_live %}
+			<div class="col">
+				<div class="field">
+					<a href="{% url 'dj-stream' follower.id%}"> {{follower.name}}</a>
+				</div>
+				<div class="field">
+					<div class="ui small image">
+						{% if follower.picture %}
+                    	<img src="{% url 'photo' follower.id %}" width="100px" id="id_follower_picture_{{follower.id}}">
+                    	{% else %}
+                    	<img src="default.jpg" width="200px"  id="id_follower_picture_{{follower.id}}">
+                    	{% endif %}
+					</div>
+				</div>
+			</div>
+			{% endif %}
+			{% endfor %}
+		</div>
 	</div>
+			
+	
 	<h2 class="ui dividing header">
 			<label>Popular Streams</label>
 	</h2>
