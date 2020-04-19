@@ -228,7 +228,7 @@ class Song(models.Model):
     def to_json(self, request=None):
         if request is not None:
             user_has_voted = self.voters.filter(user=request.user).exists()
-            votes = self.votes.all().count()
+            votes = self.voters.all().count()
         else:
             user_has_voted = False
             votes = 0
