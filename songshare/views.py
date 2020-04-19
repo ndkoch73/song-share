@@ -565,9 +565,9 @@ def get_requested_songs(request,id):
     if request.method == "POST":
         return Http404
     stream = get_stream(id)
-    is_stream_dj = stream.dj == Profile.objects.get(user=request.user)
     if stream == None:
         return HttpResponse(json.dumps({'not_exists':True}), content_type='application/json')
+    is_stream_dj = stream.dj == Profile.objects.get(user=request.user)
     results = {'is_stream_dj':is_stream_dj, 'requested_songs':[], 'not_exists':False}
     for item in stream.requested_songs.extra(order_by=['-creation_time']):
         results['requested_songs'].append(item.to_json(request))
