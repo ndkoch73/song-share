@@ -515,8 +515,12 @@ def get_currently_playing(request,id):
         return Http404
     stream = get_stream(id)
     if stream == None:
-        return Http404
-    results = stream.get_currently_playing().to_json()
+        currently_playing = Song(name="No song playing", artist="", album="", uri="", image_url="/static/songshare/default.jpg")
+    else:
+        currently_playing = stream.get_currently_playing()
+        if currently_playing is None:
+            currently_playing = Song(name="No song playing", artist="", album="", uri="", image_url="/static/songshare/default.jpg")
+    results = currently_playing.to_json()
     return HttpResponse(json.dumps(results), content_type='application/json')
 
 def get_recently_played(request,id):
@@ -524,7 +528,7 @@ def get_recently_played(request,id):
         return Http404
     stream = get_stream(id)
     if stream == None:
-        return Http404
+        return HttpResponse(json.dumps([]), content_type='application/json')
     results = stream.get_recently_played()
     response = []
     for item in results:
@@ -563,8 +567,8 @@ def get_requested_songs(request,id):
     stream = get_stream(id)
     is_stream_dj = stream.dj == Profile.objects.get(user=request.user)
     if stream == None:
-        return Http404
-    results = {'is_stream_dj':is_stream_dj, 'requested_songs':[]}
+        return HttpResponse(json.dumps({'not_exists':True}), content_type='application/json')
+    results = {'is_stream_dj':is_stream_dj, 'requested_songs':[], 'not_exists':False}
     for item in stream.requested_songs.extra(order_by=['-creation_time']):
         results['requested_songs'].append(item.to_json(request))
     return HttpResponse(json.dumps(results), content_type='application/json')
