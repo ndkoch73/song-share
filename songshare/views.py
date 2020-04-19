@@ -252,9 +252,9 @@ def create_query_stream_search(fulltext):
             score = SequenceMatcher(None, name, fulltext).ratio()
             if score == 1:
                 # Perfect Match for name
-                return [Q(name=name)]
+                query.insert(0,Q(name=name))
             if score >= THRESHOLD:
-                query1.append(Q(name=name))
+                query.append(Q(name=name))
         return query
     except:
         raise Http404
@@ -270,7 +270,7 @@ def create_query_dj_search(fulltext):
         score = SequenceMatcher(None, name, fulltext).ratio()
         if score == 1:
             # Perfect Match for name
-            return [Q(name=name)]
+            query1.insert(0,Q(name=name))
         if score >= THRESHOLD:
             query1.append(Q(name=name))
         print(score)
@@ -278,7 +278,7 @@ def create_query_dj_search(fulltext):
         score = SequenceMatcher(None, username, fulltext).ratio()
         if score == 1:
             # Perfect Match for name
-            return [Q(user__username=username)]
+            query2.insert(0,Q(user__username=username))
         if score >= THRESHOLD:
             query2.append(Q(user__username=name))
         print(score)
@@ -295,7 +295,6 @@ def dj_search(request):
     else:
         # print(request.POST)
         search = request.POST['search']
-        print(search)
         context['search']=  search
         try:
             queryset = Stream.objects.filter(reduce(or_, create_query_stream_search(search)), is_streaming=True)
@@ -309,7 +308,6 @@ def dj_search(request):
         except:
             context['djs'] =  []
         
-        print(Stream.objects.all())
         return render(request, 'songshare/dj_search.html', context)
 
 

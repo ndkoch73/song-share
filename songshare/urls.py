@@ -7,7 +7,6 @@ urlpatterns = [
     path('register', views.register_action, name="register"),
     path('logout',views.logout_action,name="logout"),
     path('listener-stream/<int:id>', views.listener_stream, name="listener-stream"),
-    # path('dj-search', views.dj_search, name="dj-search"),
     path('dj-search', views.dj_search, name="dj-search"),
     path('song-search/<str:search_query>', views.song_search, name="song-search"),
     path('photo/<int:id>', views.get_photo, name="photo"),
