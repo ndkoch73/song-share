@@ -24,11 +24,24 @@ from songshare.models import *
 
 import json
 
+
+# Search functionaily testing
+from difflib import SequenceMatcher
+
+from django.db.models import Q
+from functools import reduce # Needed only in python 3
+from operator import or_
+
+
+
+
 @login_required
 def home_page(request):
     context = {}
     c_user = Profile.objects.get(user=request.user)
     context['c_user'] = c_user
+    following = list(c_user.following.all())
+    context['following'] = list(c_user.following.all())
     context['streams'] = Stream.objects.all().filter(is_streaming=True)
     # pass the spotify registration form if the user is not a dj
     if not c_user.is_dj:
@@ -75,8 +88,11 @@ def profile_page_action(request):
         c_user.save()
     context['form']  = ProfilePictureForm()
     context['is_dj'] = c_user.auth_token_code != ''
+    c_user.is_dj = c_user.auth_token_code != ''
+    print(c_user.is_live)
     print(context)
-    print(Profile.objects.all())
+    print(c_user.bio)
+
     return render(request, 'songshare/profile.html', context)
 
 @login_required
@@ -172,8 +188,11 @@ def listener_stream(request, id):
         p_user = User.objects.get(id=id)
         f_user = Profile.objects.get(user=p_user)
         c_user = Profile.objects.get(user=request.user)
+        print(f_user)
+        print(c_user)
         if (c_user.user == f_user.user):
-            return redirect(reverse('dj_stream'))
+            print('here')
+            return redirect(reverse('dj-stream'))
         context['dj'] = f_user
         context['c_user'] = c_user
         return render(request, 'songshare/listener_stream.html', context)
@@ -182,7 +201,16 @@ def listener_stream(request, id):
 
 def clear_stream_action(request):
     context = {}
-    return render(request, 'songshare/dj_stream.html', context)
+    c_user = Profile.objects.get(user=request.user)
+    context['c_user'] = c_user
+    c_user.live = False
+    c_user.save()
+    return redirect('profile-create')
+
+
+
+
+
 
 def get_stream(id):
     stream = Stream.objects.all().filter(dj=Profile.objects.get(pk=id),is_streaming=True)
@@ -192,6 +220,7 @@ def get_stream(id):
 
 def dj_stream_action(request, id):
     context = {}
+
     stream = get_stream(id)
     if stream == None:
         return Http404
@@ -206,11 +235,30 @@ def dj_stream_action(request, id):
         return render(request,'songshare/stream_page.html',context)
     return 42
 
+
+
+
+# https://stackoverflow.com/questions/48603190/django-max-similarity-trigramsimilarity-from-manytomanyfield
+def create_query(fulltext):
+    profile_names = Profile.objects.values_list('name', flat=True)
+
+    query = []
+    THRESHOLD = 0.25
+    for name in profile_names:
+        score = SequenceMatcher(None, name, fulltext).ratio()
+        if score == 1:
+            # Perfect Match for name
+            return [Q(name=name)]
+        if score >= THRESHOLD:
+            query.append(Q(name=name))
+
+    return query
+
+
 def dj_search(request):
     context = {}
     c_user = Profile.objects.get(user=request.user)
     context['c_user'] = c_user
-
     if request.method == "GET":
         return render(request, 'songshare/dj_search.html', context)
     else:
@@ -218,14 +266,12 @@ def dj_search(request):
         search = request.POST['search']
         print(search)
         context['search']=  search
-        context['djs'] = Profile.objects.filter(name=search)
-        try: 
-            print("hit")
-            similarity = Profile.objects.annotate(similarity=TrigramSimilarity('name', search),).filter(similarity__gt=0.1).order_by('-similarity')
-            print("hit")
-            # context['djs'] = similarity
+        try:
+            queryset = Profile.objects.filter(reduce(or_, create_query(search)))
+            context['djs']= queryset
         except:
-            print("whoops")
+            context['djs'] = []
+        
         
         return render(request, 'songshare/dj_search.html', context)
     
@@ -244,6 +290,7 @@ def song_search(request,search_query):
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
     results = clean_search_query(sp.search(search_query))
     return HttpResponse(json.dumps(results), content_type='application/json')
+
 
 @login_required
 def get_photo(request, id):

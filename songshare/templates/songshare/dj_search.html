@@ -20,27 +20,40 @@
                     </button>
                     {% csrf_token %}
                     </form>
-                    <div class="results" id="id_dj_search">
+                    <div class="results" id="id_dj_search_results">
                     
                     </div>
                 </div>
             </div>
         </div>
         {% for dj in djs %}
-        <div class="row">
+        <div class="row" id=>
             <div class="col" >
+                <div class="ui small image">
+                    {% if dj.picture %}
+                    <img src="{% url 'photo' dj.id %}" width="100px" id="id_dj_picture_{{dj.id}}">
+                    {% else %}
+                    <img src="default.jpg" width="200px"  id="id_user_picture">
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col">
                 <div class="segment">
                     <label id="id_name"> {{dj.fname}} {{dj.lname}}</label>
                 </div>
                 <div class="segment" id="id_dj_search_{{dj.id}}">
-                    {% if dj.live == True %}
+                    {% if dj.is_live == True %}
+                    >
                     <a href="{% url 'listener-stream' dj.id %}">
-					<i class="circle red icon" id="id_is_live_{{dj.id}}"></i>
-					{{dj.fname}} {{dj.lname}} is {{dj.live}} live 
+					    <i class="circle red icon" id="id_is_live_{{dj.id}}"></i>
+                        {{dj.fname}} {{dj.lname}} 
+                    </a> 
+                    is live 
                     {% else %}
+
                     <a href="{% url 'profile-view' dj.id %}">
 					<i class="circle outline icon" id="id_is_not_live_{{dj.id}}"></i>
-					{{dj.fname}} {{dj.lname}} is not live </a>
+					{{dj.fname}} {{dj.lname}} </a> is not live 
 					{% endif %}
                 </div>
             </div>
