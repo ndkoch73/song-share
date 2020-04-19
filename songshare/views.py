@@ -554,9 +554,6 @@ def vote(request):
         raise Http404 
     song = song[0]
 
-    # get the stream
-    stream = song.parent
-
     # add to voters list
     song.voters.add(request.user.profile_set.all()[0])
 
@@ -574,10 +571,7 @@ def unvote(request):
         raise Http404 
     song = song[0]
 
-    # get the stream
-    stream = song.parent
-
     # remove from voters list
-    song[0].voters.remove(request.user.profile_set[0])
+    song.voters.remove(request.user.profile_set[0])
 
     return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
