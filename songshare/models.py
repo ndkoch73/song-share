@@ -228,16 +228,18 @@ class Song(models.Model):
     def to_json(self, request=None):
         if request is not None:
             user_has_voted = self.voters.filter(user=request.user).exists()
-            votes = self.votes.all().count()
+            votes = self.voters.all().count()
+            ID = self.id
         else:
             user_has_voted = False
             votes = 0
+            ID = -1
         if self.request_status:
             return {'artist':self.artist,'album':self.album,'name':self.name, 'votes':self.voters.all().count(),
                     'uri':self.uri,'image_url':self.image_url, 'request_status':self.request_status, 
-                    'user_has_voted':user_has_voted}
+                    'user_has_voted':user_has_voted, 'id':ID}
         return {'artist':self.artist,'album':self.album,'name':self.name,'uri':self.uri,'image_url':self.image_url,
-                'votes':votes, 'user_has_voted':user_has_voted}
+                'votes':votes, 'user_has_voted':user_has_voted, 'id':ID}
 
 
 """

@@ -125,6 +125,28 @@ function request_song(song_uri){
     });
 }
 
+function vote(song_id){
+    $.post(
+        "/songshare/vote",
+        {csrfmiddlewaretoken:getCSRFToken(), song:song_id},
+        update_votes
+    );
+}
+
+function unvote(song_id){
+    $.post(
+        "/songshare/unvote",
+        {csrfmiddlewaretoken:getCSRFToken(), song:song_id},
+        update_votes
+    );
+}
+
+function update_votes(response){
+    if(response.success){
+        $("#song_" + response.song.toString() + "_vote_count").html(response.votes.toString());
+    }
+}
+
 function get_requested_songs(){
     $.ajax({
         url: window.location.pathname + "/get-requested-songs",
