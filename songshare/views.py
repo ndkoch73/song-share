@@ -502,7 +502,8 @@ def request_song_action(request,id,song_uri):
                         uri=song_uri,
                         image_url=results['album']['images'][2]['url'],
                         request_status='pending',
-                        parent=stream)
+                        parent=stream,
+                        creation_time=timezone.now())
     requested_song.save()
     requested_song.voters.add(request.user.profile_set.all()[0])
     stream.save()
@@ -518,7 +519,7 @@ def get_requested_songs(request,id):
     if stream == None:
         return Http404
     results = {'is_stream_dj':is_stream_dj, 'requested_songs':[]}
-    for item in stream.requested_songs.all():
+    for item in stream.requested_songs.extra(order_by=['creation_time']):
         results['requested_songs'].append(item.to_json(request))
     return HttpResponse(json.dumps(results), content_type='application/json')
 

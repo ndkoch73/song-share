@@ -168,8 +168,8 @@ function add_requested_song(response){
         new_requested_html += get_requested_song_html(this,is_stream_dj)
     });
     if(current_requested_html != new_requested_html){
-        $('#requested_songs_container').empty()
-        $('#requested_songs_container').html(new_requested_html)
+        //$('#requested_songs_container').empty()
+        $('#requested_songs_container').prepend(new_requested_html)
     }
 }
 

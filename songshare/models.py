@@ -214,6 +214,7 @@ class Song(models.Model):
     # can take three values 'accepted','denied','pending'
     request_status = models.CharField(max_length=10) 
     parent = models.ForeignKey(Stream, on_delete=models.CASCADE, related_name="requested_songs")
+    creation_time = models.DateTimeField()
 
     @classmethod
     def clean_artists(cls,artists):
