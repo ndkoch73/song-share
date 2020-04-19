@@ -182,6 +182,7 @@ def authenticate_action(request):
     current_user_profile.save()
     return redirect(reverse('home'))
 
+@login_required
 def listener_stream(request, id):
     context = {}
     try:
@@ -214,10 +215,11 @@ def clear_stream_action(request):
 
 def get_stream(id):
     stream = Stream.objects.all().filter(dj=Profile.objects.get(pk=id),is_streaming=True)
-    if stream == None:
+    if not stream.exists():
         return None
     return stream[0]
 
+@login_required
 def dj_stream_action(request, id):
     context = {}
 
@@ -234,7 +236,6 @@ def dj_stream_action(request, id):
         # context['recently_played'] = stream.get_recently_played()
         return render(request,'songshare/stream_page.html',context)
     return 42
-
 
 
 
@@ -255,6 +256,7 @@ def create_query(fulltext):
     return query
 
 
+@login_required
 def dj_search(request):
     context = {}
     c_user = Profile.objects.get(user=request.user)
@@ -312,6 +314,7 @@ def stream_on(request):
 def stream_off(request):
     pass
 
+@login_required
 def register_user_with_spotify(request):
     if request.method == "GET":
         # should never be the case that this is a get request.
@@ -366,7 +369,7 @@ def login_action(request):
     return redirect(reverse('home'))
 
 
-
+@login_required
 def logout_action(request):
     """ Logout flow
     Parameters
@@ -442,6 +445,7 @@ def register_action(request):
     new_profile.save()
     return redirect(reverse('home'))
 
+@login_required
 def create_stream_action(request):
     if request.method == "GET":
         return Http404
@@ -468,6 +472,7 @@ def create_stream_action(request):
 # do not need an id parameter because the button for ending the
 # stream will only be available to the DJ this is handled in the 
 # dj_stream action with the parameter is_stream_dj
+@login_required
 def end_stream_action(request):
     if request.method == "GET":
         return Http404
@@ -481,6 +486,7 @@ def end_stream_action(request):
     c_user.save()
     return redirect(reverse('home'))
 
+@login_required
 def join_stream_action(request, id):
     if request.method == "GET":
         return Http404
@@ -492,6 +498,7 @@ def join_stream_action(request, id):
     stream.save()
     return redirect(reverse('dj-stream',args=[id]))
 
+@login_required
 def leave_stream_action(request, id):
     if request.method == "GET":
         return Http404
@@ -524,6 +531,7 @@ def get_recently_played(request,id):
         response.append(item.to_json())
     return HttpResponse(json.dumps(response), content_type='application/json')
     
+@login_required
 def request_song_action(request,id,song_uri):
     if request.method == "GET":
         return Http404
@@ -537,16 +545,18 @@ def request_song_action(request,id,song_uri):
     requested_song = Song(artist=Song.clean_artists(results['artists']),
                         album=results['album']['name'],
                         name=results['name'],
-                        vote_count=0,
                         uri=song_uri,
                         image_url=results['album']['images'][2]['url'],
-                        request_status='pending')
+                        request_status='pending',
+                        parent=stream,
+                        creation_time=timezone.now())
     requested_song.save()
-    stream.requested_songs.add(requested_song)
+    requested_song.voters.add(request.user.profile_set.all()[0])
     stream.save()
-    result = {'is_stream_dj':False, 'requested_songs':[requested_song.to_json()]}
+    result = {'is_stream_dj':False, 'requested_songs':[requested_song.to_json(request)]}
     return HttpResponse(json.dumps(result), content_type='application/json')
 
+@login_required
 def get_requested_songs(request,id):
     if request.method == "POST":
         return Http404
@@ -555,10 +565,11 @@ def get_requested_songs(request,id):
     if stream == None:
         return Http404
     results = {'is_stream_dj':is_stream_dj, 'requested_songs':[]}
-    for item in stream.requested_songs.all():
-        results['requested_songs'].append(item.to_json())
+    for item in stream.requested_songs.extra(order_by=['-creation_time']):
+        results['requested_songs'].append(item.to_json(request))
     return HttpResponse(json.dumps(results), content_type='application/json')
 
+@login_required
 def add_song_to_queue(request,id,song_uri):
     if request.method == "GET":
         return Http404
@@ -573,6 +584,7 @@ def add_song_to_queue(request,id,song_uri):
     stream.save()
     return HttpResponse(json.dumps({}), content_type='application/json')
 
+@login_required
 def remove_requested_song(request,id,song_uri):
     if request.method == "GET":
         return Http404
@@ -585,6 +597,42 @@ def remove_requested_song(request,id,song_uri):
     song.save()
     stream.save()
     return HttpResponse(json.dumps({}), content_type='application/json')
+
+@login_required
+def vote(request):
+    # check that the correct parameters have been sent
+    if request.method != 'POST' or ('song' not in request.POST):
+        return HttpResponse(json.dumps({"success":False}), content_type='application/json')
+
+    # This checks whether the song is in the stream. Note: each song has only one parent playlist
+    song = Song.objects.filter(id=request.POST['song'])
+    if not song.exists():
+        raise Http404 
+    song = song[0]
+
+    # add to voters list
+    if song.request_status != 'denied':
+        song.voters.add(request.user.profile_set.all()[0])
+
+    return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
+
+@login_required
+def unvote(request):
+    # check that the correct parameters have been sent
+    if request.method != 'POST' or ('song' not in request.POST):
+        return HttpResponse(json.dumps({"success":False}), content_type='application/json')
+
+    # This checks whether the song is in the stream. Note: each song has only one parent playlist
+    song = Song.objects.filter(id=request.POST['song'])
+    if not song.exists():
+        raise Http404 
+    song = song[0]
+
+    # remove from voters list
+    if song.request_status != 'denied':
+        song.voters.remove(request.user.profile_set.all()[0])
+
+    return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
 
 def get_currently_streaming(request):
     if request.method == "POST":
