@@ -125,17 +125,17 @@ function request_song(song_uri){
     });
 }
 
-function vote(song_uri){
+function vote(song_id){
     $.post(
         "/songshare/vote",
-        {csrfmiddlewaretoken:getCSRFToken(), song:song_uri}
+        {csrfmiddlewaretoken:getCSRFToken(), song:song_id}
     );
 }
 
-function unvote(song_uri){
+function unvote(song_id){
     $.post(
         "/songshare/unvote",
-        {csrfmiddlewaretoken:getCSRFToken(), song:song_uri}
+        {csrfmiddlewaretoken:getCSRFToken(), song:song_id}
     );
 }
 
@@ -172,11 +172,11 @@ function votes_html(song,is_stream_dj){
 
     if(!song.user_has_voted){
         button = '<button class="circular ui green button" ' + 
-                 'onclick="vote('+"'"+song.uri+"'"+')"><i class="check icon"></i>Vote</button>'
+                 'onclick="vote('+song.id+')"><i class="check icon"></i>Vote</button>'
     }
     else {
         button = '<button class="circular ui green button" ' + 
-                 'onclick="unvote('+"'"+song.uri+"'"+')"><i class="close icon"></i>Unvote</button>'
+                 'onclick="unvote('+song.id+')"><i class="close icon"></i>Unvote</button>'
     }
     
     return '<div class="three wide column">\n<div class="sub header">' + song.votes.toString() + '</div>' + button + '\n</div>'
