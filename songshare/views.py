@@ -40,6 +40,8 @@ def home_page(request):
     context = {}
     c_user = Profile.objects.get(user=request.user)
     context['c_user'] = c_user
+    following = list(c_user.following.all())
+    context['following'] = list(c_user.following.all())
     context['streams'] = Stream.objects.all().filter(is_streaming=True)
     # pass the spotify registration form if the user is not a dj
     if not c_user.is_dj:
@@ -89,7 +91,7 @@ def profile_page_action(request):
     c_user.is_dj = c_user.auth_token_code != ''
     print(c_user.is_live)
     print(context)
-    print(Profile.objects.all())
+    print(c_user.bio)
 
     return render(request, 'songshare/profile.html', context)
 
@@ -264,9 +266,12 @@ def dj_search(request):
         search = request.POST['search']
         print(search)
         context['search']=  search
-        queryset = Profile.objects.filter(reduce(or_, create_query(search)))
-        context['djs']= queryset
-        print(queryset)
+        try:
+            queryset = Profile.objects.filter(reduce(or_, create_query(search)))
+            context['djs']= queryset
+        except:
+            context['djs'] = []
+        
         
         return render(request, 'songshare/dj_search.html', context)
     

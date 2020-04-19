@@ -31,7 +31,7 @@
                     <label for="id_bio">
                       Bio:
                     </label>
-                    <input type="text" name="bio" maxlength="200" required="" id="id_bio" value={{c_user.bio}}>
+                    <input type="text" name="bio" maxlength="200" required="" id="id_bio" value="{{c_user.bio}}">
                   </div>
                   {% csrf_token %}
                   <input class="ui gray submit button" type="submit" value="Submit" id="id_update_profile_button">
@@ -46,7 +46,7 @@
                     </button>
                   {% elif c_user.is_dj == True and c_user.is_live == False  %}
                     <button class="ui green submit button" id="id_start_new_stream_button"> 
-                      <a href="{% url 'dj-stream' %}"> <span style="color:black;">Start New Stream</span></a>
+                      <a href="{% url 'dj-stream' c_user.id%}"> <span style="color:black;">Start New Stream</span></a>
 
                     </button>
                   {% else %}
