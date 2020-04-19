@@ -498,7 +498,7 @@ def request_song_action(request,id,song_uri):
     requested_song.save()
     requested_song.voters.add(request.user.profile_set.all()[0])
     stream.save()
-    result = {'is_stream_dj':False, 'requested_songs':[requested_song.to_json()]}
+    result = {'is_stream_dj':False, 'requested_songs':[requested_song.to_json(request)]}
     return HttpResponse(json.dumps(result), content_type='application/json')
 
 @login_required

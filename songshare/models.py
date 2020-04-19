@@ -225,8 +225,11 @@ class Song(models.Model):
         return result
     def __str__(self):
         return 'Song(artist=' + str(self.artist) + ' album=' + str(self.album) + ')'
-    def to_json(self, request):
-        user_has_voted = self.voters.filter(user=request.user).exists()
+    def to_json(self, request=None):
+        if request is not None:
+            user_has_voted = self.voters.filter(user=request.user).exists()
+        else:
+            user_has_voted = False
         if self.request_status:
             return {'artist':self.artist,'album':self.album,'name':self.name, 'votes':self.voters.all().count(),
                     'uri':self.uri,'image_url':self.image_url, 'request_status':self.request_status, 
