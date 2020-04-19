@@ -118,7 +118,7 @@ function request_song(song_uri){
         type: "POST",
         data: "csrfmiddlewaretoken="+getCSRFToken(),
         dataType: "json",
-        success: add_requested_song,
+        success: add_one_requested_song,
         error: function(response){
             console.log(response)
         }
@@ -168,9 +168,18 @@ function add_requested_song(response){
         new_requested_html += get_requested_song_html(this,is_stream_dj)
     });
     if(current_requested_html != new_requested_html){
-        //$('#requested_songs_container').empty()
-        $('#requested_songs_container').prepend(new_requested_html)
+        $('#requested_songs_container').empty()
+        $('#requested_songs_container').html(new_requested_html)
     }
+}
+
+function add_one_requested_song(response) {
+    var new_requested_html = ""
+    var is_stream_dj = response['is_stream_dj']
+    $(response['requested_songs']).each(function(){
+        new_requested_html += get_requested_song_html(this,is_stream_dj)
+    });
+    $('#requested_songs_container').prepend(new_requested_html)
 }
 
 function votes_html(song,is_stream_dj){
