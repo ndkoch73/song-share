@@ -151,6 +151,23 @@ function add_requested_song(response){
     }
 }
 
+function votes_html(song,is_stream_dj){
+    if(is_stream_dj){
+        return '<div class="three wide column">\n<div class="sub header">' + song.votes.toString() + '</div>\n</div>'
+    }
+
+    if(!song.user_has_voted){
+        button = '<button class="circular ui green button" ' + 
+                 'onclick=""><i class="check icon"></i>Vote</button>'
+    }
+    else {
+        button = '<button class="circular ui green button" ' + 
+                 'onclick=""><i class="close icon"></i>Unvote</button>'
+    }
+    
+    return '<div class="three wide column">\n<div class="sub header">' + song.votes.toString() + '</div>' + button + '\n</div>'
+}
+
 function get_requested_song_html(song,is_stream_dj){
     if(song.request_status == 'accepted'){
         button_status_html = `
@@ -189,7 +206,7 @@ function get_requested_song_html(song,is_stream_dj){
         return `
                 <div class="ui raised segment">` + 
                     status_label_html + 
-                    `<div class="ui two column stackable grid">
+                    `<div class="ui three column stackable grid">
                         <div class="three wide column"> ` + 
                             '<div class="ui image">' + 
                                 '<img src="'+ song.image_url + '">' + 
@@ -203,14 +220,15 @@ function get_requested_song_html(song,is_stream_dj){
                                     song.artist +
                                 '</div>' + 
                             '</div>' +
-                        `</div>
-                    </div>
+                        '</div>' + 
+                        votes_html(song,is_stream_dj) +
+                    `</div>
                 </div>
         `
     } else {
         main_html = `
                     <div class="ui segment">
-                        <div class="ui three column stackable grid">
+                        <div class="ui four column stackable grid">
                             <div class="two wide column"> ` + 
                                 '<div class="ui small image">' + 
                                     '<img src="'+ song.image_url + '">' + 
@@ -225,6 +243,7 @@ function get_requested_song_html(song,is_stream_dj){
                                     '</div>' + 
                                 '</div>' +
                             '</div>' + 
+                            votes_html(song,is_stream_dj) + 
                             button_status_html
         return main_html
     }
