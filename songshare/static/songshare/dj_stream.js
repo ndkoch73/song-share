@@ -187,12 +187,14 @@ function update_requested_songs(response){
 }
 
 function add_one_requested_song(response) {
-    var new_requested_html = ""
-    var is_stream_dj = response['is_stream_dj']
-    $(response['requested_songs']).each(function(){
-        new_requested_html += get_requested_song_html(this,is_stream_dj)
-    });
-    $('#requested_songs_container').prepend(new_requested_html)
+    if(response['success']) {
+        var new_requested_html = ""
+        var is_stream_dj = response['is_stream_dj']
+        $(response['requested_songs']).each(function(){
+            new_requested_html += get_requested_song_html(this,is_stream_dj)
+        });
+        $('#requested_songs_container').prepend(new_requested_html)
+    }
 }
 
 function votes_html(song,is_stream_dj){
