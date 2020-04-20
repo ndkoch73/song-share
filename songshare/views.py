@@ -223,7 +223,7 @@ def dj_stream_action(request, id):
 
     stream = get_stream(id)
     if stream == None:
-        return Http404
+        raise Http404
     c_user = Profile.objects.get(user=request.user)
     is_stream_dj = c_user.id == id
     context['c_user'] = c_user
@@ -316,7 +316,7 @@ def stream_off(request):
 def register_user_with_spotify(request):
     if request.method == "GET":
         # should never be the case that this is a get request.
-        return Http404
+        raise Http404
     context = {}
     spotify_registration_form = SpotifyRegistrationForm(request.POST)
     context['spotify_registration_form'] = spotify_registration_form
@@ -446,7 +446,7 @@ def register_action(request):
 @login_required
 def create_stream_action(request):
     if request.method == "GET":
-        return Http404
+        raise Http404
     context = {}
     stream_creation_form = CreateStreamForm(request.POST)
     c_user = Profile.objects.get(user=request.user)
@@ -473,11 +473,11 @@ def create_stream_action(request):
 @login_required
 def end_stream_action(request):
     if request.method == "GET":
-        return Http404
+        raise Http404
     c_user = Profile.objects.get(user=request.user)
     stream = get_stream(c_user.id)
     if stream == None:
-        return Http404
+        raise Http404
     stream.is_streaming = False
     stream.save()
     c_user.is_live = False
@@ -487,10 +487,10 @@ def end_stream_action(request):
 @login_required
 def join_stream_action(request, id):
     if request.method == "GET":
-        return Http404
+        raise Http404
     stream = get_stream(id)
     if stream == None:
-        return Http404
+        raise Http404
     listener_profile = Profile.objects.get(user=request.user)
     stream.listeners.add(listener_profile)
     stream.save()
@@ -499,10 +499,10 @@ def join_stream_action(request, id):
 @login_required
 def leave_stream_action(request, id):
     if request.method == "GET":
-        return Http404
+        raise Http404
     stream = get_stream(id)
     if stream == None:
-        return Http404
+        raise Http404
     listener_profile = Profile.objects.get(user=request.user)
     stream.listeners.remove(listener_profile)
     stream.save()
@@ -510,19 +510,23 @@ def leave_stream_action(request, id):
 
 def get_currently_playing(request,id):
     if request.method == "POST":
-        return Http404
+        raise Http404
     stream = get_stream(id)
     if stream == None:
-        return Http404
-    results = stream.get_currently_playing().to_json()
+        currently_playing = Song(name="No song playing", artist="", album="", uri="", image_url="/static/songshare/default.jpg")
+    else:
+        currently_playing = stream.get_currently_playing()
+        if currently_playing is None:
+            currently_playing = Song(name="No song playing", artist="", album="", uri="", image_url="/static/songshare/default.jpg")
+    results = currently_playing.to_json()
     return HttpResponse(json.dumps(results), content_type='application/json')
 
 def get_recently_played(request,id):
     if request.method == "POST":
-        return Http404
+        raise Http404
     stream = get_stream(id)
     if stream == None:
-        return Http404
+        return HttpResponse(json.dumps([]), content_type='application/json')
     results = stream.get_recently_played()
     response = []
     for item in results:
@@ -532,10 +536,12 @@ def get_recently_played(request,id):
 @login_required
 def request_song_action(request,id,song_uri):
     if request.method == "GET":
-        return Http404
+        raise Http404
     stream = get_stream(id)
     if stream == None:
-        return Http404
+        return HttpResponse(json.dumps({'success':False, 'message':'The stream does not exist. The DJ may have ended it.'}), content_type='application/json')
+    if stream.requested_songs.filter(uri=song_uri).exists():
+        return HttpResponse(json.dumps({'success':False, 'message':'This song has already been requested. Please vote for it instead.'}), content_type='application/json')
     client_credentials_manager = SpotifyClientCredentials(client_id=settings.SPOTIPY_CLIENT_ID,
                                                         client_secret=settings.SPOTIPY_CLIENT_SECRET)
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
@@ -551,18 +557,18 @@ def request_song_action(request,id,song_uri):
     requested_song.save()
     requested_song.voters.add(request.user.profile_set.all()[0])
     stream.save()
-    result = {'is_stream_dj':False, 'requested_songs':[requested_song.to_json(request)]}
+    result = {'is_stream_dj':False, 'requested_songs':[requested_song.to_json(request)], 'success':True}
     return HttpResponse(json.dumps(result), content_type='application/json')
 
 @login_required
 def get_requested_songs(request,id):
     if request.method == "POST":
-        return Http404
+        raise Http404
     stream = get_stream(id)
-    is_stream_dj = stream.dj == Profile.objects.get(user=request.user)
     if stream == None:
-        return Http404
-    results = {'is_stream_dj':is_stream_dj, 'requested_songs':[]}
+        return HttpResponse(json.dumps({'not_exists':True}), content_type='application/json')
+    is_stream_dj = stream.dj == Profile.objects.get(user=request.user)
+    results = {'is_stream_dj':is_stream_dj, 'requested_songs':[], 'not_exists':False}
     for item in stream.requested_songs.extra(order_by=['-creation_time']):
         results['requested_songs'].append(item.to_json(request))
     return HttpResponse(json.dumps(results), content_type='application/json')
@@ -570,11 +576,16 @@ def get_requested_songs(request,id):
 @login_required
 def add_song_to_queue(request,id,song_uri):
     if request.method == "GET":
-        return Http404
+        raise Http404
     stream = get_stream(id)
-    is_stream_dj = stream.dj == Profile.objects.get(user=request.user)
-    if stream == None:
-        return Http404
+    if stream == None or (stream.dj.user != request.user):
+        raise Http404
+    sp = spotipy.Spotify(auth=stream.dj.get_auth_token(scope=settings.SPOTIFY_SCOPE_ACCESS,
+                                            client_id=settings.SPOTIPY_CLIENT_ID,
+                                            client_secret=settings.SPOTIPY_CLIENT_SECRET,
+                                            redirect_uri=settings.REDIRECT_AUTHENTICATION_URL))
+    if sp.current_user()['product'] != 'premium':
+        return HttpResponse(json.dumps({}), content_type='application/json')
     song = stream.requested_songs.get(uri=song_uri)
     stream.add_to_queue(song)
     song.request_status = 'accepted'
@@ -585,11 +596,10 @@ def add_song_to_queue(request,id,song_uri):
 @login_required
 def remove_requested_song(request,id,song_uri):
     if request.method == "GET":
-        return Http404
+        raise Http404
     stream = get_stream(id)
-    is_stream_dj = stream.dj == Profile.objects.get(user=request.user)
-    if stream == None:
-        return Http404
+    if stream == None or (stream.dj.user != request.user):
+        raise Http404
     song = stream.requested_songs.get(uri=song_uri)
     song.request_status = 'rejected'
     song.save()
@@ -609,7 +619,7 @@ def vote(request):
     song = song[0]
 
     # add to voters list
-    if song.request_status != 'denied':
+    if song.request_status != 'rejected':
         song.voters.add(request.user.profile_set.all()[0])
 
     return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
@@ -627,14 +637,14 @@ def unvote(request):
     song = song[0]
 
     # remove from voters list
-    if song.request_status != 'denied':
+    if song.request_status != 'rejected':
         song.voters.remove(request.user.profile_set.all()[0])
 
     return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
 
 def get_currently_streaming(request):
     if request.method == "POST":
-        return Http404
+        raise Http404
     streams = Stream.objects.all().filter(is_streaming=True)
     stream_list = []
     for stream in streams:
