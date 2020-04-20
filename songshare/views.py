@@ -582,6 +582,12 @@ def add_song_to_queue(request,id,song_uri):
     stream = get_stream(id)
     if stream == None or (stream.dj.user != request.user):
         raise Http404
+    sp = spotipy.Spotify(auth=stream.dj.get_auth_token(scope=settings.SPOTIFY_SCOPE_ACCESS,
+                                            client_id=settings.SPOTIPY_CLIENT_ID,
+                                            client_secret=settings.SPOTIPY_CLIENT_SECRET,
+                                            redirect_uri=settings.REDIRECT_AUTHENTICATION_URL))
+    if sp.current_user()['product'] != 'premium':
+        return HttpResponse(json.dumps({}), content_type='application/json')
     song = stream.requested_songs.get(uri=song_uri)
     stream.add_to_queue(song)
     song.request_status = 'accepted'

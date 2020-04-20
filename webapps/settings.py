@@ -135,7 +135,7 @@ RECENT_SONG_LIMIT = 7
 
 # different scopes that we will be requesting from the user
 SPOTIFY_SCOPE_ACCESS = 'user-modify-playback-state' + ' ' + 'user-read-currently-playing' + \
-    ' ' + 'user-read-recently-played'
+    ' ' + 'user-read-recently-played' + ' ' + 'user-read-private'
 
 # different urls for redirections
 REDIRECT_HOME_URL = 'http://localhost:8000/songshare/home'
