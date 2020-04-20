@@ -541,9 +541,9 @@ def request_song_action(request,id,song_uri):
         raise Http404
     stream = get_stream(id)
     if stream == None:
-        return HttpResponse(json.dumps({'success':False}), content_type='application/json')
+        return HttpResponse(json.dumps({'success':False, 'message':'The stream does not exist. The DJ may have ended it.'}), content_type='application/json')
     if stream.requested_songs.filter(uri=song_uri).exists():
-        return HttpResponse(json.dumps({'success':False}), content_type='application/json')
+        return HttpResponse(json.dumps({'success':False, 'message':'This song has already been requested. Please vote for it instead.'}), content_type='application/json')
     client_credentials_manager = SpotifyClientCredentials(client_id=settings.SPOTIPY_CLIENT_ID,
                                                         client_secret=settings.SPOTIPY_CLIENT_SECRET)
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
