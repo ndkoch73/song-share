@@ -511,7 +511,7 @@ def end_stream_action(request):
     if stream == None:
         raise Http404
     stream.is_streaming = False
-    stream.save()
+    stream.delete()
     c_user.is_live = False
     c_user.save()
     return redirect(reverse('home'))
