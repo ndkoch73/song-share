@@ -29,5 +29,6 @@ urlpatterns = [
     path('vote',views.vote,name="vote"),
     path('unvote',views.unvote,name="unvote"),
     path('get-currently-streaming',views.get_currently_streaming,name="get-currently-streaming"),
+    path('dj-stream/<int:id>/get-listener-count',views.get_listener_count,name="get-listener-count"),
     # path('dj-search/refresh-streams', views.refresh_stream, name="refresh-stream"),
 ]

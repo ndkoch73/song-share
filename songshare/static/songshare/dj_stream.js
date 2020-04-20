@@ -55,6 +55,28 @@ function add_song_to_queue(song_uri){
     });
 }
 
+function update_current_listeners(){
+    $.ajax({
+        url: window.location.pathname + "/get-listener-count",
+        type: "GET",
+        data: "csrfmiddlewaretoken="+getCSRFToken(),
+        dataType: "json",
+        success: update_number_of_listeners,
+        error: function(response){
+            console.log(response)
+        }
+    });
+}
+
+function update_number_of_listeners(response){
+    count_id = "#stream_" + response['id'] + "_count";
+    new_count = parseInt(response['count']);
+    old_count = parseInt($(count_id).html());
+    if(new_count != old_count){
+        $(count_id).html(new_count);
+    }
+}   
+
 function deny_song(song_uri){
     $.ajax({
         url: window.location.pathname + "/remove-requested-song/" + encodeURIComponent(song_uri),
@@ -380,5 +402,6 @@ function refresh_songs(){
 
 window.onload = refresh_songs;
 window.setInterval(get_currently_playing, 10*1000);
-window.setInterval(get_recently_played,15*1000)
-window.setInterval(get_requested_songs,2*1000)
+window.setInterval(get_recently_played,15*1000);
+window.setInterval(get_requested_songs,2*1000);
+window.setInterval(update_current_listeners,1*1000);

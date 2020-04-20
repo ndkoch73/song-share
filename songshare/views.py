@@ -683,3 +683,11 @@ def get_currently_streaming(request):
         stream_list.append(stream.to_json())
     results = {'c_user': Profile.objects.get(user=request.user).to_json(),'streams':stream_list}
     return HttpResponse(json.dumps(results), content_type='application/json')
+
+def get_listener_count(request,id):
+    if request.method == "POST":
+        raise Http404
+    stream = get_stream(id)
+    if stream == None:
+        return HttpResponse(json.dumps({'not_exists':True}), content_type='application/json')
+    return HttpResponse(json.dumps({'count':stream.listeners.all().count(),'id':id}), content_type='application/json')
