@@ -142,6 +142,6 @@ REDIRECT_HOME_URL = 'http://localhost:8000/songshare/home'
 
 REDIRECT_AUTHENTICATION_URL = 'http://localhost:8000/songshare/authenticate'
 
-LOGIN_REDIRECT_URL = "/login"
-LOGIN_URL = "/login"
+LOGIN_REDIRECT_URL = "/songshare/login"
+LOGIN_URL = "/songshare/login"
 
