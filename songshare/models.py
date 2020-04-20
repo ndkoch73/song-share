@@ -82,6 +82,12 @@ class Profile(models.Model):
         else:
             return None
 
+    def to_json(self):
+        picuture_available = bool(self.picture)
+        return {'spotify_email':self.spotify_email,'is_dj':self.is_dj,'id':self.id,
+            'is_live':self.is_live,'fname':self.fname,'lname':self.lname,'name':self.name,
+            'bio':self.bio, 'picture_avaliable':picuture_available,'username':self.user.username}
+
 
 # Post Model (optional for now)
 class Post(models.Model):
@@ -179,6 +185,15 @@ class Stream(models.Model):
                         uri=result['uri'],
                         image_url=result['album']['images'][1]['url'])
         return current_song
+    
+    def to_json(self):
+        result = {'name': self.name, 'dj':self.dj.to_json(),'is_streaming':self.is_streaming}
+        listeners = []
+        for listener in self.listeners.all():
+            listeners.append(listener.to_json())
+        result['listeners'] = listeners
+        result['total_listening'] = len(listeners)
+        return result
     
     def add_to_queue(self,song):
         sp = spotipy.Spotify(auth=self.dj.get_auth_token(scope=settings.SPOTIFY_SCOPE_ACCESS,

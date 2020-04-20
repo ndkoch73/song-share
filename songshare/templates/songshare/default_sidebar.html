@@ -37,18 +37,7 @@
 			{% endblock %}
 		</div>
 		{% block mainpage %}
-			{% if stream_creation_form %}
-				{% if spotify_registration_form.errors %}
-					{% for field in spotify_registration_form %}
-						{% for error in field.errors %}
-						<div class="ui error message">
-							<i class="close icon" onclick="closeError()"></i>
-							{{error}}
-						</div>
-						{% endfor %}
-					{% endfor %}
-				{% endif %}
-			{% endif %}
+			
 		{% endblock %}
 	</div>
   </div>
@@ -65,9 +54,9 @@
 		</div>
 		<form class="ui form" method="POST" action="{% url 'create-stream' %}">
 			<div class="six wide field">
-				{{stream_creation_form.stream_name.label_tag}}
+				Stream Name:
 				<div class="ui eight wide input">
-					{{stream_creation_form.stream_name}}
+					<input type="text" placeholder="Stream name" name="stream_name">
 				</div>
 			</div>
 			<button class="ui positive right labeled icon button" type="submit">Create Stream

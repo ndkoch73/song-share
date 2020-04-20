@@ -21,8 +21,9 @@ class CreateStreamForm(forms.Form):
     def clean_stream_name(self):
         stream_name = self.cleaned_data.get('stream_name')
         try:
-            Stream.objects.get(name=stream_name)
-            raise forms.ValidationError("Stream is currently live with the same name")
+            s = Stream.objects.get(name=stream_name)
+            if s.is_streaming:
+                raise forms.ValidationError("Stream is currently live with the same name")
         except:
             return stream_name
 
