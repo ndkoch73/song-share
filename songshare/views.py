@@ -343,18 +343,7 @@ def get_photo(request, id):
     return HttpResponse(profile.picture, content_type=profile.content_type)
 
 
-<<<<<<< HEAD
-=======
 @login_required
-def stream_on(request):
-    pass
-
-@login_required
-def stream_off(request):
-    pass
-
-@login_required
->>>>>>> 795a2f1860787ccb6972d7ccc6f91224b2994eb5
 def register_user_with_spotify(request):
     if request.method == "GET":
         # should never be the case that this is a get request.
