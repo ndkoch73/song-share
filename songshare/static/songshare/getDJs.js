@@ -125,3 +125,19 @@ function djSearch(name) {
     });
 }
 
+function refresh_streams(){
+    $.ajax({
+        url: window.location.pathname + "/refresh-streams",
+        type: "GET",
+        data: "csrfmiddlewaretoken="+getCSRFToken(),
+        dataType: "json",
+        success: add_recently_played,
+        error: function(response){
+            console.log(response)
+        }
+    });
+}
+
+
+window.onload = refresh_streams;
+window.setInterval(1000); 

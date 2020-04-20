@@ -94,7 +94,7 @@
 	<div class="ui grid">
 		<div class="four wide column">
 			<div class="ui card">
-				<div class="content">
+				<div class="content" id="id_stream_{{stream.id}}">
 					<span class="header" href="#">{{stream.name}}</span>
 					{% if stream.dj.picture %}
 					<img src="{% url 'photo' stream.dj.id %}"  style="height: 64px; width: 64px;">

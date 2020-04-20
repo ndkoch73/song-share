@@ -12,11 +12,15 @@ function get_currently_streaming(){
 }
 
 function update_streams(response){
-    // streams.forEach(stream => {
-    //     var stream_followers_id = "id_stream_follower" + x;
-    //     if (document.getElementById(my_id)) 
-    //     {
+    streams.forEach(stream => {
+        var stream_followers_id = "id_stream_follower" + x;
+        if (document.getElementById(stream_followers_id)) 
+        {
 
-    //     }
-    // });
+        }
+    });
 }
+window.onload = get_currently_streaming();
+window.setInterval(5000);
+
+
