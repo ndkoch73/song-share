@@ -542,6 +542,8 @@ def request_song_action(request,id,song_uri):
     stream = get_stream(id)
     if stream == None:
         return HttpResponse(json.dumps({'success':False}), content_type='application/json')
+    if stream.requested_songs.filter(uri=song_uri).exists():
+        return HttpResponse(json.dumps({'success':False}), content_type='application/json')
     client_credentials_manager = SpotifyClientCredentials(client_id=settings.SPOTIPY_CLIENT_ID,
                                                         client_secret=settings.SPOTIPY_CLIENT_SECRET)
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
@@ -578,8 +580,7 @@ def add_song_to_queue(request,id,song_uri):
     if request.method == "GET":
         raise Http404
     stream = get_stream(id)
-    is_stream_dj = stream.dj == Profile.objects.get(user=request.user)
-    if stream == None:
+    if stream == None or (stream.dj.user != request.user):
         raise Http404
     song = stream.requested_songs.get(uri=song_uri)
     stream.add_to_queue(song)
@@ -593,8 +594,7 @@ def remove_requested_song(request,id,song_uri):
     if request.method == "GET":
         raise Http404
     stream = get_stream(id)
-    is_stream_dj = stream.dj == Profile.objects.get(user=request.user)
-    if stream == None:
+    if stream == None or (stream.dj.user != request.user):
         raise Http404
     song = stream.requested_songs.get(uri=song_uri)
     song.request_status = 'rejected'
