@@ -167,26 +167,34 @@ function add_requested_song(response){
 }
 
 function update_requested_songs(response){
-    var current_requested_html = $('#requested_songs_container').html();
-    var new_requested_html = ""
-    var is_stream_dj = response['is_stream_dj']
-    $(response['requested_songs']).each(function(){
-        new_requested_html += get_requested_song_html(this,is_stream_dj)
-    });
-    current_requested_html = current_requested_html.replace(/\amp;/g,"")
-    if(current_requested_html != new_requested_html){
+    if(response['not_exists']) {
+        $("#id_name_of_stream").html("The DJ has stopped the stream. Please visit the home page for live streams.")
         $('#requested_songs_container').empty()
-        $('#requested_songs_container').html(new_requested_html)
+    }
+    else {
+        var current_requested_html = $('#requested_songs_container').html();
+        var new_requested_html = ""
+        var is_stream_dj = response['is_stream_dj']
+        $(response['requested_songs']).each(function(){
+            new_requested_html += get_requested_song_html(this,is_stream_dj)
+        });
+        current_requested_html = current_requested_html.replace(/\amp;/g,"")
+        if(current_requested_html != new_requested_html){
+            $('#requested_songs_container').empty()
+            $('#requested_songs_container').html(new_requested_html)
+        }
     }
 }
 
 function add_one_requested_song(response) {
-    var new_requested_html = ""
-    var is_stream_dj = response['is_stream_dj']
-    $(response['requested_songs']).each(function(){
-        new_requested_html += get_requested_song_html(this,is_stream_dj)
-    });
-    $('#requested_songs_container').prepend(new_requested_html)
+    if(response['success']) {
+        var new_requested_html = ""
+        var is_stream_dj = response['is_stream_dj']
+        $(response['requested_songs']).each(function(){
+            new_requested_html += get_requested_song_html(this,is_stream_dj)
+        });
+        $('#requested_songs_container').prepend(new_requested_html)
+    }
 }
 
 function votes_html(song,is_stream_dj){
