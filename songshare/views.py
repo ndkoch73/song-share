@@ -620,3 +620,17 @@ def remove_requested_song(request,id,song_uri):
 def get_currently_streaming(request):
     if request.method == "POST":
         return Http404
+
+def refresh_stream(request):
+    if request.method == "POST":
+        return Http404
+    print('hi')
+
+    streams = []
+    for stream in Stream.objects.all():
+        streams.append({
+            'id': stream.pk,
+            'listener':  stream.objects.annotate(Count('listeners')),
+        })
+    
+    return HttpResponse(json.dumps(streams), content_type='application/json')

@@ -1,6 +1,9 @@
 {% extends 'songshare/default_sidebar.html' %}
 
 {% block mainpage %}
+{% load static %}
+<script src="{% static 'songshare/getDJs.js' %}" type="text/javascript"></script>
+
 <div class="main ui container">
       
     <h2 class="ui dividing header">
@@ -44,6 +47,11 @@
                         <img src="https://cdn1.iconfinder.com/data/icons/user-pictures/100/unknown-512.png"  style="height: 64px; width: 64px;">
                         {% endif %}
                         <br><br>
+                        <div class="meta">
+                            <i class="users icon"></i>
+                            <span id="id_stream_listener_count_{{stream.id}}">{{stream.listeners.count}}</span>
+                            <span>listeners</span>
+                        </div>
                         <div class="meta">
                         {% if stream.is_streaming == True %}
                             <div class="meta">
@@ -102,7 +110,9 @@
             </div>
             {% endfor %}
         </div>
+       
     </div>
+    <script>refresh_streams()</script> 
 </div>
 
 

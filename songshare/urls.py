@@ -27,4 +27,5 @@ urlpatterns = [
     path('dj-stream/<int:id>/add-to-queue/<str:song_uri>',views.add_song_to_queue,name="add-to-queue"),
     path('dj-stream/<int:id>/remove-requested-song/<str:song_uri>',views.remove_requested_song,name='remove-requested-song'),
     path('get-currently-streaming',views.get_currently_streaming,name="get-currently-streaming"),
+    path('dj-search/refresh-streams', views.refresh_stream, name="refresh-stream"),
 ]
