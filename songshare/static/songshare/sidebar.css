@@ -13,7 +13,27 @@
   padding-top: 40px;
 }
 
+
+.ui.floating.label.non-dj {
+  position: absolute;
+  z-index: 100;
+  top: -1em;
+  left: 1% !important;
+  top: 1% !important;
+  margin: 0 -1em 0 0 !important;
+}
+
+.ui.floating.label.dj {
+  position: absolute;
+  z-index: 100;
+  top: -1em;
+  left: 1% !important;
+  top: 6% !important;
+  margin: 0 -1em 0 0 !important;
+}
+
 .scrolling-content {
   max-height: 75vh; 
   overflow-y: auto;
+  overflow-x: hidden;
 }

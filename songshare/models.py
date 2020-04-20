@@ -82,81 +82,11 @@ class Profile(models.Model):
         else:
             return None
 
-# Song class (essential)
-class Song(models.Model):
-    """
-    A class used to encapsulate a song provided by Spotify API
-    ...
-    Attributes
-    ----------
-    artist : models.CharField
-        the artist of the song (might need an additional field to reference
-        an artist profile via uri)
-    album : models.CharField
-        the album of the song (might need an additional field to reference
-        an album profile via uri)
-    vote_count : models.IntegerField
-        vote count for the song
-    uri : models.CharField
-        reference to the song provided by the Spotify API
-    """
-    artist = models.CharField(max_length=200)
-    album = models.CharField(max_length=200)
-    name = models.CharField(max_length=200)
-    vote_count = models.IntegerField(blank=True, null=True)
-    uri = models.CharField(max_length=200)
-    image_url = models.CharField(max_length=500)
-    # can take three values 'accepted','denied','pending'
-    request_status = models.CharField(max_length=10) 
-
-    @classmethod
-    def clean_artists(cls,artists):
-        result = ""
-        for i in range(0,len(artists)):
-            result += artists[i]['name']
-            if i != len(artists) - 1:
-                result += " & "
-        print(result)
-        return result
-    def __str__(self):
-        return 'Song(artist=' + str(self.artist) + ' album=' + str(self.album) + ')'
     def to_json(self):
-        if self.request_status:
-            return {'artist':self.artist,'album':self.album,'name':self.name,
-                    'uri':self.uri,'image_url':self.image_url, 'request_status':self.request_status}
-        return {'artist':self.artist,'album':self.album,'name':self.name,'uri':self.uri,'image_url':self.image_url}
-
-# Playlist class (essential)
-class Playlist(models.Model):
-    """
-    A class used to represent a user Playlist created using songshare app
-    ...
-    Attributes
-    ----------
-    user : models.ForeignKey(User)
-        the owner of the playlist
-    profile : models.ForeignKey(Profile)
-        reference to the playlist owner's profile for a user to view
-    songs : models.ForeignKey(Song)
-        the songs in the playlist
-    bio : models.CharField
-        a playlist should have a description (maybe?)
-    followers : models.ManyToManyField(Profile)
-        the followers of the playlist used to reference their profile
-    picture : models.FileField(blank=True)
-        the playlist's picture
-    content_type: models.CharField
-        used to verify that the user's profile picture is indeed a picture
-    """
-    user = models.ForeignKey(User, default=None, on_delete=models.PROTECT)
-    profile = models.ForeignKey(Profile, default=None, on_delete=models.PROTECT)
-    songs = models.ForeignKey(Song, default=None, on_delete=models.PROTECT)
-    picture = models.FileField(blank=True)
-    bio = models.CharField(max_length=200)
-    content_type = models.CharField(max_length=50, blank=True)
-
-    def __str__(self):
-        return 'Playlist(user=' + str(self.user) + ' songs=' + str(self.songs) + ')'
+        picuture_available = bool(self.picture)
+        return {'spotify_email':self.spotify_email,'is_dj':self.is_dj,'id':self.id,
+            'is_live':self.is_live,'fname':self.fname,'lname':self.lname,'name':self.name,
+            'bio':self.bio, 'picture_avaliable':picuture_available,'username':self.user.username}
 
 
 # Post Model (optional for now)
@@ -220,7 +150,6 @@ class Stream(models.Model):
     dj = models.ForeignKey(Profile, default=None, on_delete=models.PROTECT)
     listeners = models.ManyToManyField(Profile, related_name="listening")
     is_streaming = models.BooleanField(default=True)
-    requested_songs = models.ManyToManyField(Song, related_name="requested_songs")
     
     def get_recently_played(self):
         sp = spotipy.Spotify(auth=self.dj.get_auth_token(scope=settings.SPOTIFY_SCOPE_ACCESS,
@@ -257,12 +186,77 @@ class Stream(models.Model):
                         image_url=result['album']['images'][1]['url'])
         return current_song
     
+    def to_json(self):
+        result = {'name': self.name, 'dj':self.dj.to_json(),'is_streaming':self.is_streaming}
+        listeners = []
+        for listener in self.listeners.all():
+            listeners.append(listener.to_json())
+        result['listeners'] = listeners
+        result['total_listening'] = len(listeners)
+        return result
+    
     def add_to_queue(self,song):
         sp = spotipy.Spotify(auth=self.dj.get_auth_token(scope=settings.SPOTIFY_SCOPE_ACCESS,
                                             client_id=settings.SPOTIPY_CLIENT_ID,
                                             client_secret=settings.SPOTIPY_CLIENT_SECRET,
                                             redirect_uri=settings.REDIRECT_AUTHENTICATION_URL))
         sp.add_to_queue(song.uri)
+
+# Song class (essential)
+class Song(models.Model):
+    """
+    A class used to encapsulate a song provided by Spotify API
+    ...
+    Attributes
+    ----------
+    artist : models.CharField
+        the artist of the song (might need an additional field to reference
+        an artist profile via uri)
+    album : models.CharField
+        the album of the song (might need an additional field to reference
+        an album profile via uri)
+    vote_count : models.IntegerField
+        vote count for the song
+    uri : models.CharField
+        reference to the song provided by the Spotify API
+    """
+    artist = models.CharField(max_length=200)
+    album = models.CharField(max_length=200)
+    name = models.CharField(max_length=200)
+    voters = models.ManyToManyField(Profile)
+    uri = models.CharField(max_length=200)
+    image_url = models.CharField(max_length=500)
+    # can take three values 'accepted','denied','pending'
+    request_status = models.CharField(max_length=10) 
+    parent = models.ForeignKey(Stream, on_delete=models.CASCADE, related_name="requested_songs")
+    creation_time = models.DateTimeField()
+
+    @classmethod
+    def clean_artists(cls,artists):
+        result = ""
+        for i in range(0,len(artists)):
+            result += artists[i]['name']
+            if i != len(artists) - 1:
+                artists += " & "
+        return result
+    def __str__(self):
+        return 'Song(artist=' + str(self.artist) + ' album=' + str(self.album) + ')'
+    def to_json(self, request=None):
+        if request is not None:
+            user_has_voted = self.voters.filter(user=request.user).exists()
+            votes = self.voters.all().count()
+            ID = self.id
+        else:
+            user_has_voted = False
+            votes = 0
+            ID = -1
+        if self.request_status:
+            return {'artist':self.artist,'album':self.album,'name':self.name, 'votes':self.voters.all().count(),
+                    'uri':self.uri,'image_url':self.image_url, 'request_status':self.request_status, 
+                    'user_has_voted':user_has_voted, 'id':ID}
+        return {'artist':self.artist,'album':self.album,'name':self.name,'uri':self.uri,'image_url':self.image_url,
+                'votes':votes, 'user_has_voted':user_has_voted, 'id':ID}
+
 
 """
 Note:

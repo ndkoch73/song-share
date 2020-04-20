@@ -118,11 +118,33 @@ function request_song(song_uri){
         type: "POST",
         data: "csrfmiddlewaretoken="+getCSRFToken(),
         dataType: "json",
-        success: add_requested_song,
+        success: add_one_requested_song,
         error: function(response){
             console.log(response)
         }
     });
+}
+
+function vote(song_id){
+    $.post(
+        "/songshare/vote",
+        {csrfmiddlewaretoken:getCSRFToken(), song:song_id},
+        update_votes
+    );
+}
+
+function unvote(song_id){
+    $.post(
+        "/songshare/unvote",
+        {csrfmiddlewaretoken:getCSRFToken(), song:song_id},
+        update_votes
+    );
+}
+
+function update_votes(response){
+    if(response.success){
+        $("#song_" + response.song.toString() + "_vote_count").html(response.votes.toString());
+    }
 }
 
 function get_requested_songs(){
@@ -158,10 +180,40 @@ function update_requested_songs(response){
     }
 }
 
+function add_one_requested_song(response) {
+    var new_requested_html = ""
+    var is_stream_dj = response['is_stream_dj']
+    $(response['requested_songs']).each(function(){
+        new_requested_html += get_requested_song_html(this,is_stream_dj)
+    });
+    $('#requested_songs_container').prepend(new_requested_html)
+}
+
+function votes_html(song,is_stream_dj){
+    if(is_stream_dj){
+        return '<div class="ui floating blue circular label dj" id="song_' + song.id + '_vote_count">' + song.votes + '</div>'
+    }
+
+    if(!song.user_has_voted){
+        button = `  <button class="circular mini ui icon button" onclick="vote(` + song.id + `)">
+                        <i class="thumbs up icon"></i>
+                    </button>
+                `
+    }
+    else {
+        button = `  <button class="blue active circular mini ui icon button" onclick="unvote(`+ song.id +`)">
+                        <i class="thumbs up icon"></i>
+                    </button>
+                `
+    }
+    return '<div class="ui floating blue circular label non-dj" id="song_' + song.id + '_vote_count">' + song.votes + '</div>' + 
+            '<div class="ui bottom right attached label" style="background-color: transparent;">' + button + '</div>'
+}
+
 function get_requested_song_html(song,is_stream_dj){
     if(song.request_status == 'accepted'){
         button_status_html = `
-                    <div class="center aligned column">` +
+                    <div class="six wide right aligned column">` +
                         '<button class="disabled circular ui green button" style="opacity: 1 !important"><i class="check icon"></i>Accept</button>' +
                         '<button class="disabled circular ui red button"><i class="close icon"></i>Deny</button>' +
                     `</div>
@@ -171,7 +223,7 @@ function get_requested_song_html(song,is_stream_dj){
         status_label_html = '<span class="ui green right corner label"><i class="check icon"></i></span>'
     } else if(song.request_status == 'rejected'){
         button_status_html = `
-                    <div class="center aligned column">` +
+                    <div class="six wide right aligned column">` +
                     '<button class="disabled circular ui green button"><i class="check icon"></i>Accept</button>' +
                     '<button class="disabled circular ui red button" style="opacity: 1 !important"><i class="close icon"></i>Deny</button>' +
                 `</div>
@@ -181,7 +233,7 @@ function get_requested_song_html(song,is_stream_dj){
         status_label_html = '<span class="ui red right corner label"><i class="close icon"></i></span>'
     } else {
         button_status_html = `
-                    <div class="center aligned column">` +
+                    <div class="six wide right aligned column">` +
                     '<button class="circular ui green button" ' + 
                         'onclick="add_song_to_queue(' + "'" + song.uri + "'" + ')"><i class="check icon"></i>Accept</button>' +
                     '<button class="circular ui red button" ' + 
@@ -196,13 +248,14 @@ function get_requested_song_html(song,is_stream_dj){
         return `
                 <div class="ui raised segment">` + 
                     status_label_html + 
-                    `<div class="ui two column stackable grid">
+                    votes_html(song,is_stream_dj) + 
+                    `<div class="ui three column stackable grid">
                         <div class="three wide column"> ` + 
                             '<div class="ui image">' + 
                                 '<img src="'+ song.image_url + '">' + 
                             '</div>' +     
                         `</div>
-                        <div class="twelve wide column">` + 
+                        <div class="nine wide column">` + 
                             '<div class="ui header">' +
                                 song.name +
                                 '<div class="sub header">' + song.album +
@@ -210,14 +263,15 @@ function get_requested_song_html(song,is_stream_dj){
                                     song.artist +
                                 '</div>' + 
                             '</div>' +
-                        `</div>
-                    </div>
+                        '</div>' + 
+                    `</div>
                 </div>
         `
     } else {
         main_html = `
-                    <div class="ui segment">
-                        <div class="ui three column stackable grid">
+                    <div class="ui raised segment"> ` + 
+                        votes_html(song,is_stream_dj) + 
+                        `<div class="ui four column stackable grid">
                             <div class="two wide column"> ` + 
                                 '<div class="ui small image">' + 
                                     '<img src="'+ song.image_url + '">' + 
@@ -274,25 +328,29 @@ function get_searched_song_html(searched_song){
             artists += ' & ';
         }
     }
-    return  '<div class="ui fluid card">' + 
-                '<div style="display: flex;flex-direction: row;">' + 
-                    '<div class="ui small image">' + 
-                        '<img src="' + searched_song.album.images[2].url + '">' +
-                    '</div>' + 
-                    '<div class="segment left aligned">' + 
-                        '<div class="ui small header" style="padding-top: 3%;">' + 
-                            searched_song.name + 
-                            '<div class="sub header">' + searched_song.album.name + 
-                            '<br>' + 
-                            artists + 
-                        '</div>' + 
-                    '</div>' +
-                '</div>' +
+    return `<div class="ui fluid raised card">` +
+                `<div class="ui two column stackable grid">
+                    <div class="three wide column"> ` + 
+                        '<div class="ui image">' + 
+                            '<img src="'+ searched_song.album.images[2].url + '">' + 
+                        '</div>' +     
+                    `</div>
+                    <div class="twelve wide column">` + 
+                        '<div class="ui header">' +
+                            searched_song.name +
+                            '<div class="sub header">' + searched_song.album.name +
+                                '<br>' + 
+                                artists +
+                            '</div>' + 
+                        '</div>' +
+                    `</div>
+                </div>` + 
+                '<div class="ui bottom attached button" onclick="request_song(' + "'" + searched_song.uri + "'" + ')">' + 
+                    '<i class="add icon"></i>' + 
+                    'Request Song' + 
+                '</div>' + 
             '</div>' + 
-            '<div class="ui bottom attached button" onclick="request_song(' + "'" + searched_song.uri + "'" + ')">' + 
-                '<i class="add icon"></i>' + 
-                'Request Song' + 
-            '</div>'
+        '</div>'
 }
 
 function getCSRFToken() {
@@ -315,4 +373,4 @@ function refresh_songs(){
 window.onload = refresh_songs;
 window.setInterval(get_currently_playing, 10*1000);
 window.setInterval(get_recently_played,15*1000)
-window.setInterval(get_requested_songs,5*1000)
+window.setInterval(get_requested_songs,2*1000)
