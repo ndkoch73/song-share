@@ -46,8 +46,6 @@ def home_page(request):
     # pass the spotify registration form if the user is not a dj
     if not c_user.is_dj:
         context['spotify_registration_form'] = SpotifyRegistrationForm()
-    elif c_user.is_dj and not c_user.is_live:
-        context['stream_creation_form'] = CreateStreamForm()
     return render(request,'songshare/user_home.html', context)
 
 @login_required
@@ -451,10 +449,10 @@ def create_stream_action(request):
         raise Http404
     context = {}
     stream_creation_form = CreateStreamForm(request.POST)
-    context['stream_creation_form'] = stream_creation_form
     c_user = Profile.objects.get(user=request.user)
     context['c_user'] = c_user
     if not stream_creation_form.is_valid():
+        context['errors'] = [{'message':'Oops, please provide a unique name for your stream'}]
         return render(request,'songshare/user_home.html',context)
     stream_name = stream_creation_form.cleaned_data['stream_name']
     new_stream = Stream(name=stream_name,
@@ -647,3 +645,9 @@ def unvote(request):
 def get_currently_streaming(request):
     if request.method == "POST":
         raise Http404
+    streams = Stream.objects.all().filter(is_streaming=True)
+    stream_list = []
+    for stream in streams:
+        stream_list.append(stream.to_json())
+    results = {'c_user': Profile.objects.get(user=request.user).to_json(),'streams':stream_list}
+    return HttpResponse(json.dumps(results), content_type='application/json')
