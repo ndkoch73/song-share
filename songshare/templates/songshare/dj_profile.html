@@ -9,7 +9,7 @@
 	</h2>
 	<div class="ui three column grid" id="id-profile">
 	  <div class="row">
-		  <div class="five wide column">
+		  <div class="four wide column">
 			{% if profile.picture %}
 			<div class="small circular ui image"><img src="{% url 'photo' profile.id %}" alt="{{profile.text}}"
 				id="id_profile_picture"></div>
@@ -17,7 +17,7 @@
 			<div class="small circular ui image"><img src="../../static/songshare/default.webp" id="id_user_picture"></div>
 			{% endif %}
 		  </div>
-		<div class="column">
+		<div class="six wide column">
 			<div class="ui segment">
 				<div class="field">
 					<div class="ui header">Bio</div>
@@ -43,8 +43,7 @@
 			</div>
 		</div>	
 		{% if profile.is_live %}
-		here
-		<div class="column">
+		<div class="six wide column">
 			<div class="ui segment">
 				<div class="field">
 					{% if c_user in stream.listeners.all %}
