@@ -52,7 +52,6 @@
 
 {% block mainpage %}
 <div class="main ui container">
-	
 	<div class="ui three column grid" id="id-Streams">
 		<div class="row">
 			{% for follower in following %}
@@ -75,15 +74,9 @@
 			{% endfor %}
 		</div>
 	</div>
-			
-	
-	<h2 class="ui dividing header">
-			<label>Popular Streams</label>
-	</h2>
 	<h2 class="ui dividing header">
 		<label>Currently Streaming</label>
 	</h2>
-
 	<div class="ui grid" id="currently-streaming-container"></div>
 </div>
 {% endblock %}
