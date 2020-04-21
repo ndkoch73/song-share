@@ -622,7 +622,7 @@ def vote(request):
     if song.request_status != 'rejected':
         song.voters.add(request.user.profile_set.all()[0])
 
-    return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
+    return HttpResponse(json.dumps({"success":True, "song":song.to_json(request), "votes":song.voters.all().count()}), content_type='application/json')
 
 @login_required
 def unvote(request):
@@ -640,7 +640,7 @@ def unvote(request):
     if song.request_status != 'rejected':
         song.voters.remove(request.user.profile_set.all()[0])
 
-    return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
+    return HttpResponse(json.dumps({"success":True, "song":song.to_json(request), "votes":song.voters.all().count()}), content_type='application/json')
 
 def get_currently_streaming(request):
     if request.method == "POST":

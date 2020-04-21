@@ -143,7 +143,16 @@ function unvote(song_id){
 
 function update_votes(response){
     if(response.success){
-        $("#song_" + response.song.toString() + "_vote_count").html(response.votes.toString());
+        $("#song_" + response.song.id.toString() + "_vote_count").html(response.votes.toString());
+        button = $("#vote_button_" + response.song.id.toString());
+        if(response.song.user_has_voted) {
+            button.addClass("blue active");
+            button.attr("onclick", "unvote("+response.song.id+")");
+        }
+        else {
+            button.removeClass("blue active");
+            button.attr("onclick", "vote("+response.song.id+")");
+        }
     }
 }
 
@@ -203,13 +212,13 @@ function votes_html(song,is_stream_dj){
     }
 
     if(!song.user_has_voted){
-        button = `  <button class="circular mini ui icon button" onclick="vote(` + song.id + `)">
+        button = `  <button class="circular mini ui icon button" onclick="vote(` + song.id + `)" id="vote_button_` + song.id + `">
                         <i class="thumbs up icon"></i>
                     </button>
                 `
     }
     else {
-        button = `  <button class="blue active circular mini ui icon button" onclick="unvote(`+ song.id +`)">
+        button = `  <button class="blue active circular mini ui icon button" onclick="unvote(`+ song.id +`)" id="vote_button_` + song.id + `">
                         <i class="thumbs up icon"></i>
                     </button>
                 `

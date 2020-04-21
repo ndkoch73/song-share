@@ -131,7 +131,8 @@ SPOTIPY_CLIENT_ID = '4f8a77d7836949868c6487a0142d28d2'
 
 SPOTIPY_CLIENT_SECRET = '63135bafa188430991566a01dac77e26'
 
-RECENT_SONG_LIMIT = 7
+# This won't be exactly the same limit, spotify will send duplicates
+RECENT_SONG_LIMIT = 20
 
 # different scopes that we will be requesting from the user
 SPOTIFY_SCOPE_ACCESS = 'user-modify-playback-state' + ' ' + 'user-read-currently-playing' + \
