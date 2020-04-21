@@ -130,6 +130,15 @@ class Stream(models.Model):
                                             redirect_uri=settings.REDIRECT_AUTHENTICATION_URL))
         sp.add_to_queue(song.uri)
 
+    def clear_queue(self):
+        sp = spotipy.Spotify(auth=self.dj.get_auth_token(scope=settings.SPOTIFY_SCOPE_ACCESS,
+                                            client_id=settings.SPOTIPY_CLIENT_ID,
+                                            client_secret=settings.SPOTIPY_CLIENT_SECRET,
+                                            redirect_uri=settings.REDIRECT_AUTHENTICATION_URL))
+        for x in range(self.requested_songs.count()):
+            sp.next_track()
+        sp.pause_playback()
+
 
 class Song(models.Model):
     artist = models.CharField(max_length=200)

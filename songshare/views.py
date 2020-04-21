@@ -510,6 +510,7 @@ def end_stream_action(request):
     stream = get_stream(c_user.id)
     if stream == None:
         raise Http404
+    stream.clear_queue()
     stream.is_streaming = False
     stream.delete()
     c_user.is_live = False
