@@ -232,7 +232,7 @@ def dj_stream_action(request, id):
         # context['currently_playing'] = stream.get_currently_playing()
         # context['recently_played'] = stream.get_recently_played()
         return render(request,'songshare/stream_page.html',context)
-    return 42
+    raise Http404
 
 
 
@@ -651,7 +651,7 @@ def vote(request):
         song.num_votes = song.voters.all().count()
         song.save()
 
-    return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
+    return HttpResponse(json.dumps({"success":True, "song":song.to_json(request), "votes":song.voters.all().count()}), content_type='application/json')
 
 @login_required
 def unvote(request):
@@ -671,7 +671,7 @@ def unvote(request):
         song.num_votes = song.voters.all().count()
         song.save()
 
-    return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
+    return HttpResponse(json.dumps({"success":True, "song":song.to_json(request), "votes":song.voters.all().count()}), content_type='application/json')
 
 def get_currently_streaming(request):
     if request.method == "POST":
