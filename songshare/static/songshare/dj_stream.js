@@ -154,6 +154,9 @@ function update_votes(response){
             button.attr("onclick", "vote("+response.song.id+")");
         }
     }
+    else {
+        alert(response.message)
+    }
 }
 
 function get_requested_songs(){
