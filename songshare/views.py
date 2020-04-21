@@ -538,11 +538,11 @@ def get_currently_playing(request,id):
         raise Http404
     stream = get_stream(id)
     if stream == None:
-        currently_playing = Song(name="No song playing", artist="", album="", uri="", image_url="/static/songshare/default.jpg")
+        currently_playing = Song(name="No song playing", artist="", album="", uri="", image_url="/static/songshare/default.png")
     else:
         currently_playing = stream.get_currently_playing()
         if currently_playing is None:
-            currently_playing = Song(name="No song playing", artist="", album="", uri="", image_url="/static/songshare/default.jpg")
+            currently_playing = Song(name="No song playing", artist="", album="", uri="", image_url="/static/songshare/default.png")
     results = currently_playing.to_json()
     return HttpResponse(json.dumps(results), content_type='application/json')
 
