@@ -84,17 +84,22 @@ class Stream(models.Model):
                                             client_id=settings.SPOTIPY_CLIENT_ID,
                                             client_secret=settings.SPOTIPY_CLIENT_SECRET,
                                             redirect_uri=settings.REDIRECT_AUTHENTICATION_URL))
-        recently_played = sp.current_user_recently_played(limit=settings.RECENT_SONG_LIMIT)
+        recently_played = sp.current_user_recently_played(limit=settings.RECENT_SONG_LIMIT_WITH_DUPLICATES)
         recently_played = recently_played['items']
         results = []
+        last_uri = ''
         for song in recently_played:
-            artists = Song.clean_artists(song['track']['artists'])
-            recent_song = Song(artist=artists,
-                            album=song['track']['album']['name'],
-                            name=song['track']['name'],
-                            uri=song['track']['uri'],
-                            image_url=song['track']['album']['images'][2]['url'])
-            results.append(recent_song)
+            if song['track']['uri'] != last_uri:
+                artists = Song.clean_artists(song['track']['artists'])
+                recent_song = Song(artist=artists,
+                                album=song['track']['album']['name'],
+                                name=song['track']['name'],
+                                uri=song['track']['uri'],
+                                image_url=song['track']['album']['images'][2]['url'])
+                results.append(recent_song)
+                last_uri = song['track']['uri']
+        if len(results) > settings.RECENT_SONG_LIMIT:
+            return results[:settings.RECENT_SONG_LIMIT]
         return results
 
     def get_currently_playing(self):
