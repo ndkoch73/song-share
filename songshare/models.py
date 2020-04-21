@@ -130,7 +130,8 @@ class Stream(models.Model):
                                             redirect_uri=settings.REDIRECT_AUTHENTICATION_URL))
         for x in range(self.requested_songs.count()):
             sp.next_track()
-        sp.pause_playback()
+        if sp.currently_playing() != None:
+            sp.pause_playback()
 
 
 class Song(models.Model):
