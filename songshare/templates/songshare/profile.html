@@ -1,81 +1,126 @@
 {% extends 'songshare/default_sidebar.html' %}
 
 {% block mainpage %}
-      <div class="main ui container">
-      
-        <h2 class="ui dividing header">
-          <span id="id_name_of_page" style="color:black;text-align:center;"> Profile Page for {{c_user.user.first_name}} {{c_user.user.last_name}}
-          </span>
-          <br>
-          <div class="ui small image">
-            {% if c_user.picture %}
-              <img src="{% url 'photo' c_user.id %}" width="100px" id="id_profile_picture">
-            {% else %}
-              <img src="default.jpg" width="200px"  id="id_user_picture">
-            {% endif %}
-          </div>
-        </h2>
-        <div class="ui three column grid" id="id-profile">
-          
-          <div class="row">
-            <div class="column">
-              <form class="ui form" enctype="multipart/form-data" method="post" action="{% url 'profile-create' %}" class="add-form">
-                <div class="ui segment">
-                  {% for field in form.visible_fields %}
-                  <div class="field">
-                    {{field.label_tag}}
-                    {{field}}
-                  </div>
-                  {% endfor %} 
-                  <div class="field">
-                    <label for="id_bio">
-                      Bio:
-                    </label>
-                    <input type="text" name="bio" maxlength="200" required="" id="id_bio" value="{{c_user.bio}}">
-                  </div>
-                  {% csrf_token %}
-                  <input class="ui gray submit button" type="submit" value="Submit" id="id_update_profile_button">
-                </div>	
-              </form>
-            </div>
-            <div class="column">
-              <div class="ui verticle segment">
-                  {% if c_user.is_dj == False %}
-                  <button class="ui green submit button" id="id_link_song_share_button"> 
-                    <a href="{% url 'authenticate' %}"> Link to Spotify Premium
-                      <div class="ui small image">
-                        <img src="/static/songshare/spotifylogo.png" width="100px" id="id_spotify_logo">
-                      </div>
-                    </a>
-                  </button>
-                  {% endif %}
-              </div>
-            </div>
-            <div class="column">
-              <div class="ui segment">
-                <div class="field">
-                  <a href="{% url 'dj-stream' dj.id %" id="id_now_listening"> 
-                    Now Listening to {{dj.user_name}} 
-                  </a>
-                </div>
-              </div>
-            </div>  
-          </div>
-          
-          {% for follower in following %}
-          <div class="row">
+<div class="main ui container">
+  <h2 class="ui dividing header">
+    <span id="id_name_of_page" style="color:black;text-align:center;">
+      Profile Page for {{profile.user.first_name}} {{profile.user.last_name}}
+    </span>
+    <br>
+  </h2>
+  <div class="ui three column grid" id="id-profile">
+    <div class="row">
+      <div class="four wide column">
+        {% if profile.picture %}
+        <div class="circular ui image"><img src="{% url 'photo' profile.id %}" alt="{{profile.text}}"
+            id="id_profile_picture"></div>
+        {% else %}
+        <div class="circular ui image"><img src="../../static/songshare/default.webp" id="id_user_picture"></div>
+        {% endif %}
+      </div>
+      <div class="six wide column">
+        <div class="ui segment">
+          <form class="ui form" enctype="multipart/form-data" method="post" action="{% url 'profile-create' %}"
+            class="add-form">
+            {% for field in form.visible_fields %}
             <div class="field">
-              <a href="{% url 'profile-view' follower.id %}" id="id_profile_link_{{follower.user_name}}">{{follower.first_name}} {{follower.last_name}}</a>
+              {{field.label_tag}}
+              {{field}}
             </div>
-          </div>
-          {% endfor %}
+            {% endfor %}
+            <div class="field">
+              <label for="id_bio">
+                Bio:
+              </label>
+              <input type="text" name="bio" maxlength="200" required="" id="id_bio" value="{{c_user.bio}}">
+            </div>
+            {% csrf_token %}
+            <input class="ui gray submit button" type="submit" value="Submit" id="id_update_profile_button">
+          </form>
         </div>
       </div>
-      
+      <div class="six wide column">
+        {% if profile.is_dj == False %}
+        <div class="ui cards">
+          <div class="card">
+            <div class="content">
+              <div class="header">It looks like your account is not registered with your spotify account</div>
+              <div class="description">
+                <p>
+                  Simply ensure you have spotify premium and use your
+                  email to register.
+                </p>
+              </div>
+            </div>
+            <div class="ui bottom attached button" onclick="openModal('register-spotify')">
+              <div class="" style="color: #1DB954;">
+                <i class="spotify icon"></i>
+                Register with Spotify
+              </div>
+            </div>
+          </div>
+        </div>
 
-
-
-
-
-
+        {% if spotify_registration_form.errors %}
+        {% for field in spotify_registration_form %}
+        {% for error in field.errors %}
+        <div class="ui error message">
+          <i class="close icon" onclick="closeError()"></i>
+          {{error}}
+        </div>
+        {% endfor %}
+        {% endfor %}
+        {% endif %}
+        {% endif %}
+        {% if errors %}
+        {% for error in errors %}
+        <div class="ui error small message">
+          <i class="close icon" onclick="closeError()"></i>
+          {{error.message}}
+        </div>
+        {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+    <div class="row">
+      <div class="eight wide centered column" style="overflow-y: auto; max-height: 40vh;">
+          <table class="ui celled table">
+              <thead>
+                <tr class="center aligned">
+                  <th>Following</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>  
+                    {% for follower in profile.following.all %}
+                    <div class="ui raised segment">
+                      {% if follower.is_live %}
+                      <div class="ui raised red ribbon label">Live</div>
+                      {% endif %}
+                      <div class="ui two column grid">
+                        <div class="four wide column">
+                          <div class="ui small circular image">
+                            {% if follower.picture %}
+                            <img src="{% url 'photo' follower.id %}" alt="{{profile.text}}"id="id_profile_picture" 
+                            style="max-width: 64px; max-height: 64px;">
+                            {% else %}
+                            <img src="../../static/songshare/default.webp" id="id_user_picture" style="max-width: 64px; max-height: 64px;">
+                            {% endif %}
+                          </div>
+                        </div>
+                        <div class="four wide column left aligned">
+                            <div class="ui small header"><a href="{% url 'profile-view' follower.id %}"> DJ {{follower}}</a></div>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

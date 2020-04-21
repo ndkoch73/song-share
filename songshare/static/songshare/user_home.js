@@ -16,7 +16,10 @@ function update_streams(response){
     $(response.streams).each(function(){
         stream_html += get_stream_html(this,response.c_user)
     });
-    $('#currently-streaming-container').html(stream_html);
+    previous_stream_html = $('#currently-streaming-container').html();
+    if(previous_stream_html != stream_html){
+        $('#currently-streaming-container').html(stream_html);
+    }
 }
 
 function is_user_listener(user,listeners){
@@ -86,4 +89,4 @@ function refresh_streams(){
 }
 
 window.onload = get_currently_streaming;
-window.setInterval(2*1000,get_currently_streaming)
+window.setInterval(get_currently_streaming,2*1000)

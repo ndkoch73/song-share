@@ -32,7 +32,6 @@ from django.db.models import Q
 from functools import reduce # Needed only in python 3
 from operator import or_
 
-
 def get_basic_context(request):
     c_user = Profile.objects.get(user=request.user)
     context['c_user'] = c_user
@@ -74,26 +73,20 @@ def profile_page_action(request):
     following = list(c_user.following.all())
     context['c_user'] = c_user
     context['following'] = following
-    
-
 
     # Handling pictures
     profile_form = ProfilePictureForm(request.POST, request.FILES)
-    # print(profile_form)
     if request.FILES != {} and profile_form.is_valid():
-        # I'm so confused apparently this print statement is essential
-        # print(profile_form)
         pic = profile_form.cleaned_data['picture']
         c_user.content_type = profile_form.cleaned_data['picture'].content_type
         c_user.picture = pic
-        print('picture exists')
         c_user.save()
     context['form']  = ProfilePictureForm()
     context['is_dj'] = c_user.auth_token_code != ''
+    context['profile'] = c_user
     c_user.is_dj = c_user.auth_token_code != ''
-    print(c_user.is_live)
-    print(context)
-    print(c_user.bio)
+    if not c_user.is_dj:
+        context['spotify_registration_form'] = SpotifyRegistrationForm()
 
     return render(request, 'songshare/profile.html', context)
 
@@ -546,11 +539,11 @@ def get_currently_playing(request,id):
         raise Http404
     stream = get_stream(id)
     if stream == None:
-        currently_playing = Song(name="No song playing", artist="", album="", uri="", image_url="/static/songshare/default.jpg")
+        currently_playing = Song(name="No song playing", artist="", album="", uri="", image_url="/static/songshare/default.png")
     else:
         currently_playing = stream.get_currently_playing()
         if currently_playing is None:
-            currently_playing = Song(name="No song playing", artist="", album="", uri="", image_url="/static/songshare/default.jpg")
+            currently_playing = Song(name="No song playing", artist="", album="", uri="", image_url="/static/songshare/default.png")
     results = currently_playing.to_json()
     return HttpResponse(json.dumps(results), content_type='application/json')
 
