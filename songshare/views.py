@@ -503,6 +503,7 @@ def end_stream_action(request):
     stream = get_stream(c_user.id)
     if stream == None:
         raise Http404
+    stream.clear_queue()
     stream.is_streaming = False
     stream.delete()
     c_user.is_live = False
@@ -578,7 +579,8 @@ def request_song_action(request,id,song_uri):
                         image_url=results['album']['images'][2]['url'],
                         request_status='pending',
                         parent=stream,
-                        creation_time=timezone.now())
+                        creation_time=timezone.now(),
+                        num_votes=0)
     requested_song.save()
     requested_song.voters.add(request.user.profile_set.all()[0])
     stream.save()
@@ -594,7 +596,7 @@ def get_requested_songs(request,id):
         return HttpResponse(json.dumps({'not_exists':True}), content_type='application/json')
     is_stream_dj = stream.dj == Profile.objects.get(user=request.user)
     results = {'is_stream_dj':is_stream_dj, 'requested_songs':[], 'not_exists':False}
-    for item in stream.requested_songs.extra(order_by=['-creation_time']):
+    for item in stream.requested_songs.extra(order_by=['-num_votes']):
         results['requested_songs'].append(item.to_json(request))
     return HttpResponse(json.dumps(results), content_type='application/json')
 
@@ -646,6 +648,8 @@ def vote(request):
     # add to voters list
     if song.request_status != 'rejected':
         song.voters.add(request.user.profile_set.all()[0])
+        song.num_votes = song.voters.all().count()
+        song.save()
 
     return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
 
@@ -664,6 +668,8 @@ def unvote(request):
     # remove from voters list
     if song.request_status != 'rejected':
         song.voters.remove(request.user.profile_set.all()[0])
+        song.num_votes = song.voters.all().count()
+        song.save()
 
     return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
 
