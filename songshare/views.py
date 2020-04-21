@@ -233,7 +233,7 @@ def dj_stream_action(request, id):
         # context['currently_playing'] = stream.get_currently_playing()
         # context['recently_played'] = stream.get_recently_played()
         return render(request,'songshare/stream_page.html',context)
-    return 42
+    raise Http404
 
 
 

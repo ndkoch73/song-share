@@ -154,9 +154,6 @@ function update_votes(response){
             button.attr("onclick", "vote("+response.song.id+")");
         }
     }
-    else {
-        alert(response.message)
-    }
 }
 
 function get_requested_songs(){
@@ -206,6 +203,10 @@ function add_one_requested_song(response) {
             new_requested_html += get_requested_song_html(this,is_stream_dj)
         });
         $('#requested_songs_container').prepend(new_requested_html)
+    }
+    else {
+        $("#id_error_message").html(`<div class="ui error small message">
+                            <i class="close icon" onclick="closeError()"></i>` + response.message + '</div>')
     }
 }
 
