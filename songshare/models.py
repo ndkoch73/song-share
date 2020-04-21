@@ -170,7 +170,7 @@ class Stream(models.Model):
                                 image_url=song['track']['album']['images'][2]['url'])
                 results.append(recent_song)
                 last_uri = song['track']['uri']
-        if len(results) > settings.RECENT_SONG_LIMIT
+        if len(results) > settings.RECENT_SONG_LIMIT:
             return results[:settings.RECENT_SONG_LIMIT]
         return results
 
