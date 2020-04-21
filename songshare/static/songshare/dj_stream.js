@@ -55,6 +55,28 @@ function add_song_to_queue(song_uri){
     });
 }
 
+function update_current_listeners(){
+    $.ajax({
+        url: window.location.pathname + "/get-listener-count",
+        type: "GET",
+        data: "csrfmiddlewaretoken="+getCSRFToken(),
+        dataType: "json",
+        success: update_number_of_listeners,
+        error: function(response){
+            console.log(response)
+        }
+    });
+}
+
+function update_number_of_listeners(response){
+    count_id = "#stream_" + response['id'] + "_count";
+    new_count = parseInt(response['count']);
+    old_count = parseInt($(count_id).html());
+    if(new_count != old_count){
+        $(count_id).html(new_count);
+    }
+}   
+
 function deny_song(song_uri){
     $.ajax({
         url: window.location.pathname + "/remove-requested-song/" + encodeURIComponent(song_uri),
@@ -143,7 +165,16 @@ function unvote(song_id){
 
 function update_votes(response){
     if(response.success){
-        $("#song_" + response.song.toString() + "_vote_count").html(response.votes.toString());
+        $("#song_" + response.song.id.toString() + "_vote_count").html(response.votes.toString());
+        button = $("#vote_button_" + response.song.id.toString());
+        if(response.song.user_has_voted) {
+            button.addClass("blue active");
+            button.attr("onclick", "unvote("+response.song.id+")");
+        }
+        else {
+            button.removeClass("blue active");
+            button.attr("onclick", "vote("+response.song.id+")");
+        }
     }
 }
 
@@ -195,6 +226,10 @@ function add_one_requested_song(response) {
         });
         $('#requested_songs_container').prepend(new_requested_html)
     }
+    else {
+        $("#id_error_message").html(`<div class="ui error small message">
+                            <i class="close icon" onclick="closeError()"></i>` + response.message + '</div>')
+    }
 }
 
 function votes_html(song,is_stream_dj){
@@ -203,13 +238,13 @@ function votes_html(song,is_stream_dj){
     }
 
     if(!song.user_has_voted){
-        button = `  <button class="circular mini ui icon button" onclick="vote(` + song.id + `)">
+        button = `  <button class="circular mini ui icon button" onclick="vote(` + song.id + `)" id="vote_button_` + song.id + `">
                         <i class="thumbs up icon"></i>
                     </button>
                 `
     }
     else {
-        button = `  <button class="blue active circular mini ui icon button" onclick="unvote(`+ song.id +`)">
+        button = `  <button class="blue active circular mini ui icon button" onclick="unvote(`+ song.id +`)" id="vote_button_` + song.id + `">
                         <i class="thumbs up icon"></i>
                     </button>
                 `
@@ -380,5 +415,6 @@ function refresh_songs(){
 
 window.onload = refresh_songs;
 window.setInterval(get_currently_playing, 10*1000);
-window.setInterval(get_recently_played,15*1000)
-window.setInterval(get_requested_songs,2*1000)
+window.setInterval(get_recently_played,15*1000);
+window.setInterval(get_requested_songs,2*1000);
+window.setInterval(update_current_listeners,1*1000);

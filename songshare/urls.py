@@ -30,4 +30,5 @@ urlpatterns = [
     path('unvote',views.unvote,name="unvote"),
     path('get-currently-streaming',views.get_currently_streaming,name="get-currently-streaming"),
     path('dj-search/refresh-search', views.refresh_search, name="refresh-search"),
+    path('dj-stream/<int:id>/get-listener-count',views.get_listener_count,name="get-listener-count"),
 ]

@@ -2,30 +2,27 @@
 
 {% block mainpage %}
 <div class="main ui container">
-      
 	<h2 class="ui dividing header">
 	  <span id="id_name_of_page" style="color:black;text-align:center;"> Profile Page for {{name}}
 	  </span>
 	  <br>
-	  <div class="ui small image">
-		{% if profile.picture %}
-		  <img src="{% url 'photo' profile.id %}" alt="{{profile.text}}" width="100px" id="id_profile_picture">
-		{% else %}
-		<img src="https://cdn1.iconfinder.com/data/icons/user-pictures/100/unknown-512.png"  style="height: 64px; width: 64px;">
-
-		{% endif %}
-	  </div>
 	</h2>
 	<div class="ui three column grid" id="id-profile">
-	  
 	  <div class="row">
-		<div class="column">
+		  <div class="four wide column">
+			{% if profile.picture %}
+			<div class="small circular ui image"><img src="{% url 'photo' profile.id %}" alt="{{profile.text}}"
+				id="id_profile_picture"></div>
+			{% else %}
+			<div class="small circular ui image"><img src="../../static/songshare/default.webp" id="id_user_picture"></div>
+			{% endif %}
+		  </div>
+		<div class="six wide column">
 			<div class="ui segment">
 				<div class="field">
-					<label for="id_bio"> Bio: </label>
+					<div class="ui header">Bio</div>
 					<div class="ui input">
-						<input  type="text" name="bio" required id="id_bio" value="{{profile.bio}}" readonly>
-				
+						<textarea  type="text" name="bio" required id="id_bio" value="{{profile.bio}}" readonly></textarea>
 					</div>
 				</div>
 				<br>
@@ -43,14 +40,10 @@
 						{% endif %}
 					</form>
 				</div>
-
-			
 			</div>
 		</div>	
-	  </div>
-	  {% if profile.is_live == True %}
-	  <div class="row">
-		<div class="column">
+		{% if profile.is_live %}
+		<div class="six wide column">
 			<div class="ui segment">
 				<div class="field">
 					{% if c_user in stream.listeners.all %}
@@ -70,11 +63,9 @@
 				</div>
 			</div>
 		</div>
-	  </div>
-	  {% endif %}
+		{% endif %}
+	</div>
 	</div>
   </div>
-  
-
 {% endblock %}
 

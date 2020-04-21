@@ -16,7 +16,10 @@ function update_streams(response){
     $(response.streams).each(function(){
         stream_html += get_stream_html(this,response.c_user)
     });
-    $('#currently-streaming-container').html(stream_html);
+    previous_stream_html = $('#currently-streaming-container').html();
+    if(previous_stream_html != stream_html){
+        $('#currently-streaming-container').html(stream_html);
+    }
 }
 
 function is_user_listener(user,listeners){

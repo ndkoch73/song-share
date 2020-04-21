@@ -18,7 +18,7 @@
 	<br>
 	<div class="ui center aligned icon header">
 		<i class="users icon"></i>
-		{{stream.listeners.count}} currently listening
+		<span id="stream_{{stream.dj.id}}_count">{{stream.listeners.count}}</span> currently listening
 	</div>
 {% else %}
 	<form method="POST" action="{% url 'leave-stream' stream.dj.id %}">
@@ -26,6 +26,9 @@
 		{% csrf_token %}
 	</form>
 {% endif %}
+	<br/>
+	<div id="id_error_message">
+	</div>
 {% endblock %}
 
 {% block mainpage %}
