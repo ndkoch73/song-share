@@ -61,18 +61,6 @@ class Profile(models.Model):
 
 
 
-
-class Post(models.Model):
-    text = models.CharField(max_length=200)
-    user = models.ForeignKey(User, default=None, on_delete=models.PROTECT)
-    fname = models.CharField(max_length=20)
-    lname = models.CharField(max_length=20)
-    date = models.DateTimeField()
-
-    def __str__(self):
-        return 'Post(user=' + str(self.user) + ' text=' + str(self.text) + ')'
-
-
 class Stream(models.Model):
     name = models.CharField(max_length=256)
     dj = models.ForeignKey(Profile, default=None, on_delete=models.PROTECT)

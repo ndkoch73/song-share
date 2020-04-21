@@ -528,7 +528,7 @@ def leave_stream_action(request, id):
         raise Http404
     stream = get_stream(id)
     if stream == None:
-        raise Http404
+        return redirect(reverse('home'))
     listener_profile = Profile.objects.get(user=request.user)
     stream.listeners.remove(listener_profile)
     stream.save()
