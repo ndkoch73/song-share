@@ -104,6 +104,7 @@ def goto_profile(request, id):
     Http404
         If for some reason the page the user is currently on is not available
     """
+
     context = {}
     try:
         p_user = User.objects.get(id=id)
@@ -121,8 +122,8 @@ def goto_profile(request, id):
         else:
             context['following'] = False
         if profile.is_live:
-            print(Stream.objects.all())
-            
+            stream = Stream.objects.filter(dj=profile,listeners=c_user)
+            context['stream'] = stream
         context['name'] = name
         return render(request, 'songshare/dj_profile.html', context)
     except:
