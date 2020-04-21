@@ -657,7 +657,6 @@ def vote(request):
         song.num_votes = song.voters.all().count()
         song.save()
 
-    print(song.num_votes)
     return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
 
 @login_required
@@ -678,7 +677,6 @@ def unvote(request):
         song.num_votes = song.voters.all().count()
         song.save()
 
-    print(song.num_votes)
     return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
 
 def get_currently_streaming(request):
