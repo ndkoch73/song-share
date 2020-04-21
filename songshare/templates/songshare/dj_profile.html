@@ -42,28 +42,6 @@
 				</div>
 			</div>
 		</div>	
-		{% if profile.is_live %}
-		<div class="six wide column">
-			<div class="ui segment">
-				<div class="field">
-					{% if c_user in stream.listeners.all %}
-					<a class="fluid positive ui button" href="{% url 'dj-stream' profile.id %}">
-						<i class="spotify icon"></i>
-						Go To Stream
-					</a>
-					{% else %}
-					<form method="POST" action="{% url 'join-stream' profile.id %}">
-						<button class="fluid positive ui button">
-							<i class="spotify icon"></i>
-							Join Stream
-						</button>
-						{% csrf_token %}
-					</form>
-					{% endif %}
-				</div>
-			</div>
-		</div>
-		{% endif %}
 	</div>
 	</div>
   </div>

@@ -527,7 +527,7 @@ def leave_stream_action(request, id):
         raise Http404
     stream = get_stream(id)
     if stream == None:
-        raise Http404
+        return redirect(reverse('home'))
     listener_profile = Profile.objects.get(user=request.user)
     stream.listeners.remove(listener_profile)
     stream.save()
@@ -537,7 +537,6 @@ def get_currently_playing(request,id):
     if request.method == "POST":
         raise Http404
     stream = get_stream(id)
-    if stream == None:
         currently_playing = Song(name="No song playing", artist="", album="", uri="", image_url="/static/songshare/default.png")
     else:
         currently_playing = stream.get_currently_playing()
