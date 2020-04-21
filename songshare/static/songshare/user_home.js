@@ -86,4 +86,4 @@ function refresh_streams(){
 }
 
 window.onload = get_currently_streaming;
-window.setInterval(2*1000,get_currently_streaming)
+window.setInterval(get_currently_streaming,2*1000)

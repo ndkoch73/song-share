@@ -1,6 +1,8 @@
 {% extends 'songshare/default_sidebar.html' %}
 
 {% block mainpage %}
+{% load static %}
+<script src="{% static 'songshare/getDJs.js' %}" type="text/javascript"></script>
 
 <div class="main ui container">
       
@@ -35,7 +37,7 @@
         <div class="row">
         {% for stream in streams %}
             <div class="four wide column">
-                <div class="ui card">
+                <div class="ui card" id="id_stream_{{stream.id}}">
                     <div class="content">
                         <span class="header" href="#"> {{stream.name}} :
                             DJ {{stream.dj.user.username}}</span>
@@ -45,28 +47,26 @@
                         <img src="https://cdn1.iconfinder.com/data/icons/user-pictures/100/unknown-512.png"  style="height: 64px; width: 64px;">
                         {% endif %}
                         <br><br>
-                        <div class="meta">
+                        <div class="meta" id="id_stream_listener_count_{{stream.id}}">
                             <i class="users icon"></i>
-                            <span id="id_stream_listener_count_{{stream.id}}">{{stream.listeners.count}}</span>
-                            <span>listeners</span>
+                            <span>{{stream.listeners.count}} listeners</span>
                         </div>
-                        <div class="meta">
+                        <div class="meta" id="id_stream_live_{{stream.id}}}">
                         {% if stream.is_streaming == True %}
-                            <div class="meta">
-                            <i class="circle red icon" id="id_is_live_{{stream.dj.id}}"></i>
-                            <span> <a href="{% url 'profile-view' stream.dj.id %}">DJ {{stream.dj.name}}</a></span>
-                            </div>
+                            <i class="circle red icon"></i>
                         {% else %}
-                        <div class="meta">
-                            <i class="circle outline icon" id="id_is_not_live_{{dj.id}}"></i>
-                            <a href="{% url 'profile-view' stream.dj.id %}">
-                                {{stream.dj.name}}
-                            </a> 
-                        </div>
+                            <i class="circle outline icon"></i>
+                       
                         {% endif %}
+                            <span> 
+                                <a href="{% url 'profile-view' stream.dj.id %}">
+                                    DJ {{stream.dj.name}}
+                                </a>
+                            </span>
                         </div>
                     </div>
                 </div>
+            </div>
                        
             </div>
         {% endfor %}
@@ -110,6 +110,7 @@
         </div>
        
     </div>
+    <script>refresh_streams()</script>
 </div>
 
 

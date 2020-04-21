@@ -187,7 +187,7 @@ class Stream(models.Model):
         return current_song
     
     def to_json(self):
-        result = {'name': self.name, 'dj':self.dj.to_json(),'is_streaming':self.is_streaming}
+        result = {'name': self.name, 'dj':self.dj.to_json(),'is_streaming':self.is_streaming, 'id':self.pk}
         listeners = []
         for listener in self.listeners.all():
             listeners.append(listener.to_json())

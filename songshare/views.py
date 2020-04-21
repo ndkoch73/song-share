@@ -1,7 +1,7 @@
 
 from django.shortcuts import render,get_object_or_404
 from django.shortcuts import render
-
+from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import HttpResponse, Http404
@@ -677,9 +677,32 @@ def unvote(request):
 def get_currently_streaming(request):
     if request.method == "POST":
         raise Http404
-    streams = Stream.objects.all().filter(is_streaming=True)
+    streams = Stream.objects.all().filter(is_streaming=True).annotate(num_listeners=Count('listeners')).order_by('-num_listeners')
     stream_list = []
     for stream in streams:
         stream_list.append(stream.to_json())
     results = {'c_user': Profile.objects.get(user=request.user).to_json(),'streams':stream_list}
     return HttpResponse(json.dumps(results), content_type='application/json')
+
+def refresh_search(request):
+    if request.method == "POST":
+        raise Http404
+    streams = Stream.objects.all().filter(is_streaming=True).annotate(num_listeners=Count('listeners')).order_by('-num_listeners')
+    stream_list = []
+    for stream in streams:
+        stream_list.append(stream.to_json())
+    results = {'c_user': Profile.objects.get(user=request.user).to_json(),'streams':stream_list}
+    return HttpResponse(json.dumps(results), content_type='application/json')
+
+
+# def get_currently_streaming_following(request):
+#     if request.method == "POST":
+#         raise Http404
+#     c_user = Profile.objects.get(user=request.user)
+#     following = c_user.following
+#     streams = Stream.objects.all().filter(is_streaming=True, ).annotate(num_listeners=Count('listeners')).order_by('-num_listeners')
+#     stream_list = []
+#     for stream in streams:
+#         stream_list.append(stream.to_json())
+#     results = {'c_user': c_user.to_json(),'streams':stream_list}
+#     return HttpResponse(json.dumps(results), content_type='application/json')

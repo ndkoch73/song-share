@@ -7,17 +7,22 @@
           <span id="id_name_of_page" style="color:black;text-align:center;"> Profile Page for {{c_user.user.first_name}} {{c_user.user.last_name}}
           </span>
           <br>
-          <div class="ui small image">
-            {% if c_user.picture %}
-              <img src="{% url 'photo' c_user.id %}" width="100px" id="id_profile_picture">
-            {% else %}
-              <img src="default.jpg" width="200px"  id="id_user_picture">
-            {% endif %}
-          </div>
         </h2>
         <div class="ui three column grid" id="id-profile">
           
           <div class="row">
+            <div class="column">
+              <div class="ui segment">
+                <div class="ui image">
+                {% if c_user.picture %}
+                  <img src="{% url 'photo' c_user.id %}" width="100px" id="id_profile_picture">
+                {% else %}
+                  <img src="https://cdn1.iconfinder.com/data/icons/user-pictures/100/unknown-512.png"  style="height: 64px; width: 64px;">
+    
+                {% endif %}
+                </div>
+              </div>
+            </div>
             <div class="column">
               <form class="ui form" enctype="multipart/form-data" method="post" action="{% url 'profile-create' %}" class="add-form">
                 <div class="ui segment">
@@ -38,9 +43,10 @@
                 </div>	
               </form>
             </div>
+            {% if c_user.is_dj == False %}
             <div class="column">
               <div class="ui verticle segment">
-                  {% if c_user.is_dj == False %}
+                 
                   <button class="ui green submit button" id="id_link_song_share_button"> 
                     <a href="{% url 'authenticate' %}"> Link to Spotify Premium
                       <div class="ui small image">
@@ -48,9 +54,9 @@
                       </div>
                     </a>
                   </button>
-                  {% endif %}
               </div>
             </div>
+            {% endif %}
             <div class="column">
               <div class="ui segment">
                 <div class="field">
