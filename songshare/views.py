@@ -694,15 +694,3 @@ def refresh_search(request):
     results = {'c_user': Profile.objects.get(user=request.user).to_json(),'streams':stream_list}
     return HttpResponse(json.dumps(results), content_type='application/json')
 
-
-# def get_currently_streaming_following(request):
-#     if request.method == "POST":
-#         raise Http404
-#     c_user = Profile.objects.get(user=request.user)
-#     following = c_user.following
-#     streams = Stream.objects.all().filter(is_streaming=True, ).annotate(num_listeners=Count('listeners')).order_by('-num_listeners')
-#     stream_list = []
-#     for stream in streams:
-#         stream_list.append(stream.to_json())
-#     results = {'c_user': c_user.to_json(),'streams':stream_list}
-#     return HttpResponse(json.dumps(results), content_type='application/json')
