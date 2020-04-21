@@ -1,7 +1,7 @@
 
 from django.shortcuts import render,get_object_or_404
 from django.shortcuts import render
-
+from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import HttpResponse, Http404
@@ -232,7 +232,7 @@ def dj_stream_action(request, id):
         # context['currently_playing'] = stream.get_currently_playing()
         # context['recently_played'] = stream.get_recently_played()
         return render(request,'songshare/stream_page.html',context)
-    return 42
+    raise Http404
 
 
 
@@ -503,6 +503,7 @@ def end_stream_action(request):
     stream = get_stream(c_user.id)
     if stream == None:
         raise Http404
+    stream.clear_queue()
     stream.is_streaming = False
     stream.delete()
     c_user.is_live = False
@@ -577,7 +578,8 @@ def request_song_action(request,id,song_uri):
                         image_url=results['album']['images'][2]['url'],
                         request_status='pending',
                         parent=stream,
-                        creation_time=timezone.now())
+                        creation_time=timezone.now(),
+                        num_votes=0)
     requested_song.save()
     requested_song.voters.add(request.user.profile_set.all()[0])
     stream.save()
@@ -593,7 +595,7 @@ def get_requested_songs(request,id):
         return HttpResponse(json.dumps({'not_exists':True}), content_type='application/json')
     is_stream_dj = stream.dj == Profile.objects.get(user=request.user)
     results = {'is_stream_dj':is_stream_dj, 'requested_songs':[], 'not_exists':False}
-    for item in stream.requested_songs.extra(order_by=['-creation_time']):
+    for item in stream.requested_songs.extra(order_by=['-num_votes']):
         results['requested_songs'].append(item.to_json(request))
     return HttpResponse(json.dumps(results), content_type='application/json')
 
@@ -645,8 +647,10 @@ def vote(request):
     # add to voters list
     if song.request_status != 'rejected':
         song.voters.add(request.user.profile_set.all()[0])
+        song.num_votes = song.voters.all().count()
+        song.save()
 
-    return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
+    return HttpResponse(json.dumps({"success":True, "song":song.to_json(request), "votes":song.voters.all().count()}), content_type='application/json')
 
 @login_required
 def unvote(request):
@@ -663,13 +667,25 @@ def unvote(request):
     # remove from voters list
     if song.request_status != 'rejected':
         song.voters.remove(request.user.profile_set.all()[0])
+        song.num_votes = song.voters.all().count()
+        song.save()
 
-    return HttpResponse(json.dumps({"success":True, "song":song.id, "votes":song.voters.all().count()}), content_type='application/json')
+    return HttpResponse(json.dumps({"success":True, "song":song.to_json(request), "votes":song.voters.all().count()}), content_type='application/json')
 
 def get_currently_streaming(request):
     if request.method == "POST":
         raise Http404
-    streams = Stream.objects.all().filter(is_streaming=True)
+    streams = Stream.objects.all().filter(is_streaming=True).annotate(num_listeners=Count('listeners')).order_by('-num_listeners')
+    stream_list = []
+    for stream in streams:
+        stream_list.append(stream.to_json())
+    results = {'c_user': Profile.objects.get(user=request.user).to_json(),'streams':stream_list}
+    return HttpResponse(json.dumps(results), content_type='application/json')
+
+def refresh_search(request):
+    if request.method == "POST":
+        raise Http404
+    streams = Stream.objects.all().filter(is_streaming=True).annotate(num_listeners=Count('listeners')).order_by('-num_listeners')
     stream_list = []
     for stream in streams:
         stream_list.append(stream.to_json())
